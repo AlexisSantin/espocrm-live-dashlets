@@ -1,0 +1,7 @@
+[
+    {
+        "method": "get",
+        "route": "LiveDashlets/metric",
+        "actionClassName": "Espo\\Modules\\LiveDashlets\\Api\\Metric"
+    }
+]

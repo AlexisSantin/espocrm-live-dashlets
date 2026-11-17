@@ -1,0 +1,14 @@
+{
+    "module": "LiveDashlets",
+    "name": "Live Dashlets",
+    "description": "KPI and goal dashlets for EspoCRM: a one-click gallery of ready-made indicators with live previews, trend curves, click-through to the records behind each figure and three tile styles. Every figure respects the viewer's access rights. Installs a ready-to-deploy dashboard template.",
+    "author": "Alexis SANTIN",
+    "bundled": true,
+    "acceptableVersions": [
+        ">=10.0.3"
+    ],
+    "php": [
+        ">=8.3"
+    ],
+    "scripts": []
+}

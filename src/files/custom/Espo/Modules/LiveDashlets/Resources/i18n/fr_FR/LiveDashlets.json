@@ -1,0 +1,90 @@
+{
+    "periods": {
+        "today": "Aujourd'hui",
+        "currentWeek": "Cette semaine",
+        "currentMonth": "Ce mois-ci",
+        "currentQuarter": "Ce trimestre",
+        "currentYear": "Cette année",
+        "currentFiscalQuarter": "Ce trimestre fiscal",
+        "currentFiscalYear": "Cet exercice",
+        "lastSevenDays": "7 derniers jours",
+        "lastThirtyDays": "30 derniers jours",
+        "ever": "Depuis toujours"
+    },
+    "labels": {
+        "stable": "Stable",
+        "remaining": "Encore {value}",
+        "aboveTarget": "{value} au-delà de l'objectif",
+        "daysLeft": "{count} jours restants",
+        "dayLeft": "Dernier jour",
+        "expectedPace": "Rythme attendu : {value}",
+        "previousPeriodRange": "Période précédente : {start} – {end}",
+        "galleryTitle": "Ajouter au tableau de bord",
+        "done": "Terminé",
+        "add": "Ajouter",
+        "added": "Ajouté",
+        "nativeDashlets": "Tous les dashlets EspoCRM",
+        "comparedToDate": "contre {value} au {date}",
+        "comparedToPrevious": "contre {value} {period}",
+        "comparedToYesterday": "contre {value} hier à la même heure",
+        "pointValue": "{date} : {value}",
+        "hourLabel": "{hour} h",
+        "yesterday": "Hier",
+        "showRecords": "Voir les enregistrements",
+        "recordCount": "{count} enregistrements",
+        "oneRecord": "1 enregistrement"
+    },
+    "goalStatus": {
+        "reached": "Atteint",
+        "ahead": "En avance",
+        "behind": "En retard"
+    },
+    "messages": {
+        "notConfigured": "Choisissez quoi afficher dans les options du dashlet.",
+        "noTarget": "Indiquez un objectif dans les options du dashlet.",
+        "noAccess": "Vous n'avez pas accès à ces données.",
+        "badConfiguration": "Les réglages de ce dashlet ne sont plus valides. Vérifiez ses options.",
+        "loadError": "Le chiffre n'a pas pu être chargé.",
+        "galleryIntro": "Cliquez sur un indicateur pour l'ajouter, prêt à l'emploi, à votre tableau de bord. Les chiffres affichés sont les vôtres.",
+        "customKpi": "Choisissez vous-même l'entité, le filtre et la période.",
+        "customGoal": "Fixez votre propre cible sur n'importe quel chiffre.",
+        "nativeDashlets": "Flux, calendrier, listes, graphiques…"
+    },
+    "presets": {
+        "newLeads": "Nouveaux leads",
+        "convertedLeads": "Leads convertis",
+        "myNewLeads": "Mes nouveaux leads",
+        "wonRevenue": "Chiffre d'affaires gagné",
+        "wonDeals": "Affaires gagnées",
+        "openPipeline": "Pipeline en cours",
+        "revenueGoal": "Objectif de CA du trimestre",
+        "callsHeld": "Appels passés",
+        "myCallsGoal": "Objectif : mes appels",
+        "meetingsHeld": "Rendez-vous tenus",
+        "tasksCompleted": "Tâches terminées",
+        "overdueTasks": "Mes tâches en retard",
+        "openCases": "Tickets ouverts",
+        "newCases": "Nouveaux tickets",
+        "newAccounts": "Nouveaux comptes",
+        "newContacts": "Nouveaux contacts"
+    },
+    "presetGroups": {
+        "leads": "Prospection",
+        "sales": "Ventes",
+        "activities": "Activités",
+        "support": "Support",
+        "relations": "Comptes et contacts",
+        "custom": "Sur mesure"
+    },
+    "previousPeriods": {
+        "today": "hier",
+        "currentWeek": "la semaine dernière",
+        "currentMonth": "le mois dernier",
+        "currentQuarter": "le trimestre dernier",
+        "currentYear": "l'an dernier",
+        "currentFiscalQuarter": "le trimestre fiscal précédent",
+        "currentFiscalYear": "l'exercice précédent",
+        "lastSevenDays": "les 7 jours précédents",
+        "lastThirtyDays": "les 30 jours précédents"
+    }
+}

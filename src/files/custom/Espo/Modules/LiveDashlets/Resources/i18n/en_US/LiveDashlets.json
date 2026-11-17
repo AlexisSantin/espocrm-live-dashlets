@@ -1,0 +1,90 @@
+{
+    "periods": {
+        "today": "Today",
+        "currentWeek": "This week",
+        "currentMonth": "This month",
+        "currentQuarter": "This quarter",
+        "currentYear": "This year",
+        "currentFiscalQuarter": "This fiscal quarter",
+        "currentFiscalYear": "This fiscal year",
+        "lastSevenDays": "Last 7 days",
+        "lastThirtyDays": "Last 30 days",
+        "ever": "All time"
+    },
+    "labels": {
+        "stable": "Stable",
+        "remaining": "{value} to go",
+        "aboveTarget": "{value} above target",
+        "daysLeft": "{count} days left",
+        "dayLeft": "Last day",
+        "expectedPace": "Expected pace: {value}",
+        "previousPeriodRange": "Previous period: {start} – {end}",
+        "galleryTitle": "Add to the dashboard",
+        "done": "Done",
+        "add": "Add",
+        "added": "Added",
+        "nativeDashlets": "All EspoCRM dashlets",
+        "comparedToDate": "vs {value} by {date}",
+        "comparedToPrevious": "vs {value} {period}",
+        "comparedToYesterday": "vs {value} yesterday at this time",
+        "pointValue": "{date}: {value}",
+        "hourLabel": "{hour}:00",
+        "yesterday": "Yesterday",
+        "showRecords": "Show the records",
+        "recordCount": "{count} records",
+        "oneRecord": "1 record"
+    },
+    "goalStatus": {
+        "reached": "Reached",
+        "ahead": "On track",
+        "behind": "Behind"
+    },
+    "messages": {
+        "notConfigured": "Choose what to display in the dashlet options.",
+        "noTarget": "Set a target in the dashlet options.",
+        "noAccess": "You don't have access to this data.",
+        "badConfiguration": "This dashlet's settings are no longer valid. Check its options.",
+        "loadError": "The figure couldn't be loaded.",
+        "galleryIntro": "Click an indicator to add it to your dashboard, ready to use. Figures shown are yours.",
+        "customKpi": "Pick the entity, the filter and the period yourself.",
+        "customGoal": "Set your own target on any figure.",
+        "nativeDashlets": "Stream, calendar, lists, charts…"
+    },
+    "presets": {
+        "newLeads": "New leads",
+        "convertedLeads": "Converted leads",
+        "myNewLeads": "My new leads",
+        "wonRevenue": "Won revenue",
+        "wonDeals": "Deals won",
+        "openPipeline": "Open pipeline",
+        "revenueGoal": "Quarterly revenue goal",
+        "callsHeld": "Calls held",
+        "myCallsGoal": "My calls goal",
+        "meetingsHeld": "Meetings held",
+        "tasksCompleted": "Tasks completed",
+        "overdueTasks": "My overdue tasks",
+        "openCases": "Open cases",
+        "newCases": "New cases",
+        "newAccounts": "New accounts",
+        "newContacts": "New contacts"
+    },
+    "presetGroups": {
+        "leads": "Prospecting",
+        "sales": "Sales",
+        "activities": "Activities",
+        "support": "Support",
+        "relations": "Accounts and contacts",
+        "custom": "Build your own"
+    },
+    "previousPeriods": {
+        "today": "yesterday",
+        "currentWeek": "last week",
+        "currentMonth": "last month",
+        "currentQuarter": "last quarter",
+        "currentYear": "last year",
+        "currentFiscalQuarter": "last fiscal quarter",
+        "currentFiscalYear": "last fiscal year",
+        "lastSevenDays": "the 7 days before",
+        "lastThirtyDays": "the 30 days before"
+    }
+}

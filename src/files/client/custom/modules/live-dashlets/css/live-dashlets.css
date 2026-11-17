@@ -1,0 +1,914 @@
+/* Live Dashlets – KPI and goal dashlets, gallery. Colors come from the active theme's variables. */
+
+/* Accent color, on the dashlet panel and on gallery cards. */
+
+.live-dashlet-accent-primary { --ld-accent: var(--brand-primary); }
+.live-dashlet-accent-success { --ld-accent: var(--brand-success); }
+.live-dashlet-accent-info { --ld-accent: var(--brand-info); }
+.live-dashlet-accent-warning { --ld-accent: var(--brand-warning); }
+.live-dashlet-accent-danger { --ld-accent: var(--brand-danger); }
+.live-dashlet-accent-default { --ld-accent: var(--text-muted-color); }
+
+/* ---------------------------------------------------------------------------------------------
+   Dashlet panel styles: soft (tinted), minimal, solid.
+   --------------------------------------------------------------------------------------------- */
+
+.dashlet.live-dashlet-panel {
+    overflow: hidden;
+}
+
+/* `body` + three classes: above the themes' `body .panel-default.headered` background. */
+body .dashlet.live-dashlet-panel.live-dashlet-style-soft {
+    background:
+        linear-gradient(155deg, color-mix(in srgb, var(--ld-accent) 16%, transparent) 0%, transparent 70%),
+        var(--panel-bg, #fff);
+    border-color: color-mix(in srgb, var(--ld-accent) 30%, var(--default-border-color, #e5e5e5));
+}
+
+body .dashlet.live-dashlet-panel.live-dashlet-style-minimal {
+    background: var(--panel-bg, #fff);
+}
+
+body .dashlet.live-dashlet-panel.live-dashlet-style-solid {
+    background:
+        linear-gradient(150deg, rgba(255, 255, 255, .16) 0%, rgba(0, 0, 0, .12) 100%),
+        var(--ld-accent);
+    border-color: transparent;
+}
+
+.dashlet.live-dashlet-panel > .panel-heading,
+.dashlet.live-dashlet-panel > .dashlet-body {
+    background-color: transparent;
+}
+
+.dashlet.live-dashlet-style-solid > .panel-heading .panel-title,
+.dashlet.live-dashlet-style-solid > .panel-heading .panel-title .action,
+.dashlet.live-dashlet-style-solid > .panel-heading .menu-button {
+    color: #fff;
+}
+
+body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button,
+body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
+    color: #fff;
+    background-color: transparent;
+    border-color: transparent;
+}
+
+/* Inside a solid panel, the theme's text colors become white tints. */
+.dashlet.live-dashlet-style-solid > .dashlet-body {
+    --text-color: #fff;
+    --text-muted-color: rgba(255, 255, 255, .8);
+    --gray-lighter: rgba(255, 255, 255, .22);
+    --state-success-text: #fff;
+    --state-success-bg: rgba(255, 255, 255, .24);
+    --state-danger-text: #fff;
+    --state-danger-bg: rgba(0, 0, 0, .2);
+    --state-warning-text: #fff;
+    --state-warning-bg: rgba(0, 0, 0, .18);
+    --ld-accent-on: #fff;
+    color: #fff;
+}
+
+/* Highlight after an addition from the gallery. */
+
+.dashlet.live-dashlet-just-added {
+    animation: live-dashlet-pop 1.1s ease-out 2;
+}
+
+@keyframes live-dashlet-pop {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--ld-accent, var(--brand-primary)) 55%, transparent); }
+    100% { box-shadow: 0 0 0 14px transparent; }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Dashlet content.
+   The dashlet body has a fixed height that depends on the theme and the dashlet size: the
+   content adapts to it through container queries (end of the section).
+   --------------------------------------------------------------------------------------------- */
+
+.live-dashlet {
+    position: relative;
+    height: 100%;
+    min-height: 6em;
+    display: flex;
+    flex-direction: column;
+    padding: var(--panel-padding, 14px);
+    container-type: size;
+    overflow: hidden;
+    transition: opacity .2s ease;
+}
+
+.live-dashlet.live-dashlet-refreshing {
+    opacity: .6;
+}
+
+.live-dashlet-kpi,
+.live-dashlet-goal {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: .5em;
+    min-width: 0;
+}
+
+.live-dashlet-kpi {
+    justify-content: flex-start;
+    gap: .4em;
+}
+
+.live-dashlet-main {
+    display: flex;
+    align-items: baseline;
+    gap: .5em;
+    min-width: 0;
+}
+
+/* The figure never shrinks: the comparison gives way (ellipsis, then hidden on narrow tiles). */
+.live-dashlet-main .live-dashlet-value {
+    flex: none;
+    max-width: 100%;
+}
+
+.live-dashlet-compare {
+    min-width: 0;
+    color: var(--text-muted-color);
+    font-size: var(--font-size-small);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.live-dashlet-head .live-dashlet-trend-badge {
+    margin-left: auto;
+    font-size: var(--font-size-small);
+}
+
+/* Head: entity icon, period, status. */
+
+.live-dashlet-head {
+    display: flex;
+    align-items: center;
+    gap: .6em;
+    min-width: 0;
+}
+
+.live-dashlet-icon {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.2em;
+    height: 2.2em;
+    border-radius: 30%;
+    color: var(--ld-accent-on, var(--ld-accent));
+    background-color: var(--gray-lighter);
+    background-color: color-mix(in srgb, var(--ld-accent-on, var(--ld-accent)) 15%, transparent);
+    font-weight: 600;
+}
+
+.live-dashlet-period {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--text-muted-color);
+    font-size: var(--font-size-small);
+}
+
+/* Figure. */
+
+.live-dashlet-value {
+    color: var(--text-color);
+    font-size: 2.6em;
+    font-size: clamp(1.8em, 15cqi, 3.2em);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* KPI trend. */
+
+.live-dashlet-trend-badge {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: .3em;
+    padding: .1em .55em;
+    border-radius: 999px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.live-dashlet-trend-badge .fas {
+    font-size: .85em;
+}
+
+.live-dashlet-trend-good {
+    color: var(--state-success-text);
+    background-color: var(--state-success-bg);
+}
+
+.live-dashlet-trend-bad {
+    color: var(--state-danger-text);
+    background-color: var(--state-danger-bg);
+}
+
+.live-dashlet-trend-neutral {
+    color: var(--text-muted-color);
+    background-color: var(--gray-lighter);
+}
+
+@container (max-width: 170px) {
+    .live-dashlet-compare {
+        display: none;
+    }
+}
+
+/* Sparkline: cumulative curve of the period, previous period dashed. */
+
+.live-dashlet-spark {
+    position: relative;
+    flex: 1 1 0;
+    min-height: 1.2em;
+    margin: .2em calc(var(--panel-padding, 14px) * -1) calc(var(--panel-padding, 14px) * -1);
+    color: var(--ld-accent-on, var(--ld-accent));
+    pointer-events: none;
+}
+
+/* Out of the flow: the curve takes the space left, it never sets the height. */
+.live-dashlet-spark svg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+    animation: live-dashlet-draw 1.1s cubic-bezier(.22, 1, .36, 1) both;
+}
+
+.live-dashlet-spark-line {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+.live-dashlet-spark-area {
+    stroke: none;
+}
+
+.live-dashlet-spark-previous {
+    fill: none;
+    stroke: currentColor;
+    stroke-opacity: .38;
+    stroke-width: 1.5;
+    stroke-dasharray: 3 4;
+}
+
+.live-dashlet-spark-dot {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    margin: -4.5px 0 0 -4.5px;
+    border-radius: 50%;
+    background-color: currentColor;
+    box-shadow: 0 0 0 2px var(--panel-bg, #fff);
+    animation:
+        live-dashlet-fade-in .3s ease 1s both,
+        live-dashlet-pulse 2.4s ease-out 1.3s infinite;
+}
+
+.live-dashlet-style-solid .live-dashlet-spark-dot {
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, .12);
+}
+
+.live-dashlet-style-minimal .live-dashlet-spark-area {
+    display: none;
+}
+
+@keyframes live-dashlet-draw {
+    from { clip-path: inset(0 100% 0 0); }
+    to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes live-dashlet-fade-in {
+    from { opacity: 0; transform: scale(.4); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes live-dashlet-pulse {
+    0% { box-shadow: 0 0 0 2px var(--panel-bg, #fff), 0 0 0 2px color-mix(in srgb, currentColor 45%, transparent); }
+    70%, 100% { box-shadow: 0 0 0 2px var(--panel-bg, #fff), 0 0 0 12px transparent; }
+}
+
+/* Clickable tile: opens the records behind the figure. */
+
+.live-dashlet-clickable {
+    cursor: pointer;
+    outline: none;
+    transition: background-color .15s ease, opacity .2s ease;
+}
+
+.live-dashlet-clickable:hover {
+    background-color: color-mix(in srgb, var(--text-color) 3%, transparent);
+}
+
+.live-dashlet-clickable:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--ld-accent-on, var(--ld-accent));
+}
+
+.live-dashlet-open {
+    flex: none;
+    align-self: center;
+    color: var(--text-muted-color);
+    font-size: .75em;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity .15s ease, transform .15s ease;
+}
+
+.live-dashlet-clickable:hover .live-dashlet-open,
+.live-dashlet-clickable:focus-visible .live-dashlet-open {
+    opacity: 1;
+    transform: none;
+}
+
+/* Sparkline on hover: guide, a dot on each curve, tooltip above the curve. */
+
+.live-dashlet-spark.live-dashlet-spark-interactive {
+    pointer-events: auto;
+}
+
+.live-dashlet-spark-guide,
+.live-dashlet-spark-hover-dot,
+.live-dashlet-spark-tip {
+    position: absolute;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .12s ease;
+}
+
+.live-dashlet-spark-hovered .live-dashlet-spark-guide,
+.live-dashlet-spark-hovered .live-dashlet-spark-hover-dot,
+.live-dashlet-spark-hovered .live-dashlet-spark-tip {
+    opacity: 1;
+}
+
+.live-dashlet-spark-hovered .live-dashlet-spark-dot {
+    opacity: .35;
+}
+
+.live-dashlet-spark-guide {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    margin-left: -.5px;
+    background-color: currentColor;
+    opacity: 0;
+}
+
+.live-dashlet-spark-hovered .live-dashlet-spark-guide {
+    opacity: .35;
+}
+
+.live-dashlet-spark-hover-dot {
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    border-radius: 50%;
+    background-color: currentColor;
+    box-shadow: 0 0 0 2px var(--panel-bg, #fff);
+}
+
+.live-dashlet-spark-hover-dot-previous {
+    background-color: var(--panel-bg, #fff);
+    border: 1.5px solid currentColor;
+}
+
+/* Always dark, so it reads the same on every style and theme. */
+.live-dashlet-spark-tip {
+    bottom: calc(100% + .25em);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: .1em;
+    padding: .3em .6em;
+    border-radius: 6px;
+    color: #fff;
+    background-color: rgba(17, 22, 31, .92);
+    box-shadow: 0 6px 18px -8px rgba(0, 0, 0, .5);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+    line-height: 1.35;
+    white-space: nowrap;
+    transform: translateX(-50%);
+}
+
+.live-dashlet-spark-tip[data-align="start"] {
+    transform: translateX(-.75em);
+}
+
+.live-dashlet-spark-tip[data-align="end"] {
+    transform: translateX(calc(-100% + .75em));
+}
+
+.live-dashlet-spark-tip-current,
+.live-dashlet-spark-tip-previous {
+    display: flex;
+    align-items: center;
+    gap: .45em;
+}
+
+.live-dashlet-spark-tip-current {
+    font-weight: 600;
+}
+
+.live-dashlet-spark-tip-previous {
+    opacity: .75;
+}
+
+.live-dashlet-spark-tip-current::before,
+.live-dashlet-spark-tip-previous::before {
+    content: "";
+    width: .9em;
+    border-top: 2px solid currentColor;
+}
+
+.live-dashlet-spark-tip-previous::before {
+    border-top-style: dashed;
+    border-top-width: 1.5px;
+}
+
+/* Goal. */
+
+.live-dashlet-status {
+    flex: none;
+    margin-left: auto;
+    padding: .1em .6em;
+    border-radius: 999px;
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.live-dashlet-goal-reached .live-dashlet-status,
+.live-dashlet-goal-ahead .live-dashlet-status {
+    color: var(--state-success-text);
+    background-color: var(--state-success-bg);
+}
+
+.live-dashlet-goal-behind .live-dashlet-status {
+    color: var(--state-warning-text);
+    background-color: var(--state-warning-bg);
+}
+
+.live-dashlet-goal-figures {
+    display: flex;
+    align-items: baseline;
+    gap: .35em;
+    min-width: 0;
+}
+
+.live-dashlet-goal .live-dashlet-value {
+    font-size: 2.2em;
+    font-size: clamp(1.6em, 11cqi, 2.6em);
+    flex: none;
+    max-width: 60%;
+}
+
+.live-dashlet-goal-target {
+    color: var(--text-muted-color);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.live-dashlet-goal-percent {
+    margin-left: auto;
+    color: var(--text-color);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.live-dashlet-goal-bar {
+    position: relative;
+    height: .7em;
+    border-radius: 999px;
+    background-color: var(--gray-lighter);
+    background-color: color-mix(in srgb, var(--text-color) 10%, transparent);
+}
+
+.live-dashlet-goal-fill {
+    position: relative;
+    height: 100%;
+    width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: inherit;
+    background-color: var(--ld-accent-on, var(--ld-accent));
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, .28), rgba(255, 255, 255, 0) 70%);
+    box-shadow: 0 0 10px color-mix(in srgb, var(--ld-accent-on, var(--ld-accent)) 40%, transparent);
+    transition: width .9s cubic-bezier(.22, 1, .36, 1);
+}
+
+/* A light sweep on a reached goal. */
+.live-dashlet-goal-reached .live-dashlet-goal-fill::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 20%, rgba(255, 255, 255, .55) 50%, transparent 80%);
+    transform: translateX(-100%);
+    animation: live-dashlet-sweep 1.6s ease-in-out 1s 2;
+}
+
+@keyframes live-dashlet-sweep {
+    to { transform: translateX(100%); }
+}
+
+.live-dashlet-goal-pace {
+    position: absolute;
+    top: -.3em;
+    bottom: -.3em;
+    width: 2px;
+    margin-left: -1px;
+    border-radius: 1px;
+    background-color: var(--text-color);
+    opacity: .5;
+}
+
+.live-dashlet-goal-foot {
+    color: var(--text-muted-color);
+    font-size: var(--font-size-small);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Loading and messages. */
+
+.live-dashlet-loader,
+.live-gallery-skeleton {
+    border-radius: var(--border-radius, 4px);
+    background: linear-gradient(90deg, transparent, var(--gray-lighter), transparent);
+    background-size: 200% 100%;
+    animation: live-dashlet-shimmer 1.4s ease-in-out infinite;
+}
+
+.live-dashlet-loader {
+    flex: 1;
+    min-height: 4em;
+}
+
+@keyframes live-dashlet-shimmer {
+    from { background-position: 100% 0; }
+    to { background-position: -100% 0; }
+}
+
+.live-dashlet-message {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: .5em;
+}
+
+/* Short dashlets (compact themes such as Lucid). Container queries measure the content box. */
+
+@container (max-height: 112px) {
+    .live-dashlet-kpi,
+    .live-dashlet-goal {
+        gap: .2em;
+    }
+
+    .live-dashlet-icon {
+        width: 1.6em;
+        height: 1.6em;
+        font-size: .9em;
+    }
+
+    .live-dashlet-value {
+        font-size: clamp(1.5em, min(15cqi, 26cqh), 2.4em);
+    }
+
+    .live-dashlet-goal .live-dashlet-value {
+        font-size: clamp(1.4em, min(11cqi, 22cqh), 2.2em);
+    }
+
+    .live-dashlet-trend-badge,
+    .live-dashlet-status {
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+}
+
+@container (max-height: 64px) {
+    .live-dashlet-head {
+        display: none;
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Dashboard "Add" button.
+   --------------------------------------------------------------------------------------------- */
+
+.live-dashlets-add {
+    display: inline-flex;
+    align-items: center;
+    gap: .45em;
+    margin-right: .5em;
+    border-radius: 999px;
+    padding-left: .9em;
+    padding-right: 1em;
+    font-weight: 600;
+}
+
+.live-dashlets-add .fas {
+    color: var(--brand-primary);
+}
+
+@media (max-width: 767px) {
+    .live-dashlets-add-text {
+        display: none;
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Gallery.
+   --------------------------------------------------------------------------------------------- */
+
+.live-gallery-intro {
+    margin: 0 0 1em;
+    color: var(--text-muted-color);
+}
+
+.live-gallery-group + .live-gallery-group {
+    margin-top: 1.5em;
+}
+
+.live-gallery-group-title {
+    margin: 0 0 .7em;
+    color: var(--text-muted-color);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.live-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: .75em;
+}
+
+.live-gallery-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: .25em;
+    min-height: 8.6em;
+    padding: .85em .95em;
+    overflow: hidden;
+    text-align: left;
+    color: var(--text-color);
+    background-color: var(--panel-bg, #fff);
+    border: 1px solid var(--default-border-color, #e5e5e5);
+    border-radius: var(--panel-border-radius, 8px);
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+}
+
+.live-gallery .live-gallery-card.live-dashlet-style-soft {
+    background-image: linear-gradient(
+        155deg,
+        color-mix(in srgb, var(--ld-accent) 12%, transparent) 0%,
+        transparent 65%
+    );
+}
+
+.live-gallery .live-gallery-card.live-dashlet-style-solid {
+    --text-color: #fff;
+    --text-muted-color: rgba(255, 255, 255, .8);
+    --state-success-text: #fff;
+    --state-success-bg: rgba(255, 255, 255, .24);
+    --state-danger-text: #fff;
+    --state-danger-bg: rgba(0, 0, 0, .2);
+    --ld-accent-on: #fff;
+    color: #fff;
+    background-color: var(--ld-accent);
+    background-image: linear-gradient(150deg, rgba(255, 255, 255, .16) 0%, rgba(0, 0, 0, .12) 100%);
+    border-color: transparent;
+}
+
+.live-gallery-card:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--ld-accent) 55%, transparent);
+    box-shadow: 0 8px 22px -12px color-mix(in srgb, var(--ld-accent) 70%, transparent);
+}
+
+.live-gallery-card:focus-visible {
+    outline: 2px solid var(--ld-accent);
+    outline-offset: 2px;
+}
+
+.live-gallery-card-head {
+    display: flex;
+    align-items: center;
+    gap: .55em;
+    font-weight: 600;
+    min-width: 0;
+}
+
+.live-gallery-card-head .live-dashlet-icon {
+    width: 1.8em;
+    height: 1.8em;
+    font-size: .9em;
+}
+
+.live-gallery-card-title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    line-height: 1.25;
+}
+
+.live-gallery-card-period,
+.live-gallery-card-description {
+    color: var(--text-muted-color);
+    font-size: var(--font-size-small);
+}
+
+.live-gallery-card-preview {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: .4em;
+    margin-top: .35em;
+    min-height: 1.9em;
+}
+
+.live-gallery-skeleton {
+    display: block;
+    width: 55%;
+    height: 1.6em;
+}
+
+.live-gallery-card-value {
+    font-size: 1.6em;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.live-gallery-card-target {
+    color: var(--text-muted-color);
+    font-size: .6em;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+
+.live-gallery-card-trend {
+    padding: 0 .5em;
+    border-radius: 999px;
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.live-gallery-card-bar {
+    flex-basis: 100%;
+    height: .45em;
+    border-radius: 999px;
+    background-color: color-mix(in srgb, var(--text-color) 10%, transparent);
+    overflow: hidden;
+}
+
+.live-gallery-card-bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background-color: var(--ld-accent-on, var(--ld-accent));
+}
+
+.live-gallery-card .live-dashlet-spark {
+    flex: 0 0 2.4em;
+    margin: .35em -.95em -.85em;
+}
+
+.live-gallery-card .live-dashlet-spark-dot {
+    display: none;
+}
+
+.live-gallery-card-add {
+    position: absolute;
+    right: .75em;
+    bottom: .75em;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: .35em;
+    padding: .15em .65em;
+    border-radius: 999px;
+    color: #fff;
+    background-color: var(--ld-accent);
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    opacity: 0;
+    transform: translateY(3px);
+    transition: opacity .15s ease, transform .15s ease;
+}
+
+.live-dashlet-style-solid .live-gallery-card-add {
+    color: var(--ld-accent);
+    background-color: #fff;
+}
+
+.live-gallery-card:hover .live-gallery-card-add,
+.live-gallery-card:focus-visible .live-gallery-card-add,
+.live-gallery-card-added .live-gallery-card-add {
+    opacity: 1;
+    transform: none;
+}
+
+@media (hover: none) {
+    .live-gallery-card-add {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.live-gallery-card-added,
+.live-gallery-card-added:hover {
+    border-color: var(--brand-success);
+    box-shadow: 0 0 0 1px var(--brand-success);
+    transform: none;
+    cursor: default;
+}
+
+.live-gallery-card-added .live-gallery-card-add {
+    color: #fff;
+    background-color: var(--brand-success);
+}
+
+.live-gallery-card-custom {
+    min-height: 6.4em;
+    border-style: dashed;
+    background-color: transparent;
+}
+
+.live-gallery-card-custom .live-dashlet-icon {
+    color: var(--brand-primary);
+    background-color: color-mix(in srgb, var(--brand-primary) 12%, transparent);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Records behind a figure.
+   --------------------------------------------------------------------------------------------- */
+
+.live-record-list-summary {
+    margin: 0 0 .75em;
+    color: var(--text-muted-color);
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Reduced motion.
+   --------------------------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .live-dashlet,
+    .live-dashlet-goal-fill,
+    .live-gallery-card,
+    .live-gallery-card-add,
+    .live-dashlet-open,
+    .live-dashlet-spark-guide,
+    .live-dashlet-spark-hover-dot,
+    .live-dashlet-spark-tip {
+        transition: none;
+    }
+
+    .live-dashlet-loader,
+    .live-gallery-skeleton,
+    .live-dashlet-spark svg,
+    .live-dashlet-spark-dot,
+    .live-dashlet-goal-reached .live-dashlet-goal-fill::after,
+    .dashlet.live-dashlet-just-added {
+        animation: none;
+    }
+
+    .live-gallery-card:hover {
+        transform: none;
+    }
+}

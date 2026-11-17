@@ -1,0 +1,43 @@
+{
+    "fields": {
+        "metric": "Indicator",
+        "valueField": "Field to add up",
+        "period": "Period",
+        "dateField": "Date used for the period",
+        "comparison": "Compare with",
+        "lowerIsBetter": "A decrease is good news",
+        "target": "Target",
+        "accentColor": "Color",
+        "tileStyle": "Style"
+    },
+    "options": {
+        "metric": {
+            "count": "Number of records",
+            "sum": "Sum of a field",
+            "avg": "Average of a field"
+        },
+        "comparison": {
+            "toDate": "Previous period, at the same point",
+            "full": "Whole previous period",
+            "none": "No comparison"
+        },
+        "accentColor": {
+            "primary": "Primary",
+            "success": "Green",
+            "info": "Purple",
+            "warning": "Orange",
+            "danger": "Red",
+            "default": "Gray"
+        },
+        "tileStyle": {
+            "soft": "Soft (tinted)",
+            "minimal": "Minimal",
+            "solid": "Solid color"
+        }
+    },
+    "tooltips": {
+        "comparison": "“At the same point” compares like with like while the period runs: on the 17th of the month, with the 1st–17th of the previous month.",
+        "lowerIsBetter": "Shows a decrease in green, for figures you want to go down (open cases, overdue tasks…).",
+        "dateField": "The record counts in the period when this date falls in it."
+    }
+}

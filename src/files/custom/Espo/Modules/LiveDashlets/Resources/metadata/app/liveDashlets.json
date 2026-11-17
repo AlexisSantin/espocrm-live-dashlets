@@ -1,0 +1,303 @@
+{
+    "galleryGroupList": [
+        "leads",
+        "sales",
+        "activities",
+        "support",
+        "relations"
+    ],
+    "presetList": [
+        {
+            "name": "newLeads",
+            "group": "leads",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Lead",
+                "metric": "count",
+                "period": "currentMonth",
+                "comparison": "toDate",
+                "accentColor": "primary",
+                "tileStyle": "soft",
+                "boolFilterList": [],
+                "dateField": "createdAt"
+            }
+        },
+        {
+            "name": "convertedLeads",
+            "group": "leads",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Lead",
+                "metric": "count",
+                "period": "currentMonth",
+                "comparison": "toDate",
+                "accentColor": "success",
+                "tileStyle": "soft",
+                "boolFilterList": [],
+                "primaryFilter": "converted",
+                "dateField": "convertedAt"
+            }
+        },
+        {
+            "name": "myNewLeads",
+            "group": "leads",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Lead",
+                "metric": "count",
+                "period": "currentWeek",
+                "comparison": "toDate",
+                "accentColor": "primary",
+                "tileStyle": "minimal",
+                "boolFilterList": [
+                    "onlyMy"
+                ],
+                "dateField": "createdAt"
+            }
+        },
+        {
+            "name": "wonRevenue",
+            "group": "sales",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Opportunity",
+                "metric": "sum",
+                "period": "currentQuarter",
+                "comparison": "toDate",
+                "accentColor": "info",
+                "tileStyle": "solid",
+                "boolFilterList": [],
+                "primaryFilter": "won",
+                "valueField": "amount",
+                "dateField": "closeDate"
+            }
+        },
+        {
+            "name": "wonDeals",
+            "group": "sales",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Opportunity",
+                "metric": "count",
+                "period": "currentMonth",
+                "comparison": "toDate",
+                "accentColor": "success",
+                "tileStyle": "soft",
+                "boolFilterList": [],
+                "primaryFilter": "won",
+                "dateField": "closeDate"
+            }
+        },
+        {
+            "name": "openPipeline",
+            "group": "sales",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Opportunity",
+                "metric": "sum",
+                "period": "ever",
+                "comparison": "none",
+                "accentColor": "info",
+                "tileStyle": "soft",
+                "boolFilterList": [],
+                "primaryFilter": "open",
+                "valueField": "amount"
+            }
+        },
+        {
+            "name": "revenueGoal",
+            "group": "sales",
+            "dashlet": "LiveDashletsGoal",
+            "width": 2,
+            "height": 1,
+            "options": {
+                "entityType": "Opportunity",
+                "metric": "sum",
+                "period": "currentQuarter",
+                "accentColor": "primary",
+                "tileStyle": "soft",
+                "boolFilterList": [],
+                "primaryFilter": "won",
+                "valueField": "amount",
+                "dateField": "closeDate",
+                "target": 50000
+            }
+        },
+        {
+            "name": "callsHeld",
+            "group": "activities",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Call",
+                "metric": "count",
+                "period": "currentWeek",
+                "comparison": "toDate",
+                "accentColor": "success",
+                "tileStyle": "soft",
+                "boolFilterList": [],
+                "primaryFilter": "held",
+                "dateField": "dateStart"
+            }
+        },
+        {
+            "name": "myCallsGoal",
+            "group": "activities",
+            "dashlet": "LiveDashletsGoal",
+            "width": 2,
+            "height": 1,
+            "options": {
+                "entityType": "Call",
+                "metric": "count",
+                "period": "currentMonth",
+                "accentColor": "success",
+                "tileStyle": "soft",
+                "boolFilterList": [
+                    "onlyMy"
+                ],
+                "primaryFilter": "held",
+                "dateField": "dateStart",
+                "target": 40
+            }
+        },
+        {
+            "name": "meetingsHeld",
+            "group": "activities",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Meeting",
+                "metric": "count",
+                "period": "currentMonth",
+                "comparison": "toDate",
+                "accentColor": "info",
+                "tileStyle": "soft",
+                "boolFilterList": [],
+                "primaryFilter": "held",
+                "dateField": "dateStart"
+            }
+        },
+        {
+            "name": "tasksCompleted",
+            "group": "activities",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Task",
+                "metric": "count",
+                "period": "currentWeek",
+                "comparison": "toDate",
+                "accentColor": "success",
+                "tileStyle": "minimal",
+                "boolFilterList": [],
+                "primaryFilter": "completed",
+                "dateField": "dateCompleted"
+            }
+        },
+        {
+            "name": "overdueTasks",
+            "group": "activities",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Task",
+                "metric": "count",
+                "period": "ever",
+                "comparison": "none",
+                "accentColor": "danger",
+                "tileStyle": "soft",
+                "boolFilterList": [
+                    "onlyMy"
+                ],
+                "primaryFilter": "overdue",
+                "lowerIsBetter": true
+            }
+        },
+        {
+            "name": "openCases",
+            "group": "support",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Case",
+                "metric": "count",
+                "period": "ever",
+                "comparison": "none",
+                "accentColor": "warning",
+                "tileStyle": "soft",
+                "boolFilterList": [],
+                "primaryFilter": "open",
+                "lowerIsBetter": true
+            }
+        },
+        {
+            "name": "newCases",
+            "group": "support",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Case",
+                "metric": "count",
+                "period": "currentWeek",
+                "comparison": "toDate",
+                "accentColor": "warning",
+                "tileStyle": "minimal",
+                "boolFilterList": [],
+                "dateField": "createdAt",
+                "lowerIsBetter": true
+            }
+        },
+        {
+            "name": "newAccounts",
+            "group": "relations",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Account",
+                "metric": "count",
+                "period": "currentMonth",
+                "comparison": "toDate",
+                "accentColor": "primary",
+                "tileStyle": "soft",
+                "boolFilterList": [],
+                "dateField": "createdAt"
+            }
+        },
+        {
+            "name": "newContacts",
+            "group": "relations",
+            "dashlet": "LiveDashletsKpi",
+            "width": 1,
+            "height": 1,
+            "options": {
+                "entityType": "Contact",
+                "metric": "count",
+                "period": "currentMonth",
+                "comparison": "toDate",
+                "accentColor": "info",
+                "tileStyle": "minimal",
+                "boolFilterList": [],
+                "dateField": "createdAt"
+            }
+        }
+    ]
+}

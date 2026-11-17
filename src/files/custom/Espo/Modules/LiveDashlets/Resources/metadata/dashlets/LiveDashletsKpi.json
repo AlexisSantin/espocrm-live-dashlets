@@ -1,0 +1,180 @@
+{
+    "view": "live-dashlets:views/dashlets/kpi",
+    "options": {
+        "view": "live-dashlets:views/dashlets/options/metric",
+        "fields": {
+            "title": {
+                "type": "varchar",
+                "required": true
+            },
+            "autorefreshInterval": {
+                "type": "enumFloat",
+                "options": [
+                    0,
+                    0.5,
+                    1,
+                    2,
+                    5,
+                    10
+                ]
+            },
+            "entityType": {
+                "type": "enum",
+                "required": true,
+                "view": "live-dashlets:views/dashlets/fields/entity-type"
+            },
+            "metric": {
+                "type": "enum",
+                "options": [
+                    "count",
+                    "sum",
+                    "avg"
+                ],
+                "default": "count",
+                "translation": "DashletOptions.options.metric"
+            },
+            "valueField": {
+                "type": "enum",
+                "view": "live-dashlets:views/dashlets/fields/value-field"
+            },
+            "primaryFilter": {
+                "type": "enum",
+                "view": "views/dashlets/fields/records/primary-filter"
+            },
+            "boolFilterList": {
+                "type": "multiEnum",
+                "view": "views/dashlets/fields/records/bool-filter-list"
+            },
+            "period": {
+                "type": "enum",
+                "options": [
+                    "today",
+                    "currentWeek",
+                    "currentMonth",
+                    "currentQuarter",
+                    "currentYear",
+                    "currentFiscalQuarter",
+                    "currentFiscalYear",
+                    "lastSevenDays",
+                    "lastThirtyDays",
+                    "ever"
+                ],
+                "translation": "LiveDashlets.periods"
+            },
+            "dateField": {
+                "type": "enum",
+                "view": "live-dashlets:views/dashlets/fields/date-field",
+                "tooltip": true
+            },
+            "accentColor": {
+                "type": "enum",
+                "options": [
+                    "primary",
+                    "success",
+                    "info",
+                    "warning",
+                    "danger",
+                    "default"
+                ],
+                "translation": "DashletOptions.options.accentColor"
+            },
+            "comparison": {
+                "type": "enum",
+                "options": [
+                    "toDate",
+                    "full",
+                    "none"
+                ],
+                "translation": "DashletOptions.options.comparison",
+                "tooltip": true
+            },
+            "lowerIsBetter": {
+                "type": "bool",
+                "tooltip": true
+            },
+            "tileStyle": {
+                "type": "enum",
+                "options": [
+                    "soft",
+                    "minimal",
+                    "solid"
+                ],
+                "translation": "DashletOptions.options.tileStyle"
+            }
+        },
+        "defaults": {
+            "metric": "count",
+            "period": "currentMonth",
+            "comparison": "toDate",
+            "accentColor": "primary",
+            "lowerIsBetter": false,
+            "boolFilterList": [],
+            "autorefreshInterval": 0,
+            "tileStyle": "soft"
+        },
+        "layout": [
+            {
+                "rows": [
+                    [
+                        {
+                            "name": "title"
+                        },
+                        {
+                            "name": "accentColor"
+                        }
+                    ],
+                    [
+                        {
+                            "name": "tileStyle"
+                        },
+                        false
+                    ],
+                    [
+                        {
+                            "name": "entityType"
+                        },
+                        {
+                            "name": "primaryFilter"
+                        }
+                    ],
+                    [
+                        {
+                            "name": "boolFilterList"
+                        },
+                        false
+                    ],
+                    [
+                        {
+                            "name": "metric"
+                        },
+                        {
+                            "name": "valueField"
+                        }
+                    ],
+                    [
+                        {
+                            "name": "period"
+                        },
+                        {
+                            "name": "dateField"
+                        }
+                    ],
+                    [
+                        {
+                            "name": "comparison"
+                        },
+                        {
+                            "name": "lowerIsBetter"
+                        }
+                    ],
+                    [
+                        {
+                            "name": "autorefreshInterval"
+                        },
+                        false
+                    ]
+                ]
+            }
+        ]
+    }
+}
