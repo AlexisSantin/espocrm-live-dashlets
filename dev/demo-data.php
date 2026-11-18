@@ -11,7 +11,8 @@
  * --boost multiplies the number of leads in the current month (default 1.25). Raise it when existing
  * data makes the previous month look busier.
  *
- * Every record has DESCRIPTION in its description: demo-data-remove.php deletes them all.
+ * Every account, contact, lead, deal and case has DESCRIPTION in its description: demo-data-remove.php
+ * deletes them with the activities attached to them. Phone numbers are in the +33 1 99 00 range, reserved for fiction.
  * Records are saved silently (no stream notes, no notifications) and dated in the past.
  */
 
@@ -180,6 +181,12 @@ function later(DateTimeImmutable $from, string $modify, DateTimeImmutable $now):
     return $from->modify('+' . mt_rand(0, $span) . ' seconds');
 }
 
+/** A text that depends on the record only: the random sequence, hence the figures, stay the same. */
+function textFor(array $list, string $seed): string
+{
+    return $list[crc32($seed) % count($list)];
+}
+
 function format(DateTimeImmutable $value): string
 {
     return $value->format('Y-m-d H:i:s');
@@ -203,7 +210,7 @@ function create(
     array $forced = []
 ): string {
     $entity = $em->getNewEntity($entityType);
-    $entity->set($data + ['description' => DESCRIPTION]);
+    $entity->set($data + [$entityType === 'Email' ? 'body' : 'description' => DESCRIPTION]);
 
     $em->saveEntity($entity, ['silent' => true]);
 
@@ -213,7 +220,7 @@ function create(
         ->set([
             'createdAt' => format($createdAt),
             'modifiedAt' => format($createdAt),
-            'createdById' => $data['assignedUserId'] ?? null,
+            'createdById' => $data['assignedUserId'] ?? ($data['usersIds'][0] ?? null),
             ...$forced,
         ])
         ->where(['id' => $entity->getId()])
@@ -275,6 +282,36 @@ $callTopics = $french ?
         'Prise de rendez-vous', 'Retour sur la démo', 'Renouvellement'] :
     ['First contact', 'Quote follow-up', 'Status update', 'Needs assessment', 'Order follow-up',
         'Booking a meeting', 'Demo feedback', 'Renewal'];
+$callNotes = $french ?
+    ['Intéressé, attend le devis révisé avant de décider.', 'Budget validé en interne, signature visée ce trimestre.',
+        'Veut comparer avec son prestataire actuel, à rappeler après sa réunion.',
+        'Questions sur les délais de mise en place, réponses envoyées par e-mail.',
+        'Très satisfait du dernier échange, souhaite associer sa direction.',
+        'Demande une remise pour un engagement sur deux ans.'] :
+    ['Interested, waiting for the revised quote before deciding.', 'Budget approved internally, aiming to sign this quarter.',
+        'Wants to compare with the current supplier, call back after their meeting.',
+        'Questions about rollout time, answers sent by email.',
+        'Very happy with our last exchange, wants to involve management.',
+        'Asking for a discount on a two-year commitment.'];
+
+$missedCallNotes = $french ?
+    ['Messagerie, message laissé.', 'Pas de réponse, réessayer en fin de journée.', 'Absent jusqu\'à lundi selon le standard.'] :
+    ['Voicemail, message left.', 'No answer, try again late in the day.', 'Away until Monday according to reception.'];
+
+$meetingNotes = $french ?
+    ['Démonstration appréciée, deux points à préciser sur l\'intégration.', 'Périmètre validé, planning à confirmer sous huitaine.',
+        'Décideur présent, attend une proposition chiffrée.', 'Bon accueil de l\'équipe, pilote envisagé sur un service.'] :
+    ['Demo went well, two integration points to clarify.', 'Scope approved, schedule to confirm within a week.',
+        'Decision maker attended, expects a priced proposal.', 'Warm welcome from the team, pilot considered in one department.'];
+
+$emailBodies = $french ?
+    ['Bonjour, vous trouverez ci-joint notre proposition mise à jour. Je reste disponible pour en parler.',
+        'Merci pour votre temps. Comme convenu, voici le récapitulatif de notre échange et les prochaines étapes.',
+        'Bonjour, voici les documents demandés. N\'hésitez pas à revenir vers moi si un élément manque.'] :
+    ['Hello, please find our updated proposal attached. Happy to talk it through.',
+        'Thank you for your time. As agreed, here is a summary of our discussion and the next steps.',
+        'Hello, here are the documents you asked for. Let me know if anything is missing.'];
+
 $meetingTopics = $french ?
     ['Démonstration', 'Atelier de cadrage', 'Revue de projet', 'Présentation de l\'offre', 'Comité de pilotage',
         'Signature', 'Lancement'] :
@@ -316,6 +353,8 @@ $email = fn (string $first, string $last, string $company) =>
 // Accounts and contacts.
 // ---------------------------------------------------------------------------------------------
 
+$phone = fn () => '+3319900' . str_pad((string) mt_rand(0, 9999), 4, '0', STR_PAD_LEFT);
+
 $accounts = [];
 
 foreach (days($start, $today) as $day) {
@@ -335,27 +374,52 @@ foreach (days($start, $today) as $day) {
             'industry' => pick($industries),
             'billingAddressCity' => pick($cities),
             'billingAddressCountry' => 'France',
+            'phoneNumber' => $phone(),
             'website' => 'https://www.' . preg_replace('/[^a-z]/', '', strtolower(iconv('UTF-8', 'ASCII//TRANSLIT', $name))) . '.example',
         ] + $owner, $createdAt, $created);
 
-        $accounts[] = ['id' => $id, 'name' => $name, 'createdAt' => $createdAt] + $owner;
+        $contactIds = [];
 
         for ($c = mt_rand(1, 3); $c > 0; $c--) {
             $first = pick($firstNames);
             $last = pick($lastNames);
             $contactCreatedAt = later($createdAt, '+' . mt_rand(0, 10) . ' days', $now);
 
-            create($em, 'Contact', [
+            $contactIds[] = create($em, 'Contact', [
                 'firstName' => $first,
                 'lastName' => $last,
                 'title' => pick($titles),
                 'accountId' => $id,
                 'emailAddress' => $email($first, $last, $name),
+                'phoneNumber' => $phone(),
                 'addressCity' => pick($cities),
             ] + $owner, $contactCreatedAt, $created);
         }
+
+        // Some accounts go quiet: their deals are the ones to follow up.
+        $accounts[] = [
+            'id' => $id,
+            'name' => $name,
+            'createdAt' => $createdAt,
+            'contactIds' => $contactIds,
+            'quiet' => chance(0.3),
+        ] + $owner;
     }
 }
+
+$quietSince = $today->modify('-21 days');
+
+/** An account for an activity on that date: quiet accounts have no recent activity. */
+$accountForActivity = function (DateTimeImmutable $date) use ($accounts, $now, $quietSince): ?array {
+    $limit = min($date, $now);
+
+    $candidates = array_values(array_filter(
+        $accounts,
+        fn ($account) => $account['createdAt'] <= $limit && (!$account['quiet'] || $date < $quietSince)
+    ));
+
+    return $candidates ? pick($candidates) : null;
+};
 
 $accountsUntil = fn (DateTimeImmutable $date) => array_values(array_filter($accounts, fn ($a) => $a['createdAt'] <= $date));
 
@@ -396,6 +460,7 @@ foreach (days($start, $today) as $day) {
         ] + owner($users, $weights['sales']);
 
         $data['emailAddress'] = $email($data['firstName'], $data['lastName'], $data['accountName']);
+        $data['phoneNumber'] = $phone();
 
         if ($pipeline && isset($stageByStatus[$status])) {
             $data['pipelineId'] = $pipeline->getId();
@@ -406,7 +471,27 @@ foreach (days($start, $today) as $day) {
             $data['convertedAt'] = format(later($createdAt, '+' . mt_rand(2, 20) . ' days', $now));
         }
 
-        create($em, 'Lead', $data, $createdAt, $created);
+        $leadId = create($em, 'Lead', $data, $createdAt, $created);
+
+        // Leads being worked have been called; the new ones are still waiting.
+        if ($status !== 'New') {
+            $callDate = later($createdAt, '+' . mt_rand(0, 3) . ' days', $now);
+
+            create($em, 'Call', [
+                'name' => pick($callTopics) . ' — ' . $data['lastName'],
+                'status' => 'Held',
+                'direction' => 'Outbound',
+                'dateStart' => format($callDate),
+                'dateEnd' => format($callDate->modify('+10 minutes')),
+                'parentType' => 'Lead',
+                'parentId' => $leadId,
+                'leadsIds' => [$leadId],
+                'assignedUserId' => $data['assignedUserId'],
+                'teamsIds' => $data['teamsIds'],
+                'usersIds' => [$data['assignedUserId']],
+                'description' => textFor($callNotes, $leadId),
+            ], $callDate, $created);
+        }
     }
 }
 
@@ -440,6 +525,7 @@ foreach (days($start, $today) as $day) {
         create($em, 'Opportunity', [
             'name' => pick($offers) . ' — ' . $account['name'],
             'accountId' => $account['id'],
+            'contactId' => $account['contactIds'][0] ?? null,
             'amount' => mt_rand(2, 14) * 500,
             'amountCurrency' => $currency,
             'stage' => $stage,
@@ -467,13 +553,12 @@ foreach (['Call', 'Meeting'] as $entityType) {
             for ($i = dailyCount($day, $activityStart, $today, $base * 0.6, $base); $i > 0; $i--) {
                 $dateStart = at($day, 8, 18);
                 $isPast = $dateStart <= $now;
-                $candidates = $accountsUntil(min($dateStart, $now));
+                $account = $accountForActivity($dateStart);
 
-                if (!$candidates) {
+                if (!$account) {
                     continue;
                 }
 
-                $account = pick($candidates);
                 $minutes = $entityType === 'Call' ? pick([5, 10, 15, 15, 20, 30]) : pick([30, 45, 60, 60, 90]);
 
                 $status = $isPast ?
@@ -490,16 +575,64 @@ foreach (['Call', 'Meeting'] as $entityType) {
                     'assignedUserId' => $user['id'],
                     'teamsIds' => $user['teamsIds'],
                     'usersIds' => [$user['id']],
+                    'contactsIds' => array_slice($account['contactIds'], 0, 1),
                 ];
 
                 if ($entityType === 'Call') {
                     $data['direction'] = chance(0.7) ? 'Outbound' : 'Inbound';
                 }
 
+                if ($isPast) {
+                    $notes = match (true) {
+                        $status === 'Not Held' => $missedCallNotes,
+                        $entityType === 'Call' => $callNotes,
+                        default => $meetingNotes,
+                    };
+
+                    $data['description'] = textFor($notes, $data['name'] . $data['dateStart']);
+                } else {
+                    // A note added when closing it must not follow a demo marker.
+                    $data['description'] = null;
+                }
+
                 $createdAt = $isPast ? $dateStart : $now->modify('-' . mt_rand(0, 5) . ' days');
 
                 create($em, $entityType, $data, $createdAt, $created);
             }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------------------------
+// Emails sent to accounts.
+// ---------------------------------------------------------------------------------------------
+
+$emailSubjects = $french ?
+    ['Votre proposition', 'Suite à notre échange', 'Compte rendu', 'Documents demandés', 'Prochaines étapes'] :
+    ['Your proposal', 'Following our call', 'Meeting notes', 'The documents you asked for', 'Next steps'];
+
+foreach (days($activityStart, $today) as $day) {
+    foreach ($users as $user) {
+        for ($i = dailyCount($day, $activityStart, $today, 0.2, 0.4); $i > 0; $i--) {
+            $sentAt = at($day);
+            $account = $accountForActivity($sentAt);
+
+            if ($sentAt > $now || !$account) {
+                continue;
+            }
+
+            create($em, 'Email', [
+                'name' => pick($emailSubjects),
+                'status' => 'Sent',
+                'dateSent' => format($sentAt),
+                'isHtml' => false,
+                'body' => textFor($emailBodies, $account['id'] . format($sentAt)),
+                'parentType' => 'Account',
+                'parentId' => $account['id'],
+                'usersIds' => [$user['id']],
+                'assignedUsersIds' => [$user['id']],
+                'teamsIds' => $user['teamsIds'],
+            ], $sentAt, $created);
         }
     }
 }

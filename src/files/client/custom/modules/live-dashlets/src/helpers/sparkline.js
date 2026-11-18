@@ -97,8 +97,8 @@ export function createSparkline(series, options = {}) {
     const dot = document.createElement('span');
 
     dot.className = 'live-dashlet-spark-dot';
-    dot.style.left = (lastX / WIDTH * 100).toFixed(2) + '%';
-    dot.style.top = (y(current[current.length - 1]) / HEIGHT * 100).toFixed(2) + '%';
+    dot.style.left = insideEdges(lastX / WIDTH * 100);
+    dot.style.top = insideEdges(y(current[current.length - 1]) / HEIGHT * 100);
 
     container.append(dot);
 
@@ -107,6 +107,14 @@ export function createSparkline(series, options = {}) {
     }
 
     return container;
+}
+
+/**
+ * A position in percent that keeps a dot whole: the curve runs to the edges of the tile, which
+ * clips what goes beyond them.
+ */
+function insideEdges(percent) {
+    return `clamp(6px, ${percent.toFixed(2)}%, calc(100% - 6px))`;
 }
 
 /**
@@ -136,8 +144,8 @@ function addHover(container, {length, current, previous, x, y, describe}) {
             return;
         }
 
-        element.style.left = (x(index) / WIDTH * 100).toFixed(2) + '%';
-        element.style.top = (y(value) / HEIGHT * 100).toFixed(2) + '%';
+        element.style.left = insideEdges(x(index) / WIDTH * 100);
+        element.style.top = insideEdges(y(value) / HEIGHT * 100);
     };
 
     const show = clientX => {
