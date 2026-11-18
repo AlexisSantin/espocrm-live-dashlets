@@ -11,7 +11,10 @@
         "lowerIsBetter": "Une baisse est une bonne nouvelle",
         "target": "Objectif",
         "accentColor": "Couleur",
-        "tileStyle": "Style"
+        "tileStyle": "Style",
+        "dormantDays": "Jours sans échange",
+        "enabledSignals": "Éléments à inclure",
+        "staleDays": "Tâche mise de côté après (jours)"
     },
     "options": {
         "metric": {
@@ -36,11 +39,20 @@
             "soft": "Doux (teinté)",
             "minimal": "Épuré",
             "solid": "Couleur pleine"
+        },
+        "enabledSignals": {
+            "tasks": "Tâches en retard et du jour",
+            "activities": "Appels et rendez-vous du jour",
+            "leads": "Nouveaux leads jamais contactés",
+            "deals": "Affaires ouvertes sans échange récent",
+            "followUps": "Rendez-vous sans suite prévue"
         }
     },
     "tooltips": {
         "comparison": "« Au même moment » compare à périodes égales tant que la période n'est pas finie : le 17 du mois, avec le 1er au 17 du mois précédent.",
         "lowerIsBetter": "Affiche une baisse en vert, pour les chiffres qu'on veut voir diminuer (tickets ouverts, tâches en retard…).",
-        "dateField": "L'enregistrement compte dans la période quand cette date s'y trouve."
+        "dateField": "L'enregistrement compte dans la période quand cette date s'y trouve.",
+        "dormantDays": "Une affaire ouverte apparaît après ce nombre de jours sans appel, rendez-vous ou e-mail enregistré.",
+        "staleDays": "Les tâches en retard depuis plus longtemps quittent la liste principale et passent dans « À trier »."
     }
 }

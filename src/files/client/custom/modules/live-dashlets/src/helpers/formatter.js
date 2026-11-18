@@ -151,6 +151,43 @@ class LiveDashletsFormatter {
     }
 
     /**
+     * "Monday 23 Nov", to name a day to choose.
+     *
+     * @param {string} date Y-m-d.
+     * @return {string}
+     */
+    formatWeekdayDate(date) {
+        const [year, month, day] = date.split('-').map(Number);
+
+        try {
+            const text = new Intl.DateTimeFormat(this.getLocale(), {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'short',
+            }).format(new Date(year, month - 1, day));
+
+            return text.charAt(0).toUpperCase() + text.slice(1);
+        } catch (e) {
+            return this.formatDate(date);
+        }
+    }
+
+    /**
+     * @param {string} time H:i, already in the user's time zone.
+     * @return {string}
+     */
+    formatTime(time) {
+        const [hour, minute] = time.split(':').map(Number);
+
+        try {
+            return new Intl.DateTimeFormat(this.getLocale(), {hour: 'numeric', minute: '2-digit'})
+                .format(new Date(2000, 0, 1, hour, minute));
+        } catch (e) {
+            return time;
+        }
+    }
+
+    /**
      * Y-m-d plus a number of days.
      *
      * @param {string} date

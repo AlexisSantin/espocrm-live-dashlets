@@ -8,7 +8,10 @@
         "lowerIsBetter": "A decrease is good news",
         "target": "Target",
         "accentColor": "Color",
-        "tileStyle": "Style"
+        "tileStyle": "Style",
+        "dormantDays": "Days without exchange",
+        "enabledSignals": "What to include",
+        "staleDays": "Task set aside after (days)"
     },
     "options": {
         "metric": {
@@ -33,11 +36,20 @@
             "soft": "Soft (tinted)",
             "minimal": "Minimal",
             "solid": "Solid color"
+        },
+        "enabledSignals": {
+            "tasks": "Overdue and today's tasks",
+            "activities": "Today's calls and meetings",
+            "leads": "New leads never contacted",
+            "deals": "Open deals without recent exchange",
+            "followUps": "Meetings without a next step"
         }
     },
     "tooltips": {
         "comparison": "“At the same point” compares like with like while the period runs: on the 17th of the month, with the 1st–17th of the previous month.",
         "lowerIsBetter": "Shows a decrease in green, for figures you want to go down (open cases, overdue tasks…).",
-        "dateField": "The record counts in the period when this date falls in it."
+        "dateField": "The record counts in the period when this date falls in it.",
+        "dormantDays": "An open deal is listed after this many days without a recorded call, meeting or email.",
+        "staleDays": "Overdue tasks older than this leave the main list and go to “To sort out”."
     }
 }

@@ -1,6 +1,7 @@
 {
     "dashlets": {
         "LiveDashletsKpi": "Chiffre clé",
-        "LiveDashletsGoal": "Objectif"
+        "LiveDashletsGoal": "Objectif",
+        "LiveDashletsActions": "À faire maintenant"
     }
 }

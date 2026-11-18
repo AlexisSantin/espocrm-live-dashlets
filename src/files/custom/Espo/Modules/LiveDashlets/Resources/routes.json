@@ -3,5 +3,15 @@
         "method": "get",
         "route": "LiveDashlets/metric",
         "actionClassName": "Espo\\Modules\\LiveDashlets\\Api\\Metric"
+    },
+    {
+        "method": "get",
+        "route": "LiveDashlets/actions",
+        "actionClassName": "Espo\\Modules\\LiveDashlets\\Api\\Actions"
+    },
+    {
+        "method": "get",
+        "route": "LiveDashlets/lastExchange",
+        "actionClassName": "Espo\\Modules\\LiveDashlets\\Api\\LastExchange"
     }
 ]

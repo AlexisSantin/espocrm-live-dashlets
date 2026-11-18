@@ -1,5 +1,6 @@
 {
     "galleryGroupList": [
+        "actions",
         "leads",
         "sales",
         "activities",
@@ -7,6 +8,17 @@
         "relations"
     ],
     "presetList": [
+        {
+            "name": "nextActions",
+            "group": "actions",
+            "dashlet": "LiveDashletsActions",
+            "width": 2,
+            "height": 3,
+            "iconClass": "fas fa-bolt",
+            "options": {
+                "accentColor": "primary"
+            }
+        },
         {
             "name": "newLeads",
             "group": "leads",

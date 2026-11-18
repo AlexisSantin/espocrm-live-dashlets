@@ -1,0 +1,93 @@
+{
+    "view": "live-dashlets:views/dashlets/actions",
+    "options": {
+        "fields": {
+            "title": {
+                "type": "varchar",
+                "required": true
+            },
+            "autorefreshInterval": {
+                "type": "enumFloat",
+                "options": [
+                    0,
+                    0.5,
+                    1,
+                    2,
+                    5,
+                    10
+                ]
+            },
+            "displayRecords": {
+                "type": "int",
+                "min": 3,
+                "max": 15
+            },
+            "dormantDays": {
+                "type": "int",
+                "min": 1,
+                "max": 365,
+                "tooltip": true
+            },
+            "enabledSignals": {
+                "type": "multiEnum",
+                "options": [
+                    "tasks",
+                    "activities",
+                    "leads",
+                    "deals",
+                    "followUps"
+                ],
+                "translation": "DashletOptions.options.enabledSignals"
+            },
+            "staleDays": {
+                "type": "int",
+                "min": 7,
+                "max": 3650,
+                "tooltip": true
+            }
+        },
+        "defaults": {
+            "autorefreshInterval": 5,
+            "displayRecords": 6,
+            "dormantDays": 14,
+            "enabledSignals": [
+                "tasks",
+                "activities",
+                "leads",
+                "deals",
+                "followUps"
+            ],
+            "staleDays": 30
+        },
+        "layout": [
+            {
+                "rows": [
+                    [
+                        {
+                            "name": "title"
+                        },
+                        {
+                            "name": "autorefreshInterval"
+                        }
+                    ],
+                    [
+                        {
+                            "name": "displayRecords"
+                        },
+                        {
+                            "name": "dormantDays"
+                        }
+                    ],
+                    [
+                        {
+                            "name": "enabledSignals"
+                        },
+                        {
+                            "name": "staleDays"
+                        }
+                    ]
+                ]
+            }
+        ]
+    }
+}

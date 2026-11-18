@@ -37,7 +37,16 @@ class AfterInstall
 
         $dashlets = [
             [
-                'name' => 'LiveDashletsKpi', 'x' => 0, 'y' => 0, 'width' => 1, 'height' => 1,
+                'name' => 'LiveDashletsActions', 'x' => 0, 'y' => 0, 'width' => 2, 'height' => 3,
+                'options' => [
+                    'title' => $t('Next actions', 'À faire maintenant'),
+                    'displayRecords' => 6,
+                    'dormantDays' => 14,
+                    'autorefreshInterval' => 5,
+                ],
+            ],
+            [
+                'name' => 'LiveDashletsKpi', 'x' => 2, 'y' => 0, 'width' => 1, 'height' => 1,
                 'options' => [
                     'title' => $t('New leads', 'Nouveaux leads'),
                     'entityType' => 'Lead',
@@ -50,7 +59,7 @@ class AfterInstall
                 ],
             ],
             [
-                'name' => 'LiveDashletsKpi', 'x' => 1, 'y' => 0, 'width' => 1, 'height' => 1,
+                'name' => 'LiveDashletsKpi', 'x' => 3, 'y' => 0, 'width' => 1, 'height' => 1,
                 'options' => [
                     'title' => $t('Converted leads', 'Leads convertis'),
                     'entityType' => 'Lead',
@@ -64,7 +73,7 @@ class AfterInstall
                 ],
             ],
             [
-                'name' => 'LiveDashletsKpi', 'x' => 2, 'y' => 0, 'width' => 1, 'height' => 1,
+                'name' => 'LiveDashletsKpi', 'x' => 2, 'y' => 1, 'width' => 1, 'height' => 1,
                 'options' => [
                     'title' => $t('Won this quarter', 'Gagné ce trimestre'),
                     'entityType' => 'Opportunity',
@@ -79,7 +88,7 @@ class AfterInstall
                 ],
             ],
             [
-                'name' => 'LiveDashletsKpi', 'x' => 3, 'y' => 0, 'width' => 1, 'height' => 1,
+                'name' => 'LiveDashletsKpi', 'x' => 3, 'y' => 1, 'width' => 1, 'height' => 1,
                 'options' => [
                     'title' => $t('Open cases', 'Tickets ouverts'),
                     'entityType' => 'Case',
@@ -93,7 +102,7 @@ class AfterInstall
                 ],
             ],
             [
-                'name' => 'LiveDashletsGoal', 'x' => 0, 'y' => 1, 'width' => 2, 'height' => 1,
+                'name' => 'LiveDashletsGoal', 'x' => 2, 'y' => 2, 'width' => 2, 'height' => 1,
                 'options' => [
                     'title' => $t('My calls this month', 'Mes appels du mois'),
                     'entityType' => 'Call',
@@ -108,7 +117,7 @@ class AfterInstall
                 ],
             ],
             [
-                'name' => 'LiveDashletsGoal', 'x' => 2, 'y' => 1, 'width' => 2, 'height' => 1,
+                'name' => 'LiveDashletsGoal', 'x' => 0, 'y' => 3, 'width' => 2, 'height' => 1,
                 'options' => [
                     'title' => $t('Quarterly revenue', "Chiffre d'affaires du trimestre"),
                     'entityType' => 'Opportunity',
@@ -122,8 +131,8 @@ class AfterInstall
                     'accentColor' => 'primary',
                 ],
             ],
-            ['name' => 'Stream', 'x' => 0, 'y' => 2, 'width' => 2, 'height' => 4, 'options' => null],
-            ['name' => 'Tasks', 'x' => 2, 'y' => 2, 'width' => 2, 'height' => 4, 'options' => null],
+            ['name' => 'Stream', 'x' => 2, 'y' => 3, 'width' => 2, 'height' => 4, 'options' => null],
+            ['name' => 'Tasks', 'x' => 0, 'y' => 4, 'width' => 2, 'height' => 3, 'options' => null],
         ];
 
         $layout = [];

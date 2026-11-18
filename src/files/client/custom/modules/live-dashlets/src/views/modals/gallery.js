@@ -7,6 +7,7 @@ import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
 import {createSparkline} from 'live-dashlets:helpers/sparkline';
 
 const CONCURRENCY = 4;
+const ACTIONS_DASHLET = 'LiveDashletsActions';
 
 /**
  * Ready-made indicators, each previewed with the user's real figure: one click adds it to the
@@ -72,6 +73,11 @@ class LiveDashletsGalleryModalView extends ModalView {
 
             if (!preset.name || !this.getMetadata().get(['dashlets', preset.dashlet])) {
                 return false;
+            }
+
+            if (preset.dashlet === ACTIONS_DASHLET) {
+                return ['Task', 'Call', 'Meeting', 'Lead', 'Opportunity']
+                    .some(scope => this.getAcl().checkScope(scope, 'read'));
             }
 
             if (
@@ -171,14 +177,16 @@ class LiveDashletsGalleryModalView extends ModalView {
         const head = this.createElement('span', 'live-gallery-card-head');
 
         head.append(
-            this.createIcon(options.entityType),
+            this.createIcon(options.entityType, preset.iconClass),
             this.createElement('span', 'live-gallery-card-title', this.getPresetTitle(preset))
         );
 
         const period = this.createElement(
             'span',
             'live-gallery-card-period',
-            this.translate(options.period || 'ever', 'periods', 'LiveDashlets')
+            preset.dashlet === ACTIONS_DASHLET ?
+                this.translate('cardSubtitle', 'actionLabels', 'LiveDashlets') :
+                this.translate(options.period || 'ever', 'periods', 'LiveDashlets')
         );
 
         const preview = this.createElement('span', 'live-gallery-card-preview');
@@ -253,9 +261,9 @@ class LiveDashletsGalleryModalView extends ModalView {
     }
 
     /** @private */
-    createIcon(entityType) {
+    createIcon(entityType, presetIconClass) {
         const icon = this.createElement('span', 'live-dashlet-icon');
-        const iconClass = this.getMetadata().get(['clientDefs', entityType, 'iconClass']);
+        const iconClass = presetIconClass || this.getMetadata().get(['clientDefs', entityType, 'iconClass']);
 
         icon.setAttribute('aria-hidden', 'true');
 
@@ -299,7 +307,11 @@ class LiveDashletsGalleryModalView extends ModalView {
                 series: preset.dashlet === 'LiveDashletsKpi' && period !== 'ever' ? 'true' : null,
             };
 
-            return Espo.Ajax.getRequest('LiveDashlets/metric', params)
+            const request = preset.dashlet === ACTIONS_DASHLET ?
+                Espo.Ajax.getRequest('LiveDashlets/actions', {limit: 1}) :
+                Espo.Ajax.getRequest('LiveDashlets/metric', params);
+
+            return request
                 .then(data => this.renderPreview(preset, data))
                 .catch(xhr => {
                     if (xhr) {
@@ -350,6 +362,28 @@ class LiveDashletsGalleryModalView extends ModalView {
 
         const preview = card.querySelector('.live-gallery-card-preview');
         const options = preset.options || {};
+
+        if (preset.dashlet === ACTIONS_DASHLET) {
+            const count = this.createElement('span', 'live-gallery-card-value', String(data.total));
+
+            count.append(this.createElement(
+                'span',
+                'live-gallery-card-target',
+                ' ' + this.translate('cardValue', 'actionLabels', 'LiveDashlets')
+            ));
+
+            preview.replaceChildren(count);
+
+            if (data.urgent) {
+                preview.append(this.createElement(
+                    'span',
+                    'live-gallery-card-trend live-dashlet-trend-bad',
+                    this.translate('lateCount', 'actionLabels', 'LiveDashlets').replace('{count}', data.urgent)
+                ));
+            }
+
+            return;
+        }
 
         const value = this.createElement(
             'span',
