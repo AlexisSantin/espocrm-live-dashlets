@@ -177,8 +177,23 @@ function addHover(container, {length, current, previous, x, y, describe}) {
             return line;
         }));
 
+        // Inside the curve's area only, so that the figures above stay visible: on one line when
+        // two do not fit, not at all when even one does not.
+        const room = container.clientHeight - 4;
+
+        tip.classList.remove('live-dashlet-spark-tip-inline');
+        tip.style.visibility = '';
+
+        if (tip.offsetHeight > room) {
+            tip.classList.add('live-dashlet-spark-tip-inline');
+        }
+
+        if (tip.offsetHeight > room) {
+            tip.style.visibility = 'hidden';
+        }
+
         // Beside the guide where it fits, measured: right, else left, else centred and kept inside
-        // the tile. At the top of the curve's area, raised only when that area is too short.
+        // the tile.
         const width = container.clientWidth;
         const at = left / 100 * width;
         const tipWidth = tip.offsetWidth;
@@ -193,7 +208,7 @@ function addHover(container, {length, current, previous, x, y, describe}) {
         }
 
         tip.style.left = tipLeft + 'px';
-        tip.style.top = Math.min(4, container.clientHeight - tip.offsetHeight - 2) + 'px';
+        tip.style.top = Math.max(0, Math.min(4, room - tip.offsetHeight)) + 'px';
 
         container.classList.add('live-dashlet-spark-hovered');
     };
