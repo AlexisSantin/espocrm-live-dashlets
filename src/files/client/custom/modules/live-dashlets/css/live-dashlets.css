@@ -62,6 +62,7 @@ body .dashlet.live-dashlet-panel.live-dashlet-style-solid {
 /* A line around the tile, no fill, no shadow. */
 body .dashlet.live-dashlet-panel.live-dashlet-style-outline {
     background: var(--panel-bg, #fff);
+    border: 1.5px solid var(--default-border-color, #ccc);
     border: 1.5px solid color-mix(in srgb, var(--text-color, #333) 24%, transparent);
     box-shadow: none;
 }
@@ -615,10 +616,6 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 
 /* Outline: monospaced figures, outlined badges, the accent only on the curve and the bar. */
 
-.live-dashlet-style-outline .live-dashlet-head .live-dashlet-icon {
-    display: none;
-}
-
 .live-dashlet-style-outline .live-dashlet-period {
     font-family: var(--ld-font-mono);
     font-size: .8em;
@@ -662,6 +659,7 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 .live-dashlet-style-outline .live-dashlet-goal .live-dashlet-goal-bar {
     height: 1.05em;
     padding: 2px;
+    border: 1.5px solid var(--default-border-color, #ccc);
     border: 1.5px solid color-mix(in srgb, var(--text-color) 28%, transparent);
     background-color: transparent;
 }
@@ -694,6 +692,10 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 .live-dashlet-style-big .live-dashlet-goal .live-dashlet-value {
     font-family: var(--ld-font-condensed);
     font-size: clamp(2.6em, 24cqi, 5em);
+    /* --ld-chars is the length of the formatted figure, set by the view: a long amount gets
+       smaller so that it keeps about three quarters of the width (a figure is about .42em wide
+       per character in this face). */
+    font-size: clamp(1.6em, min(24cqi, 75cqi / (var(--ld-chars, 4) * .42)), 5em);
     font-weight: 600;
     line-height: .9;
     letter-spacing: 0;
@@ -701,6 +703,7 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 
 .live-dashlet-style-big .live-dashlet-goal .live-dashlet-value {
     font-size: clamp(2.4em, 20cqi, 4.4em);
+    font-size: clamp(1.6em, min(20cqi, 50cqi / (var(--ld-chars, 4) * .42)), 4.4em);
 }
 
 .live-dashlet-style-big .live-dashlet-main .live-dashlet-trend-badge {
@@ -723,6 +726,7 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 
 .live-dashlet-style-big .live-dashlet-kpi > .live-dashlet-compare {
     padding-top: .35em;
+    border-top: 1px solid var(--default-border-color, #e5e5e5);
     border-top: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
 }
 
@@ -752,13 +756,19 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     background: none;
 }
 
-/* Segments: 5 % of the width each (the bar spans the tile, 100cqi), the same on the track and
-   on the fill, so that the fill stops on a segment edge only at the value. */
+/* Segments: 5 % of the width each (the bar spans the tile, 100cqi). The track draws them; the
+   fill is cut by a mask of the same segments, which also keeps the sweep of a reached goal
+   inside them. */
 .live-dashlet-style-big .live-dashlet-goal .live-dashlet-goal-bar {
     height: 1.1em;
     margin-top: .45em;
     border-radius: 1px;
     background-color: transparent;
+    background-image: repeating-linear-gradient(
+        90deg,
+        var(--gray-lighter, #eee) 0 calc(5cqi - 3px),
+        transparent calc(5cqi - 3px) 5cqi
+    );
     background-image: repeating-linear-gradient(
         90deg,
         color-mix(in srgb, var(--text-color) 12%, transparent) 0 calc(5cqi - 3px),
@@ -768,12 +778,8 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 
 .live-dashlet-style-big .live-dashlet-goal-fill {
     border-radius: 1px;
-    background-color: transparent;
-    background-image: repeating-linear-gradient(
-        90deg,
-        var(--ld-goal, var(--ld-accent)) 0 calc(5cqi - 3px),
-        transparent calc(5cqi - 3px) 5cqi
-    );
+    -webkit-mask-image: repeating-linear-gradient(90deg, #000 0 calc(5cqi - 3px), transparent calc(5cqi - 3px) 5cqi);
+    mask-image: repeating-linear-gradient(90deg, #000 0 calc(5cqi - 3px), transparent calc(5cqi - 3px) 5cqi);
 }
 
 /* The expected pace, as a caret above the segments. */
@@ -852,7 +858,12 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 @container (max-height: 112px) {
     .live-dashlet-style-big .live-dashlet-value,
     .live-dashlet-style-big .live-dashlet-goal .live-dashlet-value {
-        font-size: clamp(1.8em, min(24cqi, 42cqh), 3.6em);
+        font-size: clamp(1.6em, min(24cqi, 42cqh, 75cqi / (var(--ld-chars, 4) * .42)), 3.6em);
+    }
+
+    /* Not enough height for the figure and a comparison below it: the change stays beside. */
+    .live-dashlet-style-big .live-dashlet-kpi > .live-dashlet-compare {
+        display: none;
     }
 
     .live-dashlet-style-big .live-dashlet-goal .live-dashlet-goal-bar {
@@ -961,6 +972,7 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 }
 
 .live-gallery .live-gallery-card.live-dashlet-style-outline {
+    border: 1.5px solid var(--default-border-color, #ccc);
     border: 1.5px solid color-mix(in srgb, var(--text-color) 24%, transparent);
 }
 

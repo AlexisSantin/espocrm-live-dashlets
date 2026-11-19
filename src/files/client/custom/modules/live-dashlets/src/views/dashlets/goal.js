@@ -62,6 +62,8 @@ class LiveDashletsGoalView extends LiveDashletsMetricView {
         // Figures.
         const figures = this.createElement('div', 'live-dashlet-goal-figures');
         const valueElement = this.createElement('span', 'live-dashlet-value');
+        valueElement.style.setProperty('--ld-chars', String(format(value).length));
+
         const targetElement = this.createElement('span', 'live-dashlet-goal-target', '/ ' + format(target));
         const percentElement = this.createElement(
             'span',

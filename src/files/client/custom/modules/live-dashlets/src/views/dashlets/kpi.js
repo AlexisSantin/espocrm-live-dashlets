@@ -43,6 +43,7 @@ class LiveDashletsKpiView extends LiveDashletsMetricView {
         const value = this.createElement('span', 'live-dashlet-value');
 
         value.title = format(data.value);
+        value.style.setProperty('--ld-chars', String(data.value === null ? 1 : format(data.value).length));
         main.append(value);
 
         const compare = badge ?
