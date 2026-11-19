@@ -693,7 +693,12 @@ class ActionQueue
      */
     private function nameOf(Entity $entity): ?string
     {
-        return $this->acl->checkField($entity->getEntityType(), 'name') ? $entity->get('name') : null;
+        return $this->canReadName($entity->getEntityType()) ? $entity->get('name') : null;
+    }
+
+    private function canReadName(string $entityType): bool
+    {
+        return $this->acl->checkField($entityType, 'name');
     }
 
     /**
@@ -1062,7 +1067,7 @@ class ActionQueue
             'kind' => 'task',
             'entity' => $task,
             'title' => $this->taskTitle($task),
-            'subtitle' => $task->get('parentName'),
+            'subtitle' => $this->parentOf($task)['name'] ?? null,
             'reason' => $late ?
                 ['code' => $days === 0 ? 'taskOverdueToday' : 'taskOverdue', 'count' => $days] :
                 ['code' => $allDay ? 'taskToday' : 'taskTodayAt', 'time' => $end->format('H:i')],
@@ -1124,7 +1129,7 @@ class ActionQueue
                     'kind' => $kind,
                     'entity' => $activity,
                     'title' => null,
-                    'subtitle' => $activity->get('parentName'),
+                    'subtitle' => $this->parentOf($activity)['name'] ?? null,
                     'reason' => [
                         'code' => !$past ? 'activityToday' : ($days === 0 ? 'activityLate' : 'activityMissed'),
                         'time' => $start->format('H:i'),
@@ -1188,7 +1193,7 @@ class ActionQueue
                 'kind' => 'lead',
                 'entity' => $lead,
                 'title' => $this->nameOf($lead),
-                'subtitle' => $lead->get('accountName'),
+                'subtitle' => $this->acl->checkField('Lead', 'accountName') ? $lead->get('accountName') : null,
                 'reason' => ['code' => 'leadNew', 'count' => $days],
                 'urgent' => false,
                 'primaryAction' => 'call',
@@ -1240,7 +1245,7 @@ class ActionQueue
                 'kind' => 'deal',
                 'entity' => $deal,
                 'title' => null,
-                'subtitle' => $deal->get('accountName') ?: $this->nameOf($deal),
+                'subtitle' => ($this->canReadName('Account') ? $deal->get('accountName') : null) ?: $this->nameOf($deal),
                 'reason' => $reason,
                 'urgent' => false,
                 'primaryAction' => 'call',
@@ -1280,7 +1285,7 @@ class ActionQueue
                 'kind' => 'followUp',
                 'entity' => $meeting,
                 'title' => null,
-                'subtitle' => $meeting->get('parentName'),
+                'subtitle' => $this->parentOf($meeting)['name'] ?? null,
                 'reason' => ['code' => 'followUp', 'date' => $date->format('Y-m-d'), 'label' => $this->taskTitle($meeting)],
                 'urgent' => false,
                 'primaryAction' => 'followUp',
@@ -1327,7 +1332,12 @@ class ActionQueue
         $type = $entity->get('parentType');
         $id = $entity->get('parentId');
 
-        return $type && $id ? ['type' => $type, 'id' => $id, 'name' => $entity->get('parentName')] : null;
+        if (!$type || !$id) {
+            return null;
+        }
+
+        // The parent may be a person whose name the user's role hides.
+        return ['type' => $type, 'id' => $id, 'name' => $this->canReadName($type) ? $entity->get('parentName') : null];
     }
 
     // -----------------------------------------------------------------------------------------

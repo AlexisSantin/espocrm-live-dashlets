@@ -976,7 +976,7 @@ class LiveDashletsActionsView extends BaseDashletView {
     }
 
     /** @private */
-    createChips(name, values, selected) {
+    createChips(name, values, selected, isLocked = false) {
         const chips = this.make('div', 'live-actions-chips');
 
         chips.setAttribute('role', 'group');
@@ -989,6 +989,7 @@ class LiveDashletsActionsView extends BaseDashletView {
             chip.dataset.liveChoice = name;
             chip.dataset.value = value;
             chip.setAttribute('aria-pressed', String(value === selected));
+            chip.disabled = isLocked;
 
             chips.append(chip);
         });
@@ -1080,7 +1081,14 @@ class LiveDashletsActionsView extends BaseDashletView {
             box.append(this.make('p', 'live-actions-hint', this.t('actionOutcome', 'noPhone')));
         }
 
-        box.append(this.createChips('outcome', OUTCOMES[panel.mode], panel.outcome));
+        // Once the result is saved, only the next step is left to create.
+        const isLocked = !!panel.saved;
+
+        if (isLocked) {
+            box.append(this.make('p', 'live-actions-hint', this.t('actionOutcome', 'resultSaved')));
+        }
+
+        box.append(this.createChips('outcome', OUTCOMES[panel.mode], panel.outcome, isLocked));
 
         const note = this.make('textarea', 'form-control live-actions-note');
 
@@ -1095,6 +1103,8 @@ class LiveDashletsActionsView extends BaseDashletView {
             this.make('label', null, this.t('actionOutcome', 'nextStep')),
             this.createChips('next', this.getNextSteps(), panel.next)
         );
+
+        note.readOnly = isLocked;
 
         box.append(note, next, this.createPanelFooter(this.t('actionOutcome', 'saveHint')));
 
@@ -1972,7 +1982,9 @@ class LiveDashletsActionsView extends BaseDashletView {
         try {
             // Kept on the panel: retrying after a failed next step does not save the call twice.
             if (!panel.saved) {
-                panel.saved = await this.saveActivity(item);
+                const saved = await this.saveActivity(item);
+
+                panel.saved = {...saved, outcome: panel.outcome, note: panel.note};
             }
 
             record = panel.saved.record;
@@ -1987,14 +1999,19 @@ class LiveDashletsActionsView extends BaseDashletView {
         } catch (e) {
             button.disabled = false;
 
+            // The result is saved: what is shown must not change any more.
+            if (panel.saved && this.panel === panel) {
+                this.renderList();
+            }
+
             return;
         }
 
         this.panel = null;
 
         const recap = this.addRecap(item, {
-            result: this.getPanelResult(panel),
-            note: panel.note.trim() || null,
+            result: this.getPanelResult({mode: panel.mode, outcome: panel.saved.outcome}),
+            note: panel.saved.note.trim() || null,
             record,
             followUps,
         });
