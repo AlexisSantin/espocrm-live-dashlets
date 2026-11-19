@@ -408,6 +408,11 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     white-space: nowrap;
 }
 
+.live-dashlet-spark-tip.live-dashlet-spark-tip-inline {
+    flex-direction: row;
+    gap: .8em;
+}
+
 .live-dashlet-spark-tip-current,
 .live-dashlet-spark-tip-previous {
     display: flex;
