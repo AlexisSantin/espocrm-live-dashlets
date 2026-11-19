@@ -38,7 +38,9 @@
         "tileStyle": {
             "soft": "Doux (teinté)",
             "minimal": "Épuré",
-            "solid": "Couleur pleine"
+            "solid": "Couleur pleine",
+            "outline": "Contour",
+            "big": "Grand chiffre"
         },
         "enabledSignals": {
             "tasks": "Tâches en retard et du jour",

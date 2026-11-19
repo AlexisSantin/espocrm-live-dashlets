@@ -97,7 +97,9 @@
                 "options": [
                     "soft",
                     "minimal",
-                    "solid"
+                    "solid",
+                    "outline",
+                    "big"
                 ],
                 "translation": "DashletOptions.options.tileStyle"
             }

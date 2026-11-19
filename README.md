@@ -92,14 +92,16 @@ A dashlet that turns the dashboard into a to-do list for the day: who to contact
 | Date used for the period | Which date places a record in the period: created at, close date, converted at… |
 | Compare with | The previous period at the same point, the whole previous period, or nothing |
 | Target | For a Goal |
-| Color and style | Six theme colors, three styles |
+| Color and style | Six theme colors, five styles |
 | Auto-refresh | Every 30 seconds up to every 10 minutes |
 
 ![The options of a Key Figure](docs/screenshots/options.png)
 
-### Three styles
+### Five styles
 
 **Soft** (the default) gives the tile a light tint of its color. **Minimal** stays neutral. **Solid** fills the tile with color: keep it for one headline figure per dashboard.
+
+**Outline** draws a line around the tile, with no fill or shadow, and sets the figures in a monospaced font: the color only shows on the curve and the bar. **Big figure** lets the number fill the tile in a narrow font, with the change beside it in color and the comparison below. A goal in this style reads as 20 segments. Its font ships with the extension (Barlow Condensed, SIL Open Font License), so nothing is loaded from outside EspoCRM.
 
 The ready-made indicators share one color, so that green, amber and red keep their meaning: they are left to trends and statuses. Any of the six theme colors can still be chosen in a tile's options.
 

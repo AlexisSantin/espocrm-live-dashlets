@@ -5,7 +5,7 @@
 import BaseDashletView from 'views/dashlets/abstract/base';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
 
-export const STYLE_LIST = ['soft', 'minimal', 'solid'];
+export const STYLE_LIST = ['soft', 'minimal', 'solid', 'outline', 'big'];
 export const ACCENT_LIST = ['primary', 'success', 'info', 'warning', 'danger', 'default'];
 
 /**
@@ -92,7 +92,7 @@ class LiveDashletsMetricView extends BaseDashletView {
             return;
         }
 
-        const style = STYLE_LIST.includes(this.getOption('tileStyle')) ? this.getOption('tileStyle') : 'soft';
+        const style = this.getTileStyle();
         const accent = ACCENT_LIST.includes(this.getOption('accentColor')) ? this.getOption('accentColor') : 'primary';
 
         [...panel.classList]
@@ -100,6 +100,14 @@ class LiveDashletsMetricView extends BaseDashletView {
             .forEach(name => panel.classList.remove(name));
 
         panel.classList.add('live-dashlet-panel', 'live-dashlet-style-' + style, 'live-dashlet-accent-' + accent);
+    }
+
+    /**
+     * @protected
+     * @return {string}
+     */
+    getTileStyle() {
+        return STYLE_LIST.includes(this.getOption('tileStyle')) ? this.getOption('tileStyle') : 'soft';
     }
 
     /** @private */

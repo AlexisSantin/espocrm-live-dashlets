@@ -35,7 +35,9 @@
         "tileStyle": {
             "soft": "Soft (tinted)",
             "minimal": "Minimal",
-            "solid": "Solid color"
+            "solid": "Solid color",
+            "outline": "Outline",
+            "big": "Big figure"
         },
         "enabledSignals": {
             "tasks": "Overdue and today's tasks",

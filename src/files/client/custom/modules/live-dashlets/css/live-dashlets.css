@@ -1,5 +1,29 @@
 /* Live Dashlets – KPI and goal dashlets, gallery. Colors come from the active theme's variables. */
 
+/* The narrow face of the "big figure" style, shipped with the extension (SIL Open Font License):
+   nothing is loaded from outside EspoCRM. */
+
+@font-face {
+    font-family: "Live Dashlets Condensed";
+    src: url("../fonts/barlow-condensed-latin-500-normal.woff2") format("woff2");
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Live Dashlets Condensed";
+    src: url("../fonts/barlow-condensed-latin-600-normal.woff2") format("woff2");
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+
+:root {
+    --ld-font-condensed: "Live Dashlets Condensed", "Barlow Condensed", "Roboto Condensed", "Arial Narrow", sans-serif;
+    --ld-font-mono: ui-monospace, "SFMono-Regular", "Cascadia Mono", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
 /* Accent color, on the dashlet panel and on gallery cards. */
 
 .live-dashlet-accent-primary { --ld-accent: var(--brand-primary); }
@@ -10,7 +34,7 @@
 .live-dashlet-accent-default { --ld-accent: var(--text-muted-color); }
 
 /* ---------------------------------------------------------------------------------------------
-   Dashlet panel styles: soft (tinted), minimal, solid.
+   Dashlet panel styles: soft (tinted), minimal, solid, outline, big figure.
    --------------------------------------------------------------------------------------------- */
 
 .dashlet.live-dashlet-panel {
@@ -33,6 +57,25 @@ body .dashlet.live-dashlet-panel.live-dashlet-style-solid {
     background: var(--ld-accent);
     background: oklch(from var(--ld-accent) min(l, .5) c h);
     border-color: transparent;
+}
+
+/* A line around the tile, no fill, no shadow. */
+body .dashlet.live-dashlet-panel.live-dashlet-style-outline {
+    background: var(--panel-bg, #fff);
+    border: 1.5px solid color-mix(in srgb, var(--text-color, #333) 24%, transparent);
+    box-shadow: none;
+}
+
+body .dashlet.live-dashlet-panel.live-dashlet-style-big {
+    background: var(--panel-bg, #fff);
+}
+
+/* Big figure: the title in small capitals, above a figure that fills the tile. */
+.dashlet.live-dashlet-style-big > .panel-heading .panel-title {
+    font-size: .8em;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
 }
 
 .dashlet.live-dashlet-panel > .panel-heading,
@@ -570,6 +613,184 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     text-overflow: ellipsis;
 }
 
+/* Outline: monospaced figures, outlined badges, the accent only on the curve and the bar. */
+
+.live-dashlet-style-outline .live-dashlet-head .live-dashlet-icon {
+    display: none;
+}
+
+.live-dashlet-style-outline .live-dashlet-period {
+    font-family: var(--ld-font-mono);
+    font-size: .8em;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+}
+
+.live-dashlet-style-outline .live-dashlet-value {
+    font-family: var(--ld-font-mono);
+    font-weight: 600;
+    letter-spacing: -.04em;
+}
+
+.live-dashlet-style-outline .live-dashlet-compare,
+.live-dashlet-style-outline .live-dashlet-goal-target,
+.live-dashlet-style-outline .live-dashlet-goal-percent,
+.live-dashlet-style-outline .live-dashlet-goal-foot {
+    font-family: var(--ld-font-mono);
+    font-size: .85em;
+}
+
+.live-dashlet-style-outline .live-dashlet-trend-badge,
+.live-dashlet-style-outline .live-dashlet-status {
+    padding: 0 .6em;
+    border: 1.5px solid currentColor;
+    background-color: transparent;
+    font-family: var(--ld-font-mono);
+    font-size: .8em;
+}
+
+.live-dashlet-style-outline .live-dashlet-spark-area {
+    display: none;
+}
+
+.live-dashlet-style-outline .live-dashlet-spark-previous {
+    stroke-dasharray: 3 3;
+    stroke-opacity: .6;
+}
+
+/* The bar is an outlined track with the fill set inside it. */
+.live-dashlet-style-outline .live-dashlet-goal .live-dashlet-goal-bar {
+    height: 1.05em;
+    padding: 2px;
+    border: 1.5px solid color-mix(in srgb, var(--text-color) 28%, transparent);
+    background-color: transparent;
+}
+
+.live-dashlet-style-outline .live-dashlet-goal-pace {
+    top: -.45em;
+    bottom: -.45em;
+    width: 0;
+    margin-left: 0;
+    border-left: 1.5px dashed var(--text-color);
+    border-radius: 0;
+    background: none;
+    opacity: .8;
+}
+
+/* Big figure: a narrow face, the change beside the figure as colored text, what it is compared
+   to below a thin rule. A goal reads as 20 segments. */
+
+.live-dashlet-style-big .live-dashlet-head .live-dashlet-icon {
+    display: none;
+}
+
+.live-dashlet-style-big .live-dashlet-main,
+.live-dashlet-style-big .live-dashlet-goal-figures {
+    align-items: flex-end;
+    gap: .5em;
+}
+
+.live-dashlet-style-big .live-dashlet-value,
+.live-dashlet-style-big .live-dashlet-goal .live-dashlet-value {
+    font-family: var(--ld-font-condensed);
+    font-size: clamp(2.6em, 24cqi, 5em);
+    font-weight: 600;
+    line-height: .9;
+    letter-spacing: 0;
+}
+
+.live-dashlet-style-big .live-dashlet-goal .live-dashlet-value {
+    font-size: clamp(2.4em, 20cqi, 4.4em);
+}
+
+.live-dashlet-style-big .live-dashlet-main .live-dashlet-trend-badge {
+    padding: 0 0 .12em;
+    background: none;
+    font-family: var(--ld-font-condensed);
+    font-size: clamp(1.25em, 8cqi, 1.9em);
+    font-weight: 600;
+    line-height: 1;
+}
+
+.live-dashlet-style-big .live-dashlet-main .live-dashlet-trend-badge .fas {
+    font-size: .7em;
+}
+
+.live-dashlet-style-big .live-dashlet-main .live-dashlet-open {
+    align-self: flex-end;
+    margin-bottom: .5em;
+}
+
+.live-dashlet-style-big .live-dashlet-kpi > .live-dashlet-compare {
+    padding-top: .35em;
+    border-top: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
+}
+
+.live-dashlet-style-big .live-dashlet-spark-area {
+    display: none;
+}
+
+.live-dashlet-style-big .live-dashlet-spark-line {
+    stroke-width: 1.5;
+}
+
+.live-dashlet-style-big .live-dashlet-goal-target,
+.live-dashlet-style-big .live-dashlet-goal-percent {
+    font-family: var(--ld-font-condensed);
+    font-size: clamp(1.3em, 9cqi, 2.1em);
+    font-weight: 500;
+    line-height: 1;
+    padding-bottom: .1em;
+}
+
+.live-dashlet-style-big .live-dashlet-goal-percent {
+    color: var(--text-muted-color);
+}
+
+.live-dashlet-style-big .live-dashlet-status {
+    padding: 0;
+    background: none;
+}
+
+/* Segments: 5 % of the width each (the bar spans the tile, 100cqi), the same on the track and
+   on the fill, so that the fill stops on a segment edge only at the value. */
+.live-dashlet-style-big .live-dashlet-goal .live-dashlet-goal-bar {
+    height: 1.1em;
+    margin-top: .45em;
+    border-radius: 1px;
+    background-color: transparent;
+    background-image: repeating-linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--text-color) 12%, transparent) 0 calc(5cqi - 3px),
+        transparent calc(5cqi - 3px) 5cqi
+    );
+}
+
+.live-dashlet-style-big .live-dashlet-goal-fill {
+    border-radius: 1px;
+    background-color: transparent;
+    background-image: repeating-linear-gradient(
+        90deg,
+        var(--ld-goal, var(--ld-accent)) 0 calc(5cqi - 3px),
+        transparent calc(5cqi - 3px) 5cqi
+    );
+}
+
+/* The expected pace, as a caret above the segments. */
+.live-dashlet-style-big .live-dashlet-goal-pace {
+    top: -.5em;
+    bottom: auto;
+    width: 0;
+    height: 0;
+    margin-left: -5px;
+    border: 5px solid transparent;
+    border-top-color: var(--text-color);
+    border-bottom: 0;
+    border-radius: 0;
+    background: none;
+    opacity: .8;
+}
+
 /* Loading and messages. */
 
 .live-dashlet-loader,
@@ -625,6 +846,18 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     .live-dashlet-status {
         padding-top: 0;
         padding-bottom: 0;
+    }
+}
+
+@container (max-height: 112px) {
+    .live-dashlet-style-big .live-dashlet-value,
+    .live-dashlet-style-big .live-dashlet-goal .live-dashlet-value {
+        font-size: clamp(1.8em, min(24cqi, 42cqh), 3.6em);
+    }
+
+    .live-dashlet-style-big .live-dashlet-goal .live-dashlet-goal-bar {
+        height: .8em;
+        margin-top: .3em;
     }
 }
 
@@ -725,6 +958,10 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     background-color: var(--ld-accent);
     background-color: oklch(from var(--ld-accent) min(l, .5) c h);
     border-color: transparent;
+}
+
+.live-gallery .live-gallery-card.live-dashlet-style-outline {
+    border: 1.5px solid color-mix(in srgb, var(--text-color) 24%, transparent);
 }
 
 .live-gallery-card:hover {

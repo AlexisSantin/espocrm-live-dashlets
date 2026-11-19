@@ -24,13 +24,17 @@ class LiveDashletsKpiView extends LiveDashletsMetricView {
 
         const root = this.createElement('div', 'live-dashlet-kpi');
 
+        // The "big figure" style puts the change beside the figure, and what it is compared to
+        // on a line of its own below.
+        const big = this.getTileStyle() === 'big';
+
         // Head: icon, period and, on the right, the change.
         const head = this.createElement('div', 'live-dashlet-head');
         head.append(this.createIcon(), this.createPeriod(data));
 
         const badge = this.createTrendBadge(data);
 
-        if (badge) {
+        if (badge && !big) {
             head.append(badge);
         }
 
@@ -41,8 +45,12 @@ class LiveDashletsKpiView extends LiveDashletsMetricView {
         value.title = format(data.value);
         main.append(value);
 
+        const compare = badge ?
+            this.createElement('span', 'live-dashlet-compare', this.getCompareText(data, format)) :
+            null;
+
         if (badge) {
-            main.append(this.createElement('span', 'live-dashlet-compare', this.getCompareText(data, format)));
+            main.append(big ? badge : compare);
         }
 
         const arrow = this.createElement('span', 'live-dashlet-open fas fa-arrow-right');
@@ -51,6 +59,10 @@ class LiveDashletsKpiView extends LiveDashletsMetricView {
         main.append(arrow);
 
         root.append(head, main);
+
+        if (big && compare) {
+            root.append(compare);
+        }
 
         // The curve of the period fills the bottom of the tile, edge to edge.
         const sparkline = createSparkline(data.series, {

@@ -368,6 +368,8 @@ $styleSamples = [
     'soft' => [$t('Soft', 'Doux'), 'ahead', $t('on track', 'en avance')],
     'minimal' => [$t('Minimal', 'Épuré'), 'behind', $t('behind', 'en retard')],
     'solid' => [$t('Solid', 'Plein'), 'reached', $t('reached', 'atteint')],
+    'outline' => [$t('Outline', 'Contour'), 'behind', $t('behind', 'en retard')],
+    'big' => [$t('Big figure', 'Grand chiffre'), 'ahead', $t('on track', 'en avance')],
 ];
 
 $tiles = [];
