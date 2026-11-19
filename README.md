@@ -117,7 +117,7 @@ Installing the extension creates a **Live dashboard** template in **Administrati
 - the next actions;
 - new and converted leads this month;
 - the amount won this quarter, as the one solid tile;
-- open cases;
+- open cases, as a big figure;
 - two goals, "My calls this month" and "Quarterly revenue";
 - the stream and tasks.
 

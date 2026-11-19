@@ -97,7 +97,7 @@ class AfterInstall
                     'period' => 'ever',
                     'comparison' => 'none',
                     'lowerIsBetter' => true,
-                    'tileStyle' => 'soft',
+                    'tileStyle' => 'big',
                     'accentColor' => 'primary',
                 ],
             ],
