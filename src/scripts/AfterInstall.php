@@ -69,7 +69,7 @@ class AfterInstall
                     'dateField' => 'convertedAt',
                     'comparison' => 'toDate',
                     'tileStyle' => 'soft',
-                    'accentColor' => 'success',
+                    'accentColor' => 'primary',
                 ],
             ],
             [
@@ -98,7 +98,7 @@ class AfterInstall
                     'comparison' => 'none',
                     'lowerIsBetter' => true,
                     'tileStyle' => 'soft',
-                    'accentColor' => 'warning',
+                    'accentColor' => 'primary',
                 ],
             ],
             [
@@ -113,7 +113,7 @@ class AfterInstall
                     'period' => 'currentMonth',
                     'dateField' => 'dateStart',
                     'tileStyle' => 'soft',
-                    'accentColor' => 'success',
+                    'accentColor' => 'primary',
                 ],
             ],
             [

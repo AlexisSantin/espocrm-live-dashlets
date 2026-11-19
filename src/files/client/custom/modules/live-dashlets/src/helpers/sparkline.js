@@ -61,7 +61,8 @@ export function createSparkline(series, options = {}) {
     gradient.setAttribute('x2', '0');
     gradient.setAttribute('y2', '1');
 
-    [['0', '.32'], ['1', '0']].forEach(([offset, opacity]) => {
+    // A wash, not a block.
+    [['0', '.14'], ['1', '0']].forEach(([offset, opacity]) => {
         const stop = document.createElementNS(SVG_NS, 'stop');
 
         stop.setAttribute('offset', offset);
@@ -176,9 +177,11 @@ function addHover(container, {length, current, previous, x, y, describe}) {
             return line;
         }));
 
-        // Kept inside the tile: anchored left, centred or right depending on the side.
-        tip.dataset.align = left < 25 ? 'start' : (left > 75 ? 'end' : 'center');
+        // Beside the guide, on the side with more room, at the top of the curve's area; raised
+        // only when that area is shorter than the tooltip, so that it stays inside the tile.
+        tip.dataset.side = left > 55 ? 'left' : 'right';
         tip.style.left = left.toFixed(2) + '%';
+        tip.style.top = Math.min(4, container.clientHeight - tip.offsetHeight - 2) + 'px';
 
         container.classList.add('live-dashlet-spark-hovered');
     };

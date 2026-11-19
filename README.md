@@ -34,7 +34,7 @@ New tiles line up from left to right after the small tiles at the top of the das
 A large number with the entity icon, the period and the change against the previous period, for example "27 new leads this month, +50 %, vs 18 by Oct 17".
 
 - **A fair comparison.** By default, the previous period is cut at the same point: on November 17, this month is compared with October 1 to 17. You can also compare with the whole previous period, or turn the comparison off.
-- **The curve of the period.** It shows the cumulative value day by day: the current period as a solid line, the previous one dashed. Hover the curve to read both values on a given day.
+- **The curve of the period.** It shows the cumulative value day by day: the current period in color, the previous one as a thin grey line. Hover the curve to read both values on a given day.
 - **When a decrease is good news.** The option of that name turns falling figures green, for things you want to see go down, such as open cases or overdue tasks.
 
 ![Hovering the curve shows the value on that day and the previous period's](docs/screenshots/tooltip.png)
@@ -43,7 +43,7 @@ A large number with the entity icon, the period and the change against the previ
 
 A progress bar toward a target, with:
 - a marker showing where you should be at this point of the period;
-- a status: **On track**, **Behind** or **Reached**;
+- a status: **On track**, **Behind** or **Reached**, which the bar also shows: green when on track or reached, amber when behind;
 - what is left to do and the number of days left.
 
 ### The records behind a figure
@@ -99,7 +99,9 @@ A dashlet that turns the dashboard into a to-do list for the day: who to contact
 
 ### Three styles
 
-**Soft** (the default) tints the whole tile with its color. **Minimal** stays neutral. **Solid** fills the tile with color: keep it for one headline figure per dashboard.
+**Soft** (the default) gives the tile a light tint of its color. **Minimal** stays neutral. **Solid** fills the tile with color: keep it for one headline figure per dashboard.
+
+The ready-made indicators share one color, so that green, amber and red keep their meaning: they are left to trends and statuses. Any of the six theme colors can still be chosen in a tile's options.
 
 ![Soft, Minimal and Solid](docs/screenshots/styles.png)
 
@@ -121,7 +123,7 @@ Adjust the targets, then deploy it to the users or teams you choose. Nothing is 
 
 ### Details that matter
 
-- **Animations.** Figures count up, curves draw themselves, bars fill in, and a reached goal gets a light sweep. Nothing moves when the system asks for reduced motion.
+- **Animations.** Figures count up, curves draw themselves, bars fill in, and a reached goal gets a light sweep. Nothing loops. Nothing moves when the system asks for reduced motion.
 - **Time zones and calendars.** Periods follow each user's time zone and first day of the week, and the fiscal year setting.
 - **Currencies.** Amounts are added up in the default currency, like EspoCRM's own charts, and displayed with the system's currency format and separators.
 - **Languages.** English and French.
@@ -135,7 +137,7 @@ Adjust the targets, then deploy it to the users or teams you choose. Nothing is 
 
 ## Installation
 
-1. Download `live-dashlets-1.1.1.zip` from the [latest release](../../releases/latest).
+1. Download `live-dashlets-1.2.0.zip` from the [latest release](../../releases/latest).
 2. In EspoCRM, go to **Administration → Extensions**, upload the ZIP and click **Install**.
 3. Optional: in **Administration → Dashboard Templates**, open **Live dashboard**, adjust the goal targets and deploy it.
 
@@ -164,7 +166,7 @@ The gallery is defined in metadata, so you can add company-specific indicators w
                 "dateField": "closeDate",
                 "period": "currentQuarter",
                 "comparison": "toDate",
-                "accentColor": "success",
+                "accentColor": "primary",
                 "tileStyle": "soft"
             }
         }
