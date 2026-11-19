@@ -126,7 +126,8 @@
         "snoozePick": "Choisir une date…",
         "snoozeQuestion": "Reporter à quelle date ?",
         "copyNumber": "Copier",
-        "copied": "Copié"
+        "copied": "Copié",
+        "actionCountMore": "{count}+ actions"
     },
     "actionButtons": {
         "call": "Appeler",
@@ -154,7 +155,9 @@
         "leadNewYesterday": "Créé hier, jamais contacté",
         "dealDormant": "Dernier échange enregistré il y a {count} jours · {amount}",
         "dealNoExchange": "Aucun échange enregistré · {amount}",
-        "followUp": "{label} le {date}, aucune suite prévue"
+        "followUp": "{label} le {date}, aucune suite prévue",
+        "dealDormantNoAmount": "Dernier échange enregistré il y a {count} jours",
+        "dealNoExchangeNoAmount": "Aucun échange enregistré"
     },
     "actionOutcome": {
         "callQuestion": "Comment s'est passé l'appel ?",

@@ -28,7 +28,8 @@ class ActionQueue
 {
     public const SIGNAL_LIST = ['tasks', 'activities', 'leads', 'deals', 'followUps'];
 
-    private const CANDIDATE_LIMIT = 40;
+    /** Records read per signal before ranking; past this, the count is shown as "N+". */
+    private const CANDIDATE_LIMIT = 300;
     private const ACTIVITY_WINDOW_DAYS = 7;
     private const NEW_LEAD_DAYS = 30;
     private const DONE_LIMIT = 30;
@@ -50,6 +51,8 @@ class ActionQueue
     private array $planned = [];
     /** @var array<string, string[]> */
     private array $contactsByAccount = [];
+    /** A signal had more records than were read. */
+    private bool $capped = false;
 
     public function __construct(
         private Acl $acl,
@@ -112,6 +115,7 @@ class ActionQueue
             'available' => $available !== [],
             'items' => $items,
             'total' => $total,
+            'capped' => $this->capped,
             'urgent' => $urgent,
             'staleCount' => $staleCount,
             'done' => $withDone ? $this->doneItems() : [],
@@ -136,7 +140,7 @@ class ActionQueue
         $this->prepare($staleDays);
 
         $tasks = $this->canRead('Task') ?
-            $this->fetch('Task', $this->staleTaskQuery()->order('dateEnd', 'DESC'), $limit) :
+            $this->fetch('Task', $this->staleTaskQuery()->order([['dateEnd', 'DESC']]), $limit) :
             [];
 
         $items = [];
@@ -216,7 +220,7 @@ class ActionQueue
 
             $email = $this->fetch('Email', $this->query('Email', null, false)
                 ->where(['status' => ['Sent', 'Archived'], 'OR' => $parentConditions])
-                ->order('dateSent', 'DESC'), 1)[0] ?? null;
+                ->order([['dateSent', 'DESC']]), 1)[0] ?? null;
 
             if ($email && $email->get('dateSent')) {
                 $found[] = ['date' => $email->get('dateSent'), 'entity' => $email];
@@ -264,7 +268,7 @@ class ActionQueue
         $found = [];
 
         foreach ($builders as $builder) {
-            $entity = $this->fetch($entityType, $builder->order('dateStart', 'DESC'), 1)[0] ?? null;
+            $entity = $this->fetch($entityType, $builder->order([['dateStart', 'DESC']]), 1)[0] ?? null;
 
             if ($entity) {
                 $found[] = ['date' => $entity->get('dateStart'), 'entity' => $entity];
@@ -328,7 +332,7 @@ class ActionQueue
 
         $find = function (string $type, array $where, string $order): array {
             return $this->canRead($type) ?
-                $this->fetch($type, $this->query($type, null, false)->where($where)->order($order, 'DESC'), self::DONE_LIMIT) :
+                $this->fetch($type, $this->query($type, null, false)->where($where)->order([[$order, 'DESC']]), self::DONE_LIMIT) :
                 [];
         };
 
@@ -532,6 +536,10 @@ class ActionQueue
         return $this->entityManager->getDefs()->getEntity($entityType)->hasAttribute($attribute);
     }
 
+    /**
+     * Note: the builder carries EspoCRM's default order. Order with an array, which replaces it:
+     * `->order([['dateStart', 'ASC']])`. A plain `->order('dateStart')` would only come second.
+     */
     private function query(string $entityType, ?string $primaryFilter = null, bool $onlyMine = true): SelectBuilder
     {
         return $this->selectBuilderFactory
@@ -548,7 +556,26 @@ class ActionQueue
     /**
      * @return Entity[]
      */
-    private function fetch(string $entityType, SelectBuilder $builder, int $limit = self::CANDIDATE_LIMIT): array
+    /**
+     * The records a signal ranks: all of them up to a high limit, then the count is flagged.
+     *
+     * @return Entity[]
+     */
+    private function fetchCandidates(string $entityType, SelectBuilder $builder): array
+    {
+        $list = $this->fetch($entityType, $builder, self::CANDIDATE_LIMIT);
+
+        if (count($list) >= self::CANDIDATE_LIMIT) {
+            $this->capped = true;
+        }
+
+        return $list;
+    }
+
+    /**
+     * @return Entity[]
+     */
+    private function fetch(string $entityType, SelectBuilder $builder, int $limit): array
     {
         $collection = $this->entityManager
             ->getRDBRepository($entityType)
@@ -636,9 +663,9 @@ class ActionQueue
 
         $since = $this->today()->modify('-' . self::NEW_LEAD_DAYS . ' days');
 
-        return $this->fetch('Lead', $this->query('Lead', 'actual')
+        return $this->fetchCandidates('Lead', $this->query('Lead', 'actual')
             ->where(['createdAt>=' => $this->toUtc($since)])
-            ->order('createdAt', 'DESC'));
+            ->order([['createdAt', 'DESC']]));
     }
 
     /**
@@ -650,7 +677,23 @@ class ActionQueue
             return [];
         }
 
-        return $this->fetch('Opportunity', $this->query('Opportunity', 'open')->order('amount', 'DESC'));
+        // Ordering by an amount the user may not read would reveal it.
+        $order = $this->canReadAmount() ? 'amount' : 'createdAt';
+
+        return $this->fetchCandidates('Opportunity', $this->query('Opportunity', 'open')->order([[$order, 'DESC']]));
+    }
+
+    private function canReadAmount(): bool
+    {
+        return $this->acl->checkField('Opportunity', 'amount');
+    }
+
+    /**
+     * A record's name, unless the user's role hides that field.
+     */
+    private function nameOf(Entity $entity): ?string
+    {
+        return $this->acl->checkField($entity->getEntityType(), 'name') ? $entity->get('name') : null;
     }
 
     /**
@@ -664,13 +707,13 @@ class ActionQueue
 
         $since = $this->today()->modify('-' . self::ACTIVITY_WINDOW_DAYS . ' days');
 
-        return $this->fetch('Meeting', $this->query('Meeting', 'held')
+        return $this->fetchCandidates('Meeting', $this->query('Meeting', 'held')
             ->where([
                 'dateStart>=' => $this->toUtc($since),
                 'dateStart<=' => $this->toUtc($this->now),
                 'parentId!=' => null,
             ])
-            ->order('dateStart', 'DESC'));
+            ->order([['dateStart', 'DESC']]));
     }
 
     /**
@@ -955,12 +998,12 @@ class ActionQueue
         $tasks = [];
 
         $queries = [
-            $this->query('Task', 'overdue')->where(['dateEnd>=' => $this->staleBefore])->order('dateEnd', 'DESC'),
-            $this->query('Task', 'todays')->order('dateEnd', 'ASC'),
+            $this->query('Task', 'overdue')->where(['dateEnd>=' => $this->staleBefore])->order([['dateEnd', 'DESC']]),
+            $this->query('Task', 'todays')->order([['dateEnd', 'ASC']]),
         ];
 
         foreach ($queries as $query) {
-            foreach ($this->fetch('Task', $query) as $task) {
+            foreach ($this->fetchCandidates('Task', $query) as $task) {
                 $tasks[$task->getId()] = $task;
             }
         }
@@ -1063,13 +1106,13 @@ class ActionQueue
                 continue;
             }
 
-            $list = $this->fetch($entityType, $this->query($entityType)
+            $list = $this->fetchCandidates($entityType, $this->query($entityType)
                 ->where([
                     'status' => 'Planned',
                     'dateStart>=' => $this->toUtc($from),
                     'dateStart<' => $this->toUtc($to),
                 ])
-                ->order('dateStart', 'ASC'));
+                ->order([['dateStart', 'ASC']]));
 
             foreach ($list as $activity) {
                 $start = $this->toLocal($activity->get('dateStart'));
@@ -1106,14 +1149,20 @@ class ActionQueue
     private function snoozeActivity(Entity $activity, DateTimeImmutable $start): array
     {
         $end = $activity->get('dateEnd') ? $this->toLocal($activity->get('dateEnd')) : $start;
+        $startDate = $activity->hasAttribute('dateStartDate') ? $activity->get('dateStartDate') : null;
+        $endDate = $activity->hasAttribute('dateEndDate') ? $activity->get('dateEndDate') : null;
 
         return [
             'method' => 'PUT',
             'url' => $activity->getEntityType() . '/' . $activity->getId(),
             'schedule' => [
-                'allDay' => $activity->hasAttribute('dateStartDate') && (bool) $activity->get('dateStartDate'),
+                'allDay' => (bool) $startDate,
                 'time' => $start->format('H:i'),
                 'duration' => max(0, $end->getTimestamp() - $start->getTimestamp()),
+                // An all-day meeting over several days keeps its length.
+                'days' => $startDate && $endDate ?
+                    max(0, (int) (new DateTimeImmutable($startDate))->diff(new DateTimeImmutable($endDate))->days) :
+                    0,
             ],
         ];
     }
@@ -1138,12 +1187,12 @@ class ActionQueue
             $items[] = [
                 'kind' => 'lead',
                 'entity' => $lead,
-                'title' => $lead->get('name'),
+                'title' => $this->nameOf($lead),
                 'subtitle' => $lead->get('accountName'),
                 'reason' => ['code' => 'leadNew', 'count' => $days],
                 'urgent' => false,
                 'primaryAction' => 'call',
-                'target' => ['type' => 'Lead', 'id' => $lead->getId(), 'name' => $lead->get('name')],
+                'target' => ['type' => 'Lead', 'id' => $lead->getId(), 'name' => $this->nameOf($lead)],
                 'score' => 85 - min(30, $days * 3),
                 'snooze' => $this->followUpTask('Lead', $lead->getId()),
             ];
@@ -1161,6 +1210,7 @@ class ActionQueue
     private function dealItems(array $deals, int $dormantDays): array
     {
         $items = [];
+        $withAmount = $this->canReadAmount();
         $maxAmount = max(1.0, ...array_map(fn ($deal) => (float) $deal->get('amountConverted'), $deals ?: []) ?: [1.0]);
 
         foreach ($deals as $deal) {
@@ -1177,22 +1227,25 @@ class ActionQueue
                 continue;
             }
 
-            $amount = (float) $deal->get('amountConverted');
+            $amount = $withAmount ? (float) $deal->get('amountConverted') : null;
+            $reason = ['code' => $touch ? 'dealDormant' : 'dealNoExchange', 'count' => $days];
+
+            if ($amount !== null) {
+                $reason['amount'] = $amount;
+            } else {
+                $reason['code'] .= 'NoAmount';
+            }
 
             $items[] = [
                 'kind' => 'deal',
                 'entity' => $deal,
                 'title' => null,
-                'subtitle' => $deal->get('accountName') ?: $deal->get('name'),
-                'reason' => [
-                    'code' => $touch ? 'dealDormant' : 'dealNoExchange',
-                    'count' => $days,
-                    'amount' => $amount,
-                ],
+                'subtitle' => $deal->get('accountName') ?: $this->nameOf($deal),
+                'reason' => $reason,
                 'urgent' => false,
                 'primaryAction' => 'call',
-                'target' => ['type' => 'Opportunity', 'id' => $deal->getId(), 'name' => $deal->get('name')],
-                'score' => 60 + 15 * $amount / $maxAmount + min(10, ($days - $dormantDays) / 3),
+                'target' => ['type' => 'Opportunity', 'id' => $deal->getId(), 'name' => $this->nameOf($deal)],
+                'score' => 60 + ($amount === null ? 7.5 : 15 * $amount / $maxAmount) + min(10, ($days - $dormantDays) / 3),
                 'snooze' => $this->followUpTask('Opportunity', $deal->getId()),
             ];
         }
@@ -1297,7 +1350,7 @@ class ActionQueue
             'kind' => $item['kind'],
             'entityType' => $entity->getEntityType(),
             'id' => $entity->getId(),
-            'title' => $item['title'] ?? $person['name'] ?? $item['subtitle'] ?? $entity->get('name'),
+            'title' => $item['title'] ?? $person['name'] ?? $item['subtitle'] ?? $this->nameOf($entity),
             'subtitle' => ($item['subtitle'] ?? null) !== ($item['title'] ?? $person['name'] ?? null) ?
                 $item['subtitle'] : null,
             'reason' => $item['reason'],
@@ -1406,6 +1459,18 @@ class ActionQueue
             return $this->describePerson($entity);
         }
 
+        // The person a call or a meeting is with, rather than any contact of its account.
+        if (
+            in_array($entity->getEntityType(), ['Call', 'Meeting'], true) &&
+            !in_array($target['type'] ?? null, ['Lead', 'Contact'], true)
+        ) {
+            $participant = $this->findParticipant($entity, $target);
+
+            if ($participant) {
+                return $this->describePerson($participant);
+            }
+        }
+
         $source = $target && $target['type'] !== $entity->getEntityType() && $this->canRead($target['type']) ?
             $this->entityManager->getEntityById($target['type'], $target['id']) :
             $entity;
@@ -1426,7 +1491,7 @@ class ActionQueue
         if (!$contactId && $accountId && $this->canRead('Contact')) {
             $contact = $this->fetch('Contact', $this->query('Contact', null, false)
                 ->where(['accountId' => $accountId])
-                ->order('createdAt', 'ASC'))[0] ?? null;
+                ->order([['createdAt', 'ASC']]), 1)[0] ?? null;
 
             if ($contact) {
                 return $this->describePerson($contact);
@@ -1453,6 +1518,45 @@ class ActionQueue
     }
 
     /**
+     * A readable contact or lead linked to the activity, from its account first.
+     *
+     * @param ?array{type: string, id: string, name: ?string} $target
+     */
+    private function findParticipant(Entity $activity, ?array $target): ?Entity
+    {
+        $accountId = ($target['type'] ?? null) === 'Account' ? $target['id'] : null;
+        $other = null;
+
+        foreach (['contacts' => 'Contact', 'leads' => 'Lead'] as $link => $type) {
+            if (!$activity->hasRelation($link) || !$this->canRead($type)) {
+                continue;
+            }
+
+            $people = $this->entityManager
+                ->getRDBRepository($activity->getEntityType())
+                ->getRelation($activity, $link)
+                ->limit(0, 20)
+                ->find();
+
+            foreach ($people as $person) {
+                if (!$this->acl->checkEntityRead($person)) {
+                    continue;
+                }
+
+                $isOfAccount = $accountId && $person->hasAttribute('accountId') && $person->get('accountId') === $accountId;
+
+                if (!$accountId || $isOfAccount) {
+                    return $person;
+                }
+
+                $other ??= $person;
+            }
+        }
+
+        return $other;
+    }
+
+    /**
      * @return array<string, ?string>
      */
     private function describePerson(Entity $entity): array
@@ -1462,7 +1566,7 @@ class ActionQueue
         return [
             'type' => $type,
             'id' => $entity->getId(),
-            'name' => $entity->get('name'),
+            'name' => $this->nameOf($entity),
             'phone' => $this->acl->checkField($type, 'phoneNumber') ? $entity->get('phoneNumber') : null,
             'email' => $this->acl->checkField($type, 'emailAddress') ? $entity->get('emailAddress') : null,
         ];
@@ -1482,7 +1586,7 @@ class ActionQueue
             if ($this->canRead($entityType)) {
                 $row = $this->fetch($entityType, $this->query($entityType)
                     ->where(['status' => 'Planned', 'dateStart>' => $now])
-                    ->order('dateStart', 'ASC'))[0] ?? null;
+                    ->order([['dateStart', 'ASC']]), 1)[0] ?? null;
 
                 if ($row) {
                     $dates[] = $row->get('dateStart');
@@ -1493,7 +1597,7 @@ class ActionQueue
         if ($this->canRead('Task')) {
             $row = $this->fetch('Task', $this->query('Task', 'actual')
                 ->where(['dateEnd>' => $now])
-                ->order('dateEnd', 'ASC'))[0] ?? null;
+                ->order([['dateEnd', 'ASC']]), 1)[0] ?? null;
 
             if ($row) {
                 $dates[] = $row->get('dateEnd');

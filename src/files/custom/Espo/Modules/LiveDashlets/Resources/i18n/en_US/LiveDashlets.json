@@ -126,7 +126,8 @@
         "snoozePick": "Pick a date…",
         "snoozeQuestion": "Postpone to which date?",
         "copyNumber": "Copy",
-        "copied": "Copied"
+        "copied": "Copied",
+        "actionCountMore": "{count}+ actions"
     },
     "actionButtons": {
         "call": "Call",
@@ -154,7 +155,9 @@
         "leadNewYesterday": "Created yesterday, never contacted",
         "dealDormant": "Last recorded exchange {count} days ago · {amount}",
         "dealNoExchange": "No recorded exchange · {amount}",
-        "followUp": "{label} on {date}, no next step planned"
+        "followUp": "{label} on {date}, no next step planned",
+        "dealDormantNoAmount": "Last recorded exchange {count} days ago",
+        "dealNoExchangeNoAmount": "No recorded exchange"
     },
     "actionOutcome": {
         "callQuestion": "How did the call go?",

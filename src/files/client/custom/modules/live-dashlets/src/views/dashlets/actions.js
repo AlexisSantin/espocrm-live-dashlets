@@ -100,7 +100,7 @@ class LiveDashletsActionsView extends BaseDashletView {
         ...(this.events || {}),
         /** @this LiveDashletsActionsView */
         'click [data-live-action]': function (e) {
-            this.handleAction(e.currentTarget.dataset.liveAction, e.currentTarget);
+            this.runAction(e.currentTarget.dataset.liveAction, e.currentTarget);
         },
         // A plain click previews the record; Ctrl, Cmd or the middle button open it in a new tab.
         /** @this LiveDashletsActionsView */
@@ -681,10 +681,11 @@ class LiveDashletsActionsView extends BaseDashletView {
 
     /** @private */
     createSummary() {
-        const {total, urgent} = this.queue;
+        const {total, urgent, capped} = this.queue;
         const summary = this.make('div', 'live-actions-summary');
+        const countKey = capped ? 'actionCountMore' : (total === 1 ? 'oneAction' : 'actionCount');
 
-        summary.append(this.make('b', null, this.t('actionLabels', total === 1 ? 'oneAction' : 'actionCount', {count: total})));
+        summary.append(this.make('b', null, this.t('actionLabels', countKey, {count: total})));
 
         if (urgent) {
             summary.append(
@@ -734,7 +735,7 @@ class LiveDashletsActionsView extends BaseDashletView {
         const main = this.make('div', 'live-actions-main');
         const title = this.make('div', 'live-actions-title');
 
-        title.append(this.withLink(this.make('b', null, item.title), item.links.title));
+        title.append(this.withLink(this.make('b', null, this.getItemTitle(item)), item.links.title));
 
         if (item.subtitle) {
             const subtitle = this.make('span', 'live-actions-sub');
@@ -754,6 +755,16 @@ class LiveDashletsActionsView extends BaseDashletView {
         row.append(icon, main, buttons);
 
         return row;
+    }
+
+    /**
+     * The name, or the kind of record when the user's role hides the name.
+     *
+     * @private
+     * @return {string}
+     */
+    getItemTitle(item) {
+        return item.title || this.translate(item.entityType, 'scopeNames');
     }
 
     /**
@@ -1079,14 +1090,10 @@ class LiveDashletsActionsView extends BaseDashletView {
         note.setAttribute('aria-label', this.t('actionOutcome', 'notePlaceholder'));
 
         const next = this.make('div');
-        const steps = NEXT_STEPS.filter(step => {
-            return step === 'none' ||
-                (step === 'meeting' ? this.getAcl().checkScope('Meeting', 'create') : this.getAcl().checkScope('Task', 'create'));
-        });
 
         next.append(
             this.make('label', null, this.t('actionOutcome', 'nextStep')),
-            this.createChips('next', steps, steps.includes(panel.next) ? panel.next : 'none')
+            this.createChips('next', this.getNextSteps(), panel.next)
         );
 
         box.append(note, next, this.createPanelFooter(this.t('actionOutcome', 'saveHint')));
@@ -1140,7 +1147,7 @@ class LiveDashletsActionsView extends BaseDashletView {
     }
 
     /** @private */
-    handleAction(action, element) {
+    runAction(action, element) {
         if (action === 'toggleMore') {
             this.expanded = !this.expanded;
             this.renderList();
@@ -1236,9 +1243,30 @@ class LiveDashletsActionsView extends BaseDashletView {
 
     /** @private */
     openPanel(item, mode) {
-        this.panel = {key: item.key, mode, outcome: 'held', next: 'in3Days', note: '', exchange: undefined};
+        const steps = this.getNextSteps();
+
+        this.panel = {
+            key: item.key,
+            mode,
+            outcome: 'held',
+            // What is saved is what the chips show, among the steps the user may create.
+            next: steps.includes('in3Days') ? 'in3Days' : 'none',
+            note: '',
+            exchange: undefined,
+            saved: null,
+        };
         this.renderList();
         this.loadExchange(item, this.panel);
+    }
+
+    /** @private */
+    getNextSteps() {
+        const acl = this.getAcl();
+
+        return NEXT_STEPS.filter(step => {
+            return step === 'none' ||
+                (step === 'meeting' ? acl.checkScope('Meeting', 'create') : acl.checkScope('Task', 'create'));
+        });
     }
 
     /**
@@ -1471,7 +1499,7 @@ class LiveDashletsActionsView extends BaseDashletView {
             data: {
                 key: `recap:${id}`,
                 kind: 'recap',
-                title: item.title,
+                title: this.getItemTitle(item),
                 subtitle: item.subtitle,
                 result,
                 note,
@@ -1662,7 +1690,7 @@ class LiveDashletsActionsView extends BaseDashletView {
             return;
         }
 
-        const body = {...data, name: this.t('actionLabels', 'followUpName', {name: item.title})};
+        const body = {...data, name: this.t('actionLabels', 'followUpName', {name: this.getItemTitle(item)})};
 
         this.run(item, Espo.Ajax.postRequest(url, body), {
             message,
@@ -1688,7 +1716,9 @@ class LiveDashletsActionsView extends BaseDashletView {
         const isDeadline = method === 'POST' || item.entityType === 'Task';
 
         if (schedule.allDay) {
-            return isDeadline ? {dateEndDate: date} : {dateStartDate: date, dateEndDate: date};
+            return isDeadline ?
+                {dateEndDate: date} :
+                {dateStartDate: date, dateEndDate: this.formatter.addDays(date, schedule.days || 0)};
         }
 
         const [year, month, day] = date.split('-').map(Number);
@@ -1763,7 +1793,7 @@ class LiveDashletsActionsView extends BaseDashletView {
         const parent = this.getParent(item);
 
         return {
-            name: this.t('actionLabels', 'followUpName', {name: item.title}),
+            name: this.t('actionLabels', 'followUpName', {name: this.getItemTitle(item)}),
             status: 'Not Started',
             priority: 'Normal',
             dateEnd,
@@ -1893,7 +1923,7 @@ class LiveDashletsActionsView extends BaseDashletView {
         const user = this.getUser();
 
         const call = await Espo.Ajax.postRequest('Call', {
-            name: this.t('actionLabels', 'callName', {name: item.person?.name || item.title}),
+            name: this.t('actionLabels', 'callName', {name: item.person?.name || this.getItemTitle(item)}),
             status,
             direction: 'Outbound',
             dateStart: this.addMinutes(end, -5),
@@ -1940,10 +1970,13 @@ class LiveDashletsActionsView extends BaseDashletView {
         let record;
 
         try {
-            const saved = await this.saveActivity(item);
+            // Kept on the panel: retrying after a failed next step does not save the call twice.
+            if (!panel.saved) {
+                panel.saved = await this.saveActivity(item);
+            }
 
-            record = saved.record;
-            undoSteps.push(saved.undo);
+            record = panel.saved.record;
+            undoSteps.push(panel.saved.undo);
 
             if (next === 'in3Days' || next === 'in7Days') {
                 const task = await Espo.Ajax.postRequest('Task', this.getTaskAttributes(item, dates[next]));
@@ -1982,7 +2015,7 @@ class LiveDashletsActionsView extends BaseDashletView {
             const user = this.getUser();
 
             this.showCreate('Meeting', {
-                name: this.t('actionLabels', 'meetingName', {name: item.title}),
+                name: this.t('actionLabels', 'meetingName', {name: this.getItemTitle(item)}),
                 status: 'Planned',
                 dateStart: dates.tomorrow,
                 dateEnd: this.addMinutes(dates.tomorrow, 60),
@@ -2001,9 +2034,26 @@ class LiveDashletsActionsView extends BaseDashletView {
 
                 if (remove) {
                     undoSteps.unshift(remove);
+
+                    return;
                 }
+
+                // Undo would leave this meeting behind.
+                this.withdrawUndo(recap.id);
             });
         }
+    }
+
+    /** @private */
+    withdrawUndo(recapId) {
+        if (this.undoOffer?.recapId !== recapId) {
+            return;
+        }
+
+        clearTimeout(this.undoOffer.timer);
+
+        this.undoOffer = null;
+        this.getContainer()?.querySelector('.live-actions-undo')?.remove();
     }
 
     /** @private */
