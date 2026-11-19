@@ -139,7 +139,7 @@ Adjust the targets, then deploy it to the users or teams you choose. Nothing is 
 
 ## Installation
 
-1. Download `live-dashlets-1.2.1.zip` from the [latest release](../../releases/latest).
+1. Download `live-dashlets-1.3.0.zip` from the [latest release](../../releases/latest).
 2. In EspoCRM, go to **Administration → Extensions**, upload the ZIP and click **Install**.
 3. Optional: in **Administration → Dashboard Templates**, open **Live dashboard**, adjust the goal targets and deploy it.
 
