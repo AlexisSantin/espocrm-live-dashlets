@@ -259,7 +259,7 @@ $averageDeal = [
     'title' => $t('Average deal', 'Affaire moyenne'),
     'metric' => 'avg',
     'valueField' => 'amount',
-    'accentColor' => 'info',
+    'accentColor' => 'primary',
 ];
 $leadPotential = [
     'title' => $t('Potential in open leads', 'Potentiel des leads ouverts'),
@@ -424,7 +424,7 @@ foreach (['currentWeek', 'currentMonth', 'currentQuarter', 'currentYear', 'lastS
     ]);
 }
 
-$newLeads = [...$fromPreset('newLeads'), 'accentColor' => 'success'];
+$newLeads = [...$fromPreset('newLeads'), 'accentColor' => 'primary'];
 
 $tiles[] = $kpi([...$newLeads, 'title' => $t('Vs same point last month', 'Contre le même moment')]);
 $tiles[] = $kpi([...$newLeads, 'title' => $t('Vs whole last month', 'Contre tout le mois dernier'), 'comparison' => 'full']);
@@ -434,8 +434,8 @@ $tiles[] = $kpi([
     'title' => $t('A decrease is good news', 'Une baisse est une bonne nouvelle'),
 ]);
 
-$tiles[] = $kpi([...$wonDeals, 'title' => $t('Count: deals won', 'Nombre : affaires gagnées'), 'metric' => 'count', 'accentColor' => 'info']);
-$tiles[] = $kpi([...$wonDeals, 'title' => $t('Sum: amount won', 'Somme : montant gagné'), 'metric' => 'sum', 'valueField' => 'amount', 'accentColor' => 'info']);
+$tiles[] = $kpi([...$wonDeals, 'title' => $t('Count: deals won', 'Nombre : affaires gagnées'), 'metric' => 'count', 'accentColor' => 'primary']);
+$tiles[] = $kpi([...$wonDeals, 'title' => $t('Sum: amount won', 'Somme : montant gagné'), 'metric' => 'sum', 'valueField' => 'amount', 'accentColor' => 'primary']);
 $tiles[] = $kpi([...$averageDeal, 'title' => $t('Average: deal size', 'Moyenne : affaire')]);
 $tiles[] = $kpi([
     ...$wonDeals,
@@ -446,7 +446,7 @@ $tiles[] = $kpi([
     'period' => 'ever',
     'dateField' => null,
     'comparison' => 'none',
-    'accentColor' => 'info',
+    'accentColor' => 'primary',
 ]);
 
 $flow($periods, $tiles);
