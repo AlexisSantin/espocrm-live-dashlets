@@ -1,6 +1,6 @@
 {
   "name": "espocrm-ext-live-dashlets",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Live Dashlets: KPI and goal dashlets for EspoCRM, added in one click, permission-aware.",
   "scripts": {
     "copy": "node build --copy",

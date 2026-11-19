@@ -188,7 +188,8 @@ function addHover(container, {length, current, previous, x, y, describe}) {
             tip.classList.add('live-dashlet-spark-tip-inline');
         }
 
-        if (tip.offsetHeight > room) {
+        // Wider or taller than the curve's area, it would be cut off by the tile.
+        if (tip.offsetHeight > room || tip.offsetWidth > container.clientWidth) {
             tip.style.visibility = 'hidden';
         }
 
