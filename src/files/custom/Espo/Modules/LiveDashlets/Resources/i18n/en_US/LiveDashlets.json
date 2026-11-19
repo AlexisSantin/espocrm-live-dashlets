@@ -174,7 +174,8 @@
         "meeting": "Schedule a meeting",
         "none": "Nothing to plan",
         "saveHint": "Records the result and creates the next step",
-        "meetingHeld": "It took place"
+        "meetingHeld": "It took place",
+        "resultSaved": "Result saved: only the next step is left to create."
     },
     "actionDone": {
         "completed": "Task completed",

@@ -174,7 +174,8 @@
         "meeting": "Planifier un rendez-vous",
         "none": "Rien à prévoir",
         "saveHint": "Enregistre le résultat et crée la suite",
-        "meetingHeld": "A eu lieu"
+        "meetingHeld": "A eu lieu",
+        "resultSaved": "Résultat enregistré : il ne reste qu'à créer la suite."
     },
     "actionDone": {
         "completed": "Tâche terminée",
