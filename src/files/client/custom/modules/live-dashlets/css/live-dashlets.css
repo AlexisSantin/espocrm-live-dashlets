@@ -406,11 +406,6 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     font-variant-numeric: tabular-nums;
     line-height: 1.35;
     white-space: nowrap;
-    transform: translateX(10px);
-}
-
-.live-dashlet-spark-tip[data-side="left"] {
-    transform: translateX(calc(-100% - 10px));
 }
 
 .live-dashlet-spark-tip-current,

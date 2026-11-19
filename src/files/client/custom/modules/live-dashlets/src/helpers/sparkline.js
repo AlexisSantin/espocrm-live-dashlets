@@ -177,10 +177,22 @@ function addHover(container, {length, current, previous, x, y, describe}) {
             return line;
         }));
 
-        // Beside the guide, on the side with more room, at the top of the curve's area; raised
-        // only when that area is shorter than the tooltip, so that it stays inside the tile.
-        tip.dataset.side = left > 55 ? 'left' : 'right';
-        tip.style.left = left.toFixed(2) + '%';
+        // Beside the guide where it fits, measured: right, else left, else centred and kept inside
+        // the tile. At the top of the curve's area, raised only when that area is too short.
+        const width = container.clientWidth;
+        const at = left / 100 * width;
+        const tipWidth = tip.offsetWidth;
+        const gap = 10;
+
+        let tipLeft = Math.max(0, Math.min(width - tipWidth, at - tipWidth / 2));
+
+        if (at + gap + tipWidth <= width) {
+            tipLeft = at + gap;
+        } else if (at - gap - tipWidth >= 0) {
+            tipLeft = at - gap - tipWidth;
+        }
+
+        tip.style.left = tipLeft + 'px';
         tip.style.top = Math.min(4, container.clientHeight - tip.offsetHeight - 2) + 'px';
 
         container.classList.add('live-dashlet-spark-hovered');
