@@ -74,7 +74,8 @@
         "newCases": "Nouveaux tickets",
         "newAccounts": "Nouveaux comptes",
         "newContacts": "Nouveaux contacts",
-        "nextActions": "À faire maintenant"
+        "nextActions": "À faire maintenant",
+        "recentActivity": "Ce qui s'est passé"
     },
     "presetGroups": {
         "leads": "Prospection",
@@ -211,5 +212,50 @@
         "taskAdded": "Tâche ajoutée",
         "meetingAdded": "Rendez-vous ajouté",
         "callAdded": "Appel ajouté"
+    },
+    "recentLabels": {
+        "scopeLabel": "Les actions de qui",
+        "typeLabel": "Type d'événement",
+        "notes": "Notes",
+        "today": "Aujourd'hui",
+        "yesterday": "Hier",
+        "newSinceVisit": "Nouveau depuis votre dernière visite",
+        "noTeam": "Vous n'êtes dans aucune équipe : seules vos actions sont affichées.",
+        "empty": "Rien ces {days} derniers jours.",
+        "minutes": "{count} min",
+        "by": "par {name}",
+        "byYou": "par vous",
+        "open": "Ouvrir {name}",
+        "contactGroup": "{count} contacts ajoutés",
+        "cardSubtitle": "Appels, réunions, e-mails, ajouts",
+        "cardValue": "événements aujourd'hui"
+    },
+    "recentScopes": {
+        "team": "Mon équipe",
+        "me": "Moi",
+        "all": "Tout ce que je peux voir"
+    },
+    "recentTypes": {
+        "all": "Tous les types",
+        "calls": "Appels",
+        "meetings": "Réunions",
+        "emails": "E-mails",
+        "added": "Ajouts",
+        "deals": "Affaires",
+        "tasks": "Tâches"
+    },
+    "recentResults": {
+        "callHeld": "Répondu",
+        "callNoAnswer": "Sans réponse",
+        "meetingHeld": "Tenue",
+        "meetingNotHeld": "Non tenue",
+        "emailSent": "E-mail envoyé",
+        "emailReceived": "E-mail reçu",
+        "contactAdded": "Nouveau contact",
+        "leadAdded": "Nouveau lead",
+        "accountAdded": "Nouveau compte",
+        "dealWon": "Gagnée",
+        "dealLost": "Perdue",
+        "taskCompleted": "Terminée"
     }
 }

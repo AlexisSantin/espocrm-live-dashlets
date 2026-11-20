@@ -20,6 +20,19 @@
             }
         },
         {
+            "name": "recentActivity",
+            "group": "actions",
+            "dashlet": "LiveDashletsRecent",
+            "width": 2,
+            "height": 3,
+            "iconClass": "fas fa-history",
+            "options": {
+                "accentColor": "primary",
+                "scope": "team",
+                "days": 7
+            }
+        },
+        {
             "name": "newLeads",
             "group": "leads",
             "dashlet": "LiveDashletsKpi",

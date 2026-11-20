@@ -13,5 +13,10 @@
         "method": "get",
         "route": "LiveDashlets/lastExchange",
         "actionClassName": "Espo\\Modules\\LiveDashlets\\Api\\LastExchange"
+    },
+    {
+        "method": "get",
+        "route": "LiveDashlets/recent",
+        "actionClassName": "Espo\\Modules\\LiveDashlets\\Api\\Recent"
     }
 ]

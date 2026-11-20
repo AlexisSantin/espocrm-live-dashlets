@@ -74,7 +74,8 @@
         "newCases": "New cases",
         "newAccounts": "New accounts",
         "newContacts": "New contacts",
-        "nextActions": "Next actions"
+        "nextActions": "Next actions",
+        "recentActivity": "What happened"
     },
     "presetGroups": {
         "leads": "Prospecting",
@@ -211,5 +212,50 @@
         "taskAdded": "Task added",
         "meetingAdded": "Meeting added",
         "callAdded": "Call added"
+    },
+    "recentLabels": {
+        "scopeLabel": "Whose actions",
+        "typeLabel": "Type of event",
+        "notes": "Notes",
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "newSinceVisit": "New since your last visit",
+        "noTeam": "You aren't in a team: only your own actions are shown.",
+        "empty": "Nothing in the last {days} days.",
+        "minutes": "{count} min",
+        "by": "by {name}",
+        "byYou": "by you",
+        "open": "Open {name}",
+        "contactGroup": "{count} contacts added",
+        "cardSubtitle": "Calls, meetings, emails, additions",
+        "cardValue": "events today"
+    },
+    "recentScopes": {
+        "team": "My team",
+        "me": "Me",
+        "all": "Everything I can see"
+    },
+    "recentTypes": {
+        "all": "All types",
+        "calls": "Calls",
+        "meetings": "Meetings",
+        "emails": "Emails",
+        "added": "Additions",
+        "deals": "Deals",
+        "tasks": "Tasks"
+    },
+    "recentResults": {
+        "callHeld": "Answered",
+        "callNoAnswer": "No answer",
+        "meetingHeld": "Held",
+        "meetingNotHeld": "Not held",
+        "emailSent": "Email sent",
+        "emailReceived": "Email received",
+        "contactAdded": "New contact",
+        "leadAdded": "New lead",
+        "accountAdded": "New account",
+        "dealWon": "Won",
+        "dealLost": "Lost",
+        "taskCompleted": "Done"
     }
 }

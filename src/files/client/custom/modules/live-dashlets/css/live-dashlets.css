@@ -972,6 +972,281 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 }
 
 /* ---------------------------------------------------------------------------------------------
+   What happened: one line per event, the details on a click.
+   --------------------------------------------------------------------------------------------- */
+
+.live-recent {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 6em;
+    container-type: inline-size;
+}
+
+.live-recent-loader {
+    flex: 1;
+    margin: var(--panel-padding, 14px);
+}
+
+.live-recent-toolbar {
+    flex: none;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5em;
+    padding: .6em var(--panel-padding, 14px);
+    border-bottom: 1px solid var(--default-border-color, #e5e5e5);
+}
+
+.live-recent-toolbar select.form-control {
+    width: auto;
+    max-width: 14em;
+    height: auto;
+    padding-top: .2em;
+    padding-bottom: .2em;
+    font-size: var(--font-size-small);
+}
+
+.live-recent-notes {
+    display: inline-flex;
+    align-items: center;
+    gap: .45em;
+    margin-left: auto;
+    padding: .2em .1em;
+    border: 0;
+    background: none;
+    color: var(--text-color);
+    font-size: var(--font-size-small);
+}
+
+.live-recent-switch {
+    position: relative;
+    width: 2em;
+    height: 1.15em;
+    border-radius: 999px;
+    background-color: var(--gray-lighter);
+    background-color: color-mix(in srgb, var(--text-color) 22%, transparent);
+    transition: background-color .15s ease;
+}
+
+.live-recent-switch::after {
+    content: "";
+    position: absolute;
+    top: .15em;
+    left: .15em;
+    width: .85em;
+    height: .85em;
+    border-radius: 50%;
+    background-color: #fff;
+    transition: transform .15s ease;
+}
+
+.live-recent-notes[aria-checked="true"] .live-recent-switch {
+    background-color: var(--brand-primary);
+}
+
+.live-recent-notes[aria-checked="true"] .live-recent-switch::after {
+    transform: translateX(.85em);
+}
+
+.live-recent-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+.live-recent-hint {
+    margin: 0;
+    padding: .5em var(--panel-padding, 14px);
+    color: var(--text-muted-color);
+    font-size: var(--font-size-small);
+}
+
+.live-recent-day-title {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    margin: 0;
+    padding: .55em var(--panel-padding, 14px) .35em;
+    border-bottom: 1px solid var(--default-border-color, #e5e5e5);
+    background-color: var(--panel-bg, #fff);
+    color: var(--text-muted-color);
+    font-size: .75em;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.live-recent-item {
+    border-bottom: 1px solid var(--default-border-color, #e5e5e5);
+    border-bottom-color: color-mix(in srgb, var(--text-color) 7%, transparent);
+}
+
+.live-recent-row {
+    display: flex;
+    align-items: center;
+    gap: .6em;
+    width: 100%;
+    padding: .55em var(--panel-padding, 14px) .55em calc(var(--panel-padding, 14px) - .4em);
+    border: 0;
+    background: none;
+    color: var(--text-color);
+    text-align: left;
+    cursor: pointer;
+}
+
+.live-recent-row:hover,
+.live-recent-open .live-recent-row,
+.live-recent-open .live-recent-detail {
+    background-color: color-mix(in srgb, var(--text-color) 3%, transparent);
+}
+
+.live-recent-row:focus-visible {
+    outline: 2px solid var(--brand-primary);
+    outline-offset: -2px;
+}
+
+.live-recent-dot {
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.live-recent-dot.live-recent-new {
+    background-color: var(--brand-primary);
+}
+
+.live-recent-icon {
+    flex: none;
+    width: 1.2em;
+    text-align: center;
+    color: var(--text-muted-color);
+}
+
+.live-recent-kind-call { color: var(--brand-primary); }
+.live-recent-kind-meeting { color: var(--brand-info); }
+.live-recent-kind-email { color: var(--brand-primary); }
+.live-recent-kind-deal.live-recent-won { color: var(--brand-success); }
+.live-recent-kind-deal.live-recent-lost { color: var(--brand-danger); }
+
+.live-recent-text {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: .1em;
+}
+
+.live-recent-line,
+.live-recent-note-line {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.live-recent-line b {
+    font-weight: 600;
+}
+
+.live-recent-sub,
+.live-recent-note-line {
+    color: var(--text-muted-color);
+}
+
+.live-recent-note-line {
+    font-size: var(--font-size-small);
+}
+
+.live-recent-result {
+    flex: none;
+    font-size: var(--font-size-small);
+    white-space: nowrap;
+    color: var(--text-muted-color);
+}
+
+.live-recent-tone-good {
+    color: var(--state-success-text);
+    font-weight: 600;
+}
+
+.live-recent-tone-warn {
+    color: var(--state-warning-text);
+    font-weight: 600;
+}
+
+.live-recent-tone-bad {
+    color: var(--state-danger-text);
+    font-weight: 600;
+}
+
+.live-recent-time {
+    flex: none;
+    min-width: 3em;
+    text-align: right;
+    color: var(--text-muted-color);
+    font-size: var(--font-size-small);
+    font-variant-numeric: tabular-nums;
+}
+
+.live-recent-detail {
+    display: flex;
+    flex-direction: column;
+    gap: .4em;
+    padding: 0 var(--panel-padding, 14px) .75em calc(var(--panel-padding, 14px) + 2.4em);
+    font-size: var(--font-size-small);
+}
+
+.live-recent-about,
+.live-recent-links {
+    color: var(--text-muted-color);
+}
+
+.live-recent-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4em 1.2em;
+}
+
+.live-recent-note {
+    margin: 0;
+    color: var(--text-color);
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.live-recent-members {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .35em;
+}
+
+.live-recent-members .live-recent-link {
+    padding: .1em .6em;
+    border-radius: 999px;
+    background-color: var(--gray-lighter);
+    background-color: color-mix(in srgb, var(--text-color) 7%, transparent);
+}
+
+.live-recent-next {
+    color: var(--state-success-text);
+}
+
+/* Narrow dashlets: the result moves under the name. */
+@container (max-width: 360px) {
+    .live-recent-row {
+        flex-wrap: wrap;
+    }
+
+    .live-recent-result {
+        order: 5;
+        flex-basis: 100%;
+        padding-left: calc(6px + 1.2em + 1.2em);
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------
    Dashboard "Add" button.
    --------------------------------------------------------------------------------------------- */
 

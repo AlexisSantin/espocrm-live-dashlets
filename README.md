@@ -23,7 +23,7 @@ Live Dashlets adds two dashlet types, **Key Figure** and **Goal**, which you con
 
 ### A gallery of ready-made indicators
 
-Click **+ Add** on the dashboard, or **Add Dashlet** in its menu. The gallery starts with **Next Actions**, followed by 16 indicators in five groups: Prospecting, Sales, Activities, Support, and Accounts and contacts. Each card already shows your figure, its trend and its curve. One click adds the indicator to the top of the dashboard, titled in your language; add as many as you like, then click **Done**.
+Click **+ Add** on the dashboard, or **Add Dashlet** in its menu. The gallery starts with **Next Actions** and **What happened**, followed by 16 indicators in five groups: Prospecting, Sales, Activities, Support, and Accounts and contacts. Each card already shows your figure, its trend and its curve. One click adds the indicator to the top of the dashboard, titled in your language; add as many as you like, then click **Done**.
 
 New tiles line up from left to right after the small tiles at the top of the dashboard. A tall dashlet in the way (a stream, a list) moves down one row. The gallery only offers indicators on data you can read. Its **Build your own** section adds an empty Key Figure or Goal, and links to the full list of EspoCRM dashlets.
 
@@ -81,6 +81,19 @@ A dashlet that turns the dashboard into a to-do list for the day: who to contact
 
 - **To sort out** gathers tasks overdue by more than 30 days (adjustable) at the bottom of the dashlet, out of the daily list. They can be reviewed one by one or closed together, after a confirmation, and this too can be undone.
 - **"Last exchange"** is computed from the held calls and meetings and the emails linked to the record, its account or its contacts, among those the user is allowed to read. It is only as complete as what is recorded in the CRM.
+
+### What happened
+
+A dashlet that answers "what happened recently?": calls and meetings held, emails, contacts and accounts added, deals won or lost, tasks completed. One line per event says who, what, the result and the time; a click shows the rest.
+
+- **One line per event.** The person and their company, the result ("Answered", "No answer", "Won · $5,120") and the time, grouped by day.
+- **The details on a click.** What was written about the call, the meeting or the email, who did it, how long it lasted, and the next step planned on the same record.
+- **Notes on demand.** The **Notes** switch adds the first line of each note under the name, for those who want more at a glance.
+- **Whose actions.** My team (by default), Me, or Everything I can see. Without a team, only your own actions are shown. The type menu narrows the list to calls, meetings, emails, additions, deals or tasks.
+- **What's new.** A blue dot marks what arrived since your last visit.
+- **Only what matters.** Emails count only when they are linked to an account, a contact, a lead, a deal or a case. Contacts added together to the same account make one line.
+
+Like everything else, the list only shows records the viewer can read, and it only tells who did something through fields the viewer can read. A deal's time is the time it was last changed, if that was on its close date; otherwise only the day is shown.
 
 ### Options without code
 

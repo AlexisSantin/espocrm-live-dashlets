@@ -8,6 +8,7 @@ import {createSparkline} from 'live-dashlets:helpers/sparkline';
 
 const CONCURRENCY = 4;
 const ACTIONS_DASHLET = 'LiveDashletsActions';
+const RECENT_DASHLET = 'LiveDashletsRecent';
 
 /**
  * Ready-made indicators, each previewed with the user's real figure: one click adds it to the
@@ -77,6 +78,11 @@ class LiveDashletsGalleryModalView extends ModalView {
 
             if (preset.dashlet === ACTIONS_DASHLET) {
                 return ['Task', 'Call', 'Meeting', 'Lead', 'Opportunity']
+                    .some(scope => this.getAcl().checkScope(scope, 'read'));
+            }
+
+            if (preset.dashlet === RECENT_DASHLET) {
+                return ['Call', 'Meeting', 'Email', 'Contact', 'Lead', 'Account', 'Opportunity', 'Task']
                     .some(scope => this.getAcl().checkScope(scope, 'read'));
             }
 
@@ -186,7 +192,9 @@ class LiveDashletsGalleryModalView extends ModalView {
             'live-gallery-card-period',
             preset.dashlet === ACTIONS_DASHLET ?
                 this.translate('cardSubtitle', 'actionLabels', 'LiveDashlets') :
-                this.translate(options.period || 'ever', 'periods', 'LiveDashlets')
+                preset.dashlet === RECENT_DASHLET ?
+                    this.translate('cardSubtitle', 'recentLabels', 'LiveDashlets') :
+                    this.translate(options.period || 'ever', 'periods', 'LiveDashlets')
         );
 
         const preview = this.createElement('span', 'live-gallery-card-preview');
@@ -309,7 +317,9 @@ class LiveDashletsGalleryModalView extends ModalView {
 
             const request = preset.dashlet === ACTIONS_DASHLET ?
                 Espo.Ajax.getRequest('LiveDashlets/actions', {limit: 1}) :
-                Espo.Ajax.getRequest('LiveDashlets/metric', params);
+                preset.dashlet === RECENT_DASHLET ?
+                    Espo.Ajax.getRequest('LiveDashlets/recent', {scope: options.scope || 'team', days: 1, limit: 100}) :
+                    Espo.Ajax.getRequest('LiveDashlets/metric', params);
 
             return request
                 .then(data => this.renderPreview(preset, data))
@@ -362,6 +372,20 @@ class LiveDashletsGalleryModalView extends ModalView {
 
         const preview = card.querySelector('.live-gallery-card-preview');
         const options = preset.options || {};
+
+        if (preset.dashlet === RECENT_DASHLET) {
+            const count = this.createElement('span', 'live-gallery-card-value', String(data.events.length));
+
+            count.append(this.createElement(
+                'span',
+                'live-gallery-card-target',
+                ' ' + this.translate('cardValue', 'recentLabels', 'LiveDashlets')
+            ));
+
+            preview.replaceChildren(count);
+
+            return;
+        }
 
         if (preset.dashlet === ACTIONS_DASHLET) {
             const count = this.createElement('span', 'live-gallery-card-value', String(data.total));

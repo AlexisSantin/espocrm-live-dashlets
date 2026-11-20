@@ -2,6 +2,7 @@
     "dashlets": {
         "LiveDashletsKpi": "Key Figure",
         "LiveDashletsGoal": "Goal",
-        "LiveDashletsActions": "Next Actions"
+        "LiveDashletsActions": "Next Actions",
+        "LiveDashletsRecent": "What happened"
     }
 }
