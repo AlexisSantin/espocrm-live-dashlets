@@ -51,7 +51,7 @@ class LiveDashletsRecentView extends BaseDashletView {
     noPadding = true
 
     /** @type {Object|null} */
-    data = null
+    feed = null
 
     requestNumber = 0
 
@@ -194,7 +194,7 @@ class LiveDashletsRecentView extends BaseDashletView {
 
         const number = ++this.requestNumber;
 
-        if (!this.data) {
+        if (!this.feed) {
             container.replaceChildren(this.make('div', 'live-dashlet-loader live-recent-loader'));
         }
 
@@ -208,7 +208,7 @@ class LiveDashletsRecentView extends BaseDashletView {
                     return;
                 }
 
-                this.data = data;
+                this.feed = data;
                 this.renderList();
             })
             .catch(xhr => {
@@ -239,15 +239,15 @@ class LiveDashletsRecentView extends BaseDashletView {
     renderList() {
         const container = this.getContainer();
 
-        if (!container || !this.data) {
+        if (!container || !this.feed) {
             return;
         }
 
         const kinds = TYPES[this.prefs.type];
-        const events = this.data.events.filter(event => !kinds || kinds.includes(event.kind));
+        const events = this.feed.events.filter(event => !kinds || kinds.includes(event.kind));
         const list = this.make('div', 'live-recent-list');
 
-        if (this.data.noTeam && this.prefs.scope === 'team') {
+        if (this.feed.noTeam && this.prefs.scope === 'team') {
             list.append(this.make('p', 'live-recent-hint', this.t('noTeam')));
         }
 
@@ -283,7 +283,7 @@ class LiveDashletsRecentView extends BaseDashletView {
 
         const counts = {};
 
-        for (const event of this.data.events) {
+        for (const event of this.feed.events) {
             for (const [name, kinds] of Object.entries(TYPES)) {
                 if (!kinds || kinds.includes(event.kind)) {
                     counts[name] = (counts[name] || 0) + 1;
@@ -481,7 +481,7 @@ class LiveDashletsRecentView extends BaseDashletView {
 
     /** @private */
     getDayLabel(date) {
-        const today = this.data.today;
+        const today = this.feed.today;
 
         if (date === today) {
             return this.t('today');
