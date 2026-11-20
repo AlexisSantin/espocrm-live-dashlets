@@ -43,7 +43,31 @@ class LiveDashletsMetricView extends BaseDashletView {
             this.openRecordList();
         },
         /** @this LiveDashletsMetricView */
+        'click .live-dashlet-info': function (e) {
+            const wrap = e.target.closest('.live-dashlet-info-wrap');
+
+            if (wrap) {
+                wrap.classList.toggle('live-dashlet-info-open');
+            }
+        },
+        /** @this LiveDashletsMetricView */
+        'focusout .live-dashlet-info': function (e) {
+            const wrap = e.target.closest('.live-dashlet-info-wrap');
+
+            if (wrap) {
+                wrap.classList.remove('live-dashlet-info-open');
+            }
+        },
+        /** @this LiveDashletsMetricView */
         'keydown .live-dashlet-clickable': function (e) {
+            if (e.target.closest('.live-dashlet-info')) {
+                if (e.key === 'Escape') {
+                    e.target.closest('.live-dashlet-info-wrap').classList.remove('live-dashlet-info-open');
+                }
+
+                return;
+            }
+
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
 
@@ -394,6 +418,77 @@ class LiveDashletsMetricView extends BaseDashletView {
         }
 
         return period;
+    }
+
+    /**
+     * An info button beside the period: what the figure counts, over which dates, and that only
+     * readable records are counted. Shown on hover, on focus and on a click (for touch screens).
+     *
+     * @protected
+     * @param {Object} data
+     * @param {string[]} [extraLines] Lines added before the access rights line.
+     * @return {HTMLElement}
+     */
+    createInfo(data, extraLines = []) {
+        const text = [...this.getInfoLines(data), ...extraLines,
+            this.translate('infoAccess', 'labels', 'LiveDashlets')].join('\n');
+
+        const wrap = this.createElement('span', 'live-dashlet-info-wrap');
+        const button = this.createElement('button', 'live-dashlet-info');
+        const icon = this.createElement('span', 'fas fa-info-circle');
+        const pop = this.createElement('span', 'live-dashlet-info-pop', text);
+
+        icon.setAttribute('aria-hidden', 'true');
+        button.type = 'button';
+        button.setAttribute('aria-label', text);
+        button.append(icon);
+        pop.setAttribute('aria-hidden', 'true');
+        wrap.append(button, pop);
+
+        return wrap;
+    }
+
+    /**
+     * @private
+     * @return {string[]}
+     */
+    getInfoLines(data) {
+        const params = this.getRequestParams();
+        const entityType = params.entityType;
+
+        const filters = [];
+
+        if (params.primaryFilter && params.primaryFilter !== 'all') {
+            filters.push(this.translate(params.primaryFilter, 'presetFilters', entityType));
+        }
+
+        params.boolFilterList.forEach(name => filters.push(this.translate(name, 'boolFilters', entityType)));
+
+        const lines = [
+            [this.translate(entityType, 'scopeNamesPlural'), ...filters].join(' · '),
+        ];
+
+        if (params.metric === 'count') {
+            lines.push(this.translate('infoCount', 'labels', 'LiveDashlets'));
+        } else {
+            lines.push(
+                this.translate(params.metric === 'avg' ? 'infoAvg' : 'infoSum', 'labels', 'LiveDashlets')
+                    .replace('{field}', this.translate(params.valueField, 'fields', entityType))
+            );
+        }
+
+        if (params.dateField && data.period) {
+            lines.push(
+                this.translate('infoPeriod', 'labels', 'LiveDashlets')
+                    .replace('{field}', this.translate(params.dateField, 'fields', entityType))
+                    .replace('{start}', this.formatter.formatShortDate(data.period.start))
+                    .replace('{end}', this.formatter.formatShortDate(data.period.end))
+            );
+        } else {
+            lines.push(this.translate('infoAllTime', 'labels', 'LiveDashlets'));
+        }
+
+        return lines;
     }
 
     /**

@@ -31,8 +31,9 @@ New tiles line up from left to right after the small tiles at the top of the das
 
 ### Key Figure
 
-A large number with the entity icon, the period and the change against the previous period, for example "27 new leads this month, +50 %, vs 18 by Oct 17".
+A large number with the entity icon, the period and the change against the previous period, for example "27 new leads this month, +50 %, +9 vs 18 by Oct 17". The change is given both as a percentage and as a value.
 
+- **What the figure counts.** An ⓘ beside the period gives the entity and filters, what is counted or added up, the dates of the period and of the comparison, and a reminder that only the records you can read are counted. It opens on hover, keyboard focus or a tap.
 - **A fair comparison.** By default, the previous period is cut at the same point: on November 17, this month is compared with October 1 to 17. You can also compare with the whole previous period, or turn the comparison off.
 - **The curve of the period.** It shows the cumulative value day by day: the current period in color, the previous one as a thin grey line. Hover the curve to read both values on a given day.
 - **When a decrease is good news.** The option of that name turns falling figures green, for things you want to see go down, such as open cases or overdue tasks.
@@ -99,7 +100,7 @@ A dashlet that turns the dashboard into a to-do list for the day: who to contact
 
 ### Five styles
 
-**Soft** (the default) gives the tile a light tint of its color. **Minimal** stays neutral. **Solid** fills the tile with color: keep it for one headline figure per dashboard.
+**Soft** (the default) gives the tile a light tint of its color. **Minimal** stays neutral, with the change in a line under the figure. **Solid** fills the tile with color: keep it for one headline figure per dashboard.
 
 **Outline** draws a line around the tile, with no fill or shadow, and sets the figures in a monospaced font: the color only shows on the curve and the bar. **Big figure** lets the number fill the tile in a narrow font, with the change beside it in color and the comparison below. A goal in this style reads as 20 segments. Its font ships with the extension (Barlow Condensed, SIL Open Font License), so nothing is loaded from outside EspoCRM.
 

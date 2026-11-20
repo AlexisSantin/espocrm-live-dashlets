@@ -40,7 +40,13 @@ class LiveDashletsGoalView extends LiveDashletsMetricView {
         // Head: icon, period, status.
         const head = this.createElement('div', 'live-dashlet-head');
 
-        head.append(this.createIcon(), this.createPeriod(data));
+        head.append(
+            this.createIcon(),
+            this.createPeriod(data),
+            this.createInfo(data, [
+                this.translate('infoTarget', 'labels', 'LiveDashlets').replace('{value}', format(target)),
+            ])
+        );
 
         if (status !== 'none') {
             const chip = this.createElement(

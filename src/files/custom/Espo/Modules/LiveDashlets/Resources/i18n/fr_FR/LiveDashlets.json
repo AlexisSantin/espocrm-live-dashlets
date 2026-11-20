@@ -32,7 +32,14 @@
         "yesterday": "Hier",
         "showRecords": "Voir les enregistrements",
         "recordCount": "{count} enregistrements",
-        "oneRecord": "1 enregistrement"
+        "oneRecord": "1 enregistrement",
+        "infoCount": "Compte les enregistrements",
+        "infoSum": "Additionne « {field} »",
+        "infoAvg": "Moyenne de « {field} »",
+        "infoPeriod": "{field} : du {start} au {end}",
+        "infoAllTime": "Depuis toujours, quelle que soit la date",
+        "infoTarget": "Objectif : {value}",
+        "infoAccess": "Seuls les enregistrements que vous pouvez lire sont comptés."
     },
     "goalStatus": {
         "reached": "Atteint",

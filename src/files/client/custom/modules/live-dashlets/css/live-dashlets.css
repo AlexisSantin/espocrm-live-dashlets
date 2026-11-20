@@ -226,6 +226,89 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     font-size: var(--font-size-small);
 }
 
+/* Info button beside the period, and what it says: shown on hover, on keyboard focus, and
+   on a click for touch screens. Dark, like the curve's tooltip, over the top of the tile. */
+
+.live-dashlet-info-wrap {
+    flex: none;
+    display: inline-flex;
+}
+
+.live-dashlet-info {
+    padding: 0 .2em;
+    border: 0;
+    background: none;
+    color: var(--text-muted-color);
+    font-size: .85em;
+    line-height: 1;
+    opacity: .6;
+    cursor: help;
+}
+
+.live-dashlet-info:hover,
+.live-dashlet-info:focus-visible,
+.live-dashlet-info-open .live-dashlet-info {
+    opacity: 1;
+}
+
+.live-dashlet-info:focus-visible {
+    outline: 2px solid var(--ld-accent-on, var(--ld-accent));
+    outline-offset: 1px;
+    border-radius: 3px;
+}
+
+.live-dashlet-info-pop {
+    position: absolute;
+    top: .4em;
+    left: .4em;
+    right: .4em;
+    z-index: 4;
+    max-height: calc(100% - .8em);
+    overflow: auto;
+    padding: .45em .7em;
+    border-radius: 6px;
+    color: #fff;
+    background-color: rgba(17, 22, 31, .94);
+    box-shadow: 0 6px 18px -8px rgba(0, 0, 0, .5);
+    font-family: inherit;
+    font-size: var(--font-size-small);
+    font-weight: 400;
+    letter-spacing: normal;
+    line-height: 1.45;
+    text-transform: none;
+    white-space: pre-line;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .12s ease, visibility .12s ease;
+}
+
+.live-dashlet-info-wrap:hover .live-dashlet-info-pop,
+.live-dashlet-info:focus-visible + .live-dashlet-info-pop,
+.live-dashlet-info-open .live-dashlet-info-pop {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Minimal: the change and the comparison in a line under the figure, after a thin rule. */
+
+.live-dashlet-kpi-foot {
+    display: flex;
+    align-items: baseline;
+    gap: .5em;
+    min-width: 0;
+    padding-top: .35em;
+    border-top: 1px solid var(--default-border-color, #e5e5e5);
+    border-top: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+    font-size: var(--font-size-small);
+}
+
+.live-dashlet-kpi-foot .live-dashlet-trend-badge {
+    padding: 0;
+    background: none;
+    font-size: inherit;
+}
+
 /* Figure. */
 
 .live-dashlet-value {
@@ -858,10 +941,20 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 @container (max-height: 112px) {
     .live-dashlet-style-big .live-dashlet-value,
     .live-dashlet-style-big .live-dashlet-goal .live-dashlet-value {
-        font-size: clamp(1.6em, min(24cqi, 42cqh, 75cqi / (var(--ld-chars, 4) * .42)), 3.6em);
+        font-size: clamp(1.6em, min(24cqi, 44cqh, 75cqi / (var(--ld-chars, 4) * .42)), 3.6em);
     }
 
-    /* Not enough height for the figure and a comparison below it: the change stays beside. */
+}
+
+/* Big figure in a one-row tile: the figure and its comparison come before the curve, which
+   would only get a sliver. */
+@container (max-height: 130px) {
+    .live-dashlet-style-big .live-dashlet-spark {
+        display: none;
+    }
+}
+
+@container (max-height: 80px) {
     .live-dashlet-style-big .live-dashlet-kpi > .live-dashlet-compare {
         display: none;
     }

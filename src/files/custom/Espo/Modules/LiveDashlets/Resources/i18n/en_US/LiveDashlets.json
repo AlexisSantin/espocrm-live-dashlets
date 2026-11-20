@@ -32,7 +32,14 @@
         "yesterday": "Yesterday",
         "showRecords": "Show the records",
         "recordCount": "{count} records",
-        "oneRecord": "1 record"
+        "oneRecord": "1 record",
+        "infoCount": "Counts the records",
+        "infoSum": "Adds up “{field}”",
+        "infoAvg": "Average of “{field}”",
+        "infoPeriod": "{field}: {start} – {end}",
+        "infoAllTime": "All time, whatever the date",
+        "infoTarget": "Target: {value}",
+        "infoAccess": "Only the records you can read are counted."
     },
     "goalStatus": {
         "reached": "Reached",
