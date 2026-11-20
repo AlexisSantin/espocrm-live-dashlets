@@ -33,7 +33,7 @@ New tiles line up from left to right after the small tiles at the top of the das
 
 A large number with the entity icon, the period and the change against the previous period, for example "27 new leads this month, +50 %, +9 vs 18 by Oct 17". The change is given both as a percentage and as a value.
 
-- **What the figure counts.** An ⓘ beside the period gives the entity and filters, what is counted or added up, the dates of the period and of the comparison, and a reminder that only the records you can read are counted. It opens on hover, keyboard focus or a tap.
+- **What the figure counts.** Resting the pointer on the tile's title, or giving it the keyboard focus, shows the entity and filters, what is counted or added up, the dates of the period and of the comparison, and a reminder that only the records you can read are counted. It opens on hover, keyboard focus or a tap.
 - **A fair comparison.** By default, the previous period is cut at the same point: on November 17, this month is compared with October 1 to 17. You can also compare with the whole previous period, or turn the comparison off.
 - **The curve of the period.** It shows the cumulative value day by day: the current period in color, the previous one as a thin grey line. Hover the curve to read both values on a given day.
 - **When a decrease is good news.** The option of that name turns falling figures green, for things you want to see go down, such as open cases or overdue tasks.
@@ -111,19 +111,20 @@ Like everything else, the list only shows records the viewer can read, and it on
 
 ![The options of a Key Figure](docs/screenshots/options.png)
 
-### One style for every tile
+### One style for every dashlet
 
-The **Style** button of the dashboard sets the style and the color of all the tiles at once: there is nothing to set tile by tile. A click on a style or a color shows on the dashboard right away.
+The top of the **+ Add** window sets the style and the color of every Live dashlet at once: the figures and goals, **Next Actions** and **What happened**. The cards of the window preview each style, and a click shows on the dashboard right away; there is nothing to set dashlet by dashlet.
 
-- **Soft** (the default) gives the tile a light tint of its color. **Minimal** stays neutral, with the change in a line under the figure.
-- **Outline** draws a line around the tile, with no fill or shadow, and sets the figures in a monospaced font. **Big figure** lets the number fill the tile in a narrow font, with the change beside it and the comparison below; a goal reads as 20 segments. Its font ships with the extension (Barlow Condensed, SIL Open Font License), so nothing is loaded from outside EspoCRM.
+- **Minimal** (the default) stays neutral, with the change in a line under the figure.
+- **Outline** draws a line around the dashlet, with no fill or shadow, and sets the figures in a monospaced font.
+- **Big figure** lets the number fill the tile in a narrow font, with the change beside it and the comparison below; a goal reads as 20 segments. Its font ships with the extension (Barlow Condensed, SIL Open Font License), so nothing is loaded from outside EspoCRM.
 - **Highlight**, in a tile's options, fills that one tile with color. Keep it for one headline figure per dashboard.
 
-An administrator sets the company's style with **Apply to the whole company**, in the same panel. Each user can choose another one for their own dashboard, and go back to the company's at any time.
+An administrator makes the current choice the company's with **Apply to the whole company**. Each user can choose another one for their own dashboard, and go back to the company's at any time.
 
 Green, amber and red keep their meaning on every style: they are left to trends and statuses.
 
-![The Style button sets the style and the color of every tile](docs/screenshots/styles.png)
+![The top of the + Add window sets the style and the color of every dashlet](docs/screenshots/styles.png)
 
 Colors come from the active theme, so tiles follow light and dark themes. The layout adapts to the height of the tile, which varies from one theme to another.
 

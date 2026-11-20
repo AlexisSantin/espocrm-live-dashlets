@@ -177,9 +177,14 @@ function addHover(container, {length, current, previous, x, y, describe}) {
             return line;
         }));
 
-        // Inside the curve's area only, so that the figures above stay visible: on one line when
-        // two do not fit, not at all when even one does not.
-        const room = container.clientHeight - 4;
+        // Below the figure, which stays visible: in the curve's area, or over the comparison line
+        // when the curve is too short. On one line when two do not fit, not at all when even one
+        // does not.
+        const figure = container.closest('.live-dashlet')?.querySelector('.live-dashlet-main, .live-dashlet-goal-figures');
+        const highest = figure ?
+            figure.getBoundingClientRect().bottom - container.getBoundingClientRect().top + 4 :
+            0;
+        const room = container.clientHeight - 4 - highest;
 
         tip.classList.remove('live-dashlet-spark-tip-inline');
         tip.style.visibility = '';
@@ -209,7 +214,7 @@ function addHover(container, {length, current, previous, x, y, describe}) {
         }
 
         tip.style.left = tipLeft + 'px';
-        tip.style.top = Math.max(0, Math.min(4, room - tip.offsetHeight)) + 'px';
+        tip.style.top = Math.max(highest, Math.min(4, container.clientHeight - 4 - tip.offsetHeight)) + 'px';
 
         container.classList.add('live-dashlet-spark-hovered');
     };

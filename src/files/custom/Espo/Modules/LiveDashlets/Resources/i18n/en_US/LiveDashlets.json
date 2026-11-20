@@ -259,12 +259,10 @@
         "taskCompleted": "Done"
     },
     "look": {
-        "button": "Style",
         "title": "Tile style",
         "style": "Style",
         "color": "Color",
         "styles": {
-            "soft": "Soft",
             "minimal": "Minimal",
             "outline": "Outline",
             "big": "Big figure"
@@ -281,6 +279,13 @@
         "company": "Company style: {style} · {color}.",
         "follow": "Use the company style",
         "applyCompany": "Apply to the whole company",
-        "companySaved": "Style applied to the whole company"
+        "companySaved": "Style applied to the whole company",
+        "personalShort": "Your choice",
+        "companyShort": "Company style"
+    },
+    "recentScopesShort": {
+        "team": "Team",
+        "me": "Me",
+        "all": "All"
     }
 }

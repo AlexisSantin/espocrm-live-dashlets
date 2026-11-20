@@ -10,8 +10,6 @@
         "comparison": "Comparer avec",
         "lowerIsBetter": "Une baisse est une bonne nouvelle",
         "target": "Objectif",
-        "accentColor": "Couleur",
-        "tileStyle": "Style",
         "dormantDays": "Jours sans échange",
         "enabledSignals": "Éléments à inclure",
         "staleDays": "Tâche mise de côté après (jours)",
@@ -30,21 +28,6 @@
             "toDate": "Période précédente, au même moment",
             "full": "Toute la période précédente",
             "none": "Pas de comparaison"
-        },
-        "accentColor": {
-            "primary": "Principale",
-            "success": "Vert",
-            "info": "Violet",
-            "warning": "Orange",
-            "danger": "Rouge",
-            "default": "Gris"
-        },
-        "tileStyle": {
-            "soft": "Doux (teinté)",
-            "minimal": "Épuré",
-            "solid": "Couleur pleine",
-            "outline": "Contour",
-            "big": "Grand chiffre"
         },
         "enabledSignals": {
             "tasks": "Tâches en retard et du jour",
@@ -74,6 +57,6 @@
         "staleDays": "Les tâches en retard depuis plus longtemps quittent la liste principale et passent dans « À trier ».",
         "scope": "Les actions de qui le dashlet montre à l'ouverture. Chacun peut changer dans le dashlet ; son choix est gardé dans son navigateur.",
         "showNotes": "Affiche la première ligne de chaque note sous le nom. Chacun peut l'activer ou la désactiver dans le dashlet.",
-        "highlight": "La tuile prend une couleur pleine pour ressortir. À garder pour un seul chiffre par tableau de bord. Le style et la couleur de toutes les tuiles se règlent avec le bouton Style du tableau de bord."
+        "highlight": "La tuile prend une couleur pleine pour ressortir. À garder pour un seul chiffre par tableau de bord. Le style et la couleur de tous les dashlets Live se choisissent en haut de la fenêtre + Ajouter."
     }
 }

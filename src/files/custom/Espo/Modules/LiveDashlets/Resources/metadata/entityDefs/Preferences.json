@@ -4,7 +4,6 @@
             "type": "enum",
             "options": [
                 "",
-                "soft",
                 "minimal",
                 "outline",
                 "big"

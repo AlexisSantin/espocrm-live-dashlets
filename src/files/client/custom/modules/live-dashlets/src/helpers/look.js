@@ -8,7 +8,7 @@
  * A tile can only be highlighted, in a solid color.
  */
 
-export const LOOK_STYLES = ['soft', 'minimal', 'outline', 'big'];
+export const LOOK_STYLES = ['minimal', 'outline', 'big'];
 
 export const LOOK_COLORS = ['primary', 'info', 'success', 'warning', 'danger', 'default'];
 
@@ -23,7 +23,7 @@ const pick = (value, list, fallback) => list.includes(value) ? value : fallback;
  */
 export function getCompanyLook(config) {
     return {
-        style: pick(config.get('liveDashletsStyle'), LOOK_STYLES, 'soft'),
+        style: pick(config.get('liveDashletsStyle'), LOOK_STYLES, 'minimal'),
         color: pick(config.get('liveDashletsColor'), LOOK_COLORS, 'primary'),
     };
 }
@@ -43,6 +43,40 @@ export function getLook(view) {
         color: pick(color, LOOK_COLORS, company.color),
         personal: LOOK_STYLES.includes(style) || LOOK_COLORS.includes(color),
     };
+}
+
+/**
+ * Puts the look on the dashlet's panel, header included. Every Live dashlet has it: figures,
+ * goals, next actions and what happened.
+ *
+ * @param {import('view').default} view
+ * @param {string} [style] A style of its own: "solid" for a highlighted tile.
+ */
+export function applyLookToPanel(view, style) {
+    const panel = view.element ? view.element.closest('.dashlet') : null;
+
+    if (!panel) {
+        return;
+    }
+
+    const look = getLook(view);
+
+    [...panel.classList]
+        .filter(name => name.startsWith('live-dashlet-style-') || name.startsWith('live-dashlet-accent-'))
+        .forEach(name => panel.classList.remove(name));
+
+    panel.classList.add('live-dashlet-panel', 'live-dashlet-style-' + (style || look.style), 'live-dashlet-accent-' + look.color);
+}
+
+/**
+ * Calls back when the user's or the company's choice changes.
+ *
+ * @param {import('view').default} view
+ * @param {function(): void} callback
+ */
+export function watchLook(view, callback) {
+    view.listenTo(view.getPreferences(), LOOK_EVENTS, callback);
+    view.listenTo(view.getConfig(), LOOK_EVENTS, callback);
 }
 
 /**

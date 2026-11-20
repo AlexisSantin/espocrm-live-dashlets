@@ -42,12 +42,6 @@
 }
 
 /* `body` + three classes: above the themes' `body .panel-default.headered` background. */
-body .dashlet.live-dashlet-panel.live-dashlet-style-soft {
-    background:
-        linear-gradient(155deg, color-mix(in srgb, var(--ld-accent) 7%, transparent) 0%, transparent 55%),
-        var(--panel-bg, #fff);
-}
-
 body .dashlet.live-dashlet-panel.live-dashlet-style-minimal {
     background: var(--panel-bg, #fff);
 }
@@ -226,68 +220,32 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     font-size: var(--font-size-small);
 }
 
-/* Info button beside the period, and what it says: shown on hover, on keyboard focus, and
-   on a click for touch screens. Dark, like the curve's tooltip, over the top of the tile. */
+/* What a figure counts, shown when the pointer rests on the dashlet's title or when the title
+   has the keyboard focus. Dark, like the curve's tooltip, and never cut by the tile. */
 
-.live-dashlet-info-wrap {
-    flex: none;
-    display: inline-flex;
-}
-
-.live-dashlet-info {
-    padding: 0 .2em;
-    border: 0;
-    background: none;
-    color: var(--text-muted-color);
-    font-size: .85em;
-    line-height: 1;
-    opacity: .6;
+.dashlet .panel-heading .panel-title.live-dashlet-titled {
     cursor: help;
 }
 
-.live-dashlet-info:hover,
-.live-dashlet-info:focus-visible,
-.live-dashlet-info-open .live-dashlet-info {
-    opacity: 1;
-}
-
-.live-dashlet-info:focus-visible {
-    outline: 2px solid var(--ld-accent-on, var(--ld-accent));
-    outline-offset: 1px;
+.dashlet .panel-heading .panel-title.live-dashlet-titled:focus-visible {
+    outline: 2px solid var(--ld-accent, var(--brand-primary));
+    outline-offset: 2px;
     border-radius: 3px;
 }
 
 .live-dashlet-info-pop {
-    position: absolute;
-    top: .4em;
-    left: .4em;
-    right: .4em;
-    z-index: 4;
-    max-height: calc(100% - .8em);
-    overflow: auto;
-    padding: .45em .7em;
+    position: fixed;
+    z-index: 1040;
+    max-width: min(320px, calc(100vw - 16px));
+    padding: .5em .75em;
     border-radius: 6px;
     color: #fff;
     background-color: rgba(17, 22, 31, .94);
     box-shadow: 0 6px 18px -8px rgba(0, 0, 0, .5);
-    font-family: inherit;
     font-size: var(--font-size-small);
-    font-weight: 400;
-    letter-spacing: normal;
     line-height: 1.45;
-    text-transform: none;
     white-space: pre-line;
     pointer-events: none;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity .12s ease, visibility .12s ease;
-}
-
-.live-dashlet-info-wrap:hover .live-dashlet-info-pop,
-.live-dashlet-info:focus-visible + .live-dashlet-info-pop,
-.live-dashlet-info-open .live-dashlet-info-pop {
-    opacity: 1;
-    visibility: visible;
 }
 
 /* Minimal: the change and the comparison in a line under the figure, after a thin rule. */
@@ -946,11 +904,26 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 
 }
 
-/* Big figure in a one-row tile: the figure and its comparison come before the curve, which
-   would only get a sliver. */
+/* Big figure in a one-row tile: the figure, its change and the curve along the bottom. The
+   comparison line gives way to the curve; the title's explanation keeps the dates. */
 @container (max-height: 130px) {
-    .live-dashlet-style-big .live-dashlet-spark {
+    .live-dashlet-style-big .live-dashlet-kpi > .live-dashlet-spark {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 40%;
+        min-height: 0;
+        margin: 0;
+    }
+
+    .live-dashlet-style-big .live-dashlet-kpi > .live-dashlet-compare {
         display: none;
+    }
+
+    .live-dashlet-style-big .live-dashlet-kpi > :not(.live-dashlet-spark) {
+        position: relative;
+        z-index: 1;
     }
 }
 
@@ -998,6 +971,10 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     border-bottom: 1px solid var(--default-border-color, #e5e5e5);
 }
 
+.live-recent-scope {
+    flex: none;
+}
+
 .live-recent-toolbar select.form-control {
     width: auto;
     max-width: 14em;
@@ -1042,7 +1019,7 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 }
 
 .live-recent-notes[aria-checked="true"] .live-recent-switch {
-    background-color: var(--brand-primary);
+    background-color: var(--ld-accent, var(--brand-primary));
 }
 
 .live-recent-notes[aria-checked="true"] .live-recent-switch::after {
@@ -1102,7 +1079,7 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 }
 
 .live-recent-row:focus-visible {
-    outline: 2px solid var(--brand-primary);
+    outline: 2px solid var(--ld-accent, var(--brand-primary));
     outline-offset: -2px;
 }
 
@@ -1114,7 +1091,7 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 }
 
 .live-recent-dot.live-recent-new {
-    background-color: var(--brand-primary);
+    background-color: var(--ld-accent, var(--brand-primary));
 }
 
 .live-recent-icon {
@@ -1124,9 +1101,9 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     color: var(--text-muted-color);
 }
 
-.live-recent-kind-call { color: var(--brand-primary); }
+.live-recent-kind-call { color: var(--ld-accent, var(--brand-primary)); }
 .live-recent-kind-meeting { color: var(--brand-info); }
-.live-recent-kind-email { color: var(--brand-primary); }
+.live-recent-kind-email { color: var(--ld-accent, var(--brand-primary)); }
 .live-recent-kind-deal.live-recent-won { color: var(--brand-success); }
 .live-recent-kind-deal.live-recent-lost { color: var(--brand-danger); }
 
@@ -1272,155 +1249,88 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 }
 
 /* ---------------------------------------------------------------------------------------------
-   Dashboard "Style" button and panel: one style and one color for every tile.
+   Segmented control with a sliding thumb (style of the dashlets, whose actions).
    --------------------------------------------------------------------------------------------- */
 
-.live-dashlets-look {
-    display: inline-flex;
-    align-items: center;
-    gap: .45em;
-    margin-right: .5em;
+.live-seg {
+    position: relative;
+    display: inline-grid;
+    grid-auto-columns: 1fr;
+    grid-auto-flow: column;
+    padding: 2px;
     border-radius: 999px;
-    padding-left: .9em;
-    padding-right: 1em;
-    font-weight: 600;
+    background-color: var(--gray-lighter, #eee);
+    background-color: color-mix(in srgb, var(--text-color) 8%, transparent);
+    font-size: var(--font-size-small);
+    white-space: nowrap;
 }
 
-.live-dashlets-look .fas {
-    color: var(--text-muted-color);
+.live-seg-thumb {
+    position: absolute;
+    top: 2px;
+    bottom: 2px;
+    left: 2px;
+    width: calc((100% - 4px) / var(--seg-count, 1));
+    border-radius: 999px;
+    background-color: var(--panel-bg, #fff);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .18);
+    transform: translateX(calc(100% * var(--seg-index, 0)));
+    transition: transform .22s cubic-bezier(.22, 1, .36, 1);
 }
+
+.live-seg-option {
+    position: relative;
+    z-index: 1;
+    padding: .25em .9em;
+    border: 0;
+    border-radius: 999px;
+    background: none;
+    color: var(--text-muted-color);
+    font-weight: 600;
+    cursor: pointer;
+    transition: color .15s ease;
+}
+
+.live-seg-option[aria-checked="true"] {
+    color: var(--text-color);
+}
+
+.live-seg-option:focus-visible {
+    outline: 2px solid var(--ld-accent, var(--brand-primary));
+    outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .live-seg-thumb,
+    .live-seg-option {
+        transition: none;
+    }
+}
+
+/* ---------------------------------------------------------------------------------------------
+   Style of every Live dashlet: one line at the top of the gallery.
+   --------------------------------------------------------------------------------------------- */
 
 .live-look {
-    position: fixed;
-    z-index: 1040;
-    display: grid;
-    gap: .55em;
-    width: min(320px, calc(100vw - 32px));
-    padding: 14px;
-    border: 1px solid var(--default-border-color, #e5e5e5);
-    border-radius: 12px;
-    background-color: var(--panel-bg, #fff);
-    box-shadow: 0 12px 32px -12px rgba(0, 0, 0, .35);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--default-border-color, #e5e5e5);
     color: var(--text-color);
     font-size: var(--font-size-small);
 }
 
-.live-look-heading {
-    color: var(--text-muted-color);
-    font-size: .8em;
-    font-weight: 600;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-}
-
-.live-look-styles {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-}
-
-.live-look-style {
-    display: grid;
-    justify-items: center;
-    gap: .35em;
-    padding: 6px 4px;
-    border: 1px solid transparent;
-    border-radius: 10px;
-    background: none;
-    color: var(--text-color);
-    cursor: pointer;
-}
-
-.live-look-style:hover {
-    background-color: var(--gray-lighter);
-    background-color: color-mix(in srgb, var(--text-color) 5%, transparent);
-}
-
-.live-look-style[aria-pressed="true"] {
-    border-color: var(--ld-accent);
-    background-color: var(--gray-lighter);
-    background-color: color-mix(in srgb, var(--ld-accent) 8%, transparent);
-}
-
-.live-look-style:focus-visible,
-.live-look-color:focus-visible {
-    outline: 2px solid var(--ld-accent);
-    outline-offset: 2px;
-}
-
-.live-look-name {
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-/* A thumbnail of each style, in the chosen color. */
-.live-look-sample {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 100%;
-    height: 44px;
-    padding: 6px 7px;
-    overflow: hidden;
-    border: 1px solid var(--default-border-color, #e5e5e5);
-    border-radius: 7px;
-    background-color: var(--panel-bg, #fff);
-}
-
-.live-look-sample-value {
-    color: var(--text-color);
-    font-size: 15px;
-    font-weight: 700;
-    line-height: 1;
-}
-
-.live-look-sample-line {
-    height: 2px;
-    border-radius: 1px;
-    background-color: var(--ld-accent);
-}
-
-.live-look-sample-soft {
-    background:
-        linear-gradient(155deg, color-mix(in srgb, var(--ld-accent) 14%, transparent) 0%, transparent 70%),
-        var(--panel-bg, #fff);
-}
-
-.live-look-sample-minimal .live-look-sample-line {
-    background-color: var(--text-muted-color);
-    opacity: .5;
-}
-
-.live-look-sample-outline {
-    border-color: var(--text-muted-color);
-    background: transparent;
-}
-
-.live-look-sample-outline .live-look-sample-value {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    font-weight: 600;
-}
-
-.live-look-sample-big .live-look-sample-value {
-    font-family: "Live Dashlets Condensed", "Arial Narrow", sans-serif;
-    font-size: 26px;
-    font-weight: 600;
-}
-
-.live-look-sample-big .live-look-sample-line {
-    display: none;
-}
-
 .live-look-colors {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
 }
 
 .live-look-color {
-    width: 26px;
-    height: 26px;
+    width: 18px;
+    height: 18px;
     padding: 0;
     border: 2px solid var(--panel-bg, #fff);
     border-radius: 50%;
@@ -1433,15 +1343,45 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     box-shadow: 0 0 0 2px var(--ld-accent);
 }
 
+.live-look-color:focus-visible {
+    outline: 2px solid var(--ld-accent);
+    outline-offset: 2px;
+}
+
+.live-look-foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+}
+
 .live-look-note {
-    margin: .2em 0 0;
     color: var(--text-muted-color);
 }
 
-.live-look-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+.live-look .live-look-link {
+    padding: 0;
+    font-size: inherit;
+}
+
+/* The lists take the style too: a line around them for Outline, a condensed figure for Big. */
+.live-dashlet-style-outline .live-actions-summary b,
+.live-dashlet-style-outline .live-recent-time,
+.live-dashlet-style-outline .live-recent-day-title {
+    font-family: var(--ld-font-mono);
+}
+
+.live-dashlet-style-big .live-actions-summary b {
+    font-family: var(--ld-font-condensed);
+    font-size: 1.45em;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.live-dashlet-style-big .live-recent-day-title {
+    font-family: var(--ld-font-condensed);
+    font-size: 1.05em;
+    letter-spacing: .06em;
 }
 
 /* ---------------------------------------------------------------------------------------------
@@ -1490,14 +1430,6 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
 }
 
-.live-gallery .live-gallery-card.live-dashlet-style-soft {
-    background-image: linear-gradient(
-        155deg,
-        color-mix(in srgb, var(--ld-accent) 7%, transparent) 0%,
-        transparent 55%
-    );
-}
-
 .live-gallery .live-gallery-card.live-dashlet-style-solid {
     --text-color: #fff;
     --text-muted-color: rgba(255, 255, 255, .8);
@@ -1515,6 +1447,48 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 .live-gallery .live-gallery-card.live-dashlet-style-outline {
     border: 1.5px solid var(--default-border-color, #ccc);
     border: 1.5px solid color-mix(in srgb, var(--text-color) 24%, transparent);
+}
+
+/* The cards preview the chosen style: monospaced figures for Outline, a narrow and large figure
+   for Big figure. */
+.live-gallery .live-gallery-card.live-dashlet-style-outline {
+    box-shadow: none;
+}
+
+.live-gallery .live-gallery-card.live-dashlet-style-outline .live-gallery-card-value,
+.live-gallery .live-gallery-card.live-dashlet-style-outline .live-gallery-card-description {
+    font-family: var(--ld-font-mono);
+}
+
+.live-gallery .live-gallery-card.live-dashlet-style-outline .live-gallery-card-value {
+    font-weight: 600;
+    letter-spacing: -.04em;
+}
+
+.live-gallery .live-gallery-card.live-dashlet-style-outline .live-gallery-card-trend {
+    border: 1.5px solid currentColor;
+    background: transparent;
+    font-family: var(--ld-font-mono);
+}
+
+.live-gallery .live-gallery-card.live-dashlet-style-big .live-gallery-card-title {
+    font-size: .8em;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.live-gallery .live-gallery-card.live-dashlet-style-big .live-gallery-card-value {
+    font-family: var(--ld-font-condensed);
+    font-size: 2.3em;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1;
+}
+
+.live-gallery .live-gallery-card.live-dashlet-style-big .live-gallery-card-trend {
+    padding: 0;
+    background: none;
 }
 
 .live-gallery-card:hover {

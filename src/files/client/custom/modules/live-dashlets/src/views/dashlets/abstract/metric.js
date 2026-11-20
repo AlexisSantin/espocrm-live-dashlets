@@ -4,7 +4,7 @@
 
 import BaseDashletView from 'views/dashlets/abstract/base';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
-import {getLook, isHighlighted, LOOK_EVENTS} from 'live-dashlets:helpers/look';
+import {applyLookToPanel, getLook, isHighlighted, watchLook} from 'live-dashlets:helpers/look';
 
 /**
  * Shared logic of the KPI and goal dashlets: options, server request, number formatting and
@@ -41,31 +41,7 @@ class LiveDashletsMetricView extends BaseDashletView {
             this.openRecordList();
         },
         /** @this LiveDashletsMetricView */
-        'click .live-dashlet-info': function (e) {
-            const wrap = e.target.closest('.live-dashlet-info-wrap');
-
-            if (wrap) {
-                wrap.classList.toggle('live-dashlet-info-open');
-            }
-        },
-        /** @this LiveDashletsMetricView */
-        'focusout .live-dashlet-info': function (e) {
-            const wrap = e.target.closest('.live-dashlet-info-wrap');
-
-            if (wrap) {
-                wrap.classList.remove('live-dashlet-info-open');
-            }
-        },
-        /** @this LiveDashletsMetricView */
         'keydown .live-dashlet-clickable': function (e) {
-            if (e.target.closest('.live-dashlet-info')) {
-                if (e.key === 'Escape') {
-                    e.target.closest('.live-dashlet-info-wrap').classList.remove('live-dashlet-info-open');
-                }
-
-                return;
-            }
-
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
 
@@ -80,10 +56,7 @@ class LiveDashletsMetricView extends BaseDashletView {
         this.formatter = new LiveDashletsFormatter(this);
 
         // A new style or color, for this user or the company, applies to every tile at once.
-        const redraw = () => this.isRendered() && this.reRender();
-
-        this.listenTo(this.getPreferences(), LOOK_EVENTS, redraw);
-        this.listenTo(this.getConfig(), LOOK_EVENTS, redraw);
+        watchLook(this, () => this.isRendered() && this.reRender());
     }
 
     /** @protected */
@@ -114,20 +87,7 @@ class LiveDashletsMetricView extends BaseDashletView {
      * @private
      */
     applyPanelStyle() {
-        const panel = this.element ? this.element.closest('.dashlet') : null;
-
-        if (!panel) {
-            return;
-        }
-
-        const style = this.getTileStyle();
-        const accent = getLook(this).color;
-
-        [...panel.classList]
-            .filter(name => name.startsWith('live-dashlet-style-') || name.startsWith('live-dashlet-accent-'))
-            .forEach(name => panel.classList.remove(name));
-
-        panel.classList.add('live-dashlet-panel', 'live-dashlet-style-' + style, 'live-dashlet-accent-' + accent);
+        applyLookToPanel(this, this.getTileStyle());
     }
 
     /**
@@ -429,31 +389,108 @@ class LiveDashletsMetricView extends BaseDashletView {
     }
 
     /**
-     * An info button beside the period: what the figure counts, over which dates, and that only
-     * readable records are counted. Shown on hover, on focus and on a click (for touch screens).
+     * What the figure counts, over which dates, and that only readable records are counted:
+     * shown when the pointer rests on the dashlet's title, or when the title has the focus.
      *
      * @protected
      * @param {Object} data
      * @param {string[]} [extraLines] Lines added before the access rights line.
-     * @return {HTMLElement}
      */
-    createInfo(data, extraLines = []) {
-        const text = [...this.getInfoLines(data), ...extraLines,
+    setInfo(data, extraLines = []) {
+        this.infoText = [...this.getInfoLines(data), ...extraLines,
             this.translate('infoAccess', 'labels', 'LiveDashlets')].join('\n');
 
-        const wrap = this.createElement('span', 'live-dashlet-info-wrap');
-        const button = this.createElement('button', 'live-dashlet-info');
-        const icon = this.createElement('span', 'fas fa-info-circle');
-        const pop = this.createElement('span', 'live-dashlet-info-pop', text);
+        const title = this.element ? this.element.closest('.dashlet')?.querySelector('.panel-heading .panel-title') : null;
 
-        icon.setAttribute('aria-hidden', 'true');
-        button.type = 'button';
-        button.setAttribute('aria-label', text);
-        button.append(icon);
+        if (!title) {
+            return;
+        }
+
+        // The title belongs to the dashlet's frame, which outlives this view: it always asks the
+        // latest view for its text.
+        title.liveDashletsInfoView = this;
+        title.classList.add('live-dashlet-titled');
+
+        let description = title.querySelector('.live-dashlet-info-text');
+
+        if (!description) {
+            description = this.createElement('span', 'sr-only live-dashlet-info-text');
+            description.id = 'live-dashlet-info-' + this.cid;
+            title.append(description);
+            title.setAttribute('aria-describedby', description.id);
+        }
+
+        description.textContent = this.infoText;
+
+        if (title.dataset.liveInfo) {
+            return;
+        }
+
+        title.dataset.liveInfo = '1';
+
+        if (!title.hasAttribute('tabindex')) {
+            title.tabIndex = 0;
+        }
+
+        let timer = null;
+        const view = () => title.liveDashletsInfoView;
+
+        title.addEventListener('mouseenter', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => view()?.showInfo(title), 350);
+        });
+
+        title.addEventListener('mouseleave', () => {
+            clearTimeout(timer);
+            view()?.hideInfo();
+        });
+
+        title.addEventListener('focus', () => view()?.showInfo(title));
+        title.addEventListener('blur', () => view()?.hideInfo());
+        title.addEventListener('keydown', e => e.key === 'Escape' && view()?.hideInfo());
+    }
+
+    /** @private */
+    showInfo(title) {
+        this.hideInfo();
+
+        if (!this.infoText) {
+            return;
+        }
+
+        const pop = this.createElement('div', 'live-dashlet-info-pop', this.infoText);
+        const rect = title.getBoundingClientRect();
+
         pop.setAttribute('aria-hidden', 'true');
-        wrap.append(button, pop);
+        document.body.append(pop);
 
-        return wrap;
+        const left = Math.max(8, Math.min(rect.left, window.innerWidth - pop.offsetWidth - 8));
+        const below = rect.bottom + 6;
+        const top = below + pop.offsetHeight > window.innerHeight - 8 ? rect.top - pop.offsetHeight - 6 : below;
+
+        pop.style.left = Math.round(left) + 'px';
+        pop.style.top = Math.round(Math.max(8, top)) + 'px';
+
+        this.infoPop = pop;
+        this.onInfoScroll = () => this.hideInfo();
+
+        window.addEventListener('scroll', this.onInfoScroll, true);
+    }
+
+    /** @private */
+    hideInfo() {
+        if (!this.infoPop) {
+            return;
+        }
+
+        this.infoPop.remove();
+        this.infoPop = null;
+
+        window.removeEventListener('scroll', this.onInfoScroll, true);
+    }
+
+    onRemove() {
+        this.hideInfo();
     }
 
     /**

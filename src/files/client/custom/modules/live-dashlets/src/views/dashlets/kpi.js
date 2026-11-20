@@ -40,7 +40,9 @@ class LiveDashletsKpiView extends LiveDashletsMetricView {
             ] :
             [];
 
-        head.append(this.createIcon(), this.createPeriod(data), this.createInfo(data, infoLines));
+        head.append(this.createIcon(), this.createPeriod(data));
+
+        this.setInfo(data, infoLines);
 
         const badge = this.createTrendBadge(data);
 

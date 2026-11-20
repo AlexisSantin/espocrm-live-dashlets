@@ -5,7 +5,8 @@
 import ModalView from 'views/modal';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
 import {createSparkline} from 'live-dashlets:helpers/sparkline';
-import {getLook, isHighlighted} from 'live-dashlets:helpers/look';
+import {getLook, isHighlighted, watchLook} from 'live-dashlets:helpers/look';
+import LiveDashletsLookPicker from 'live-dashlets:helpers/look-picker';
 
 const CONCURRENCY = 4;
 const ACTIONS_DASHLET = 'LiveDashletsActions';
@@ -58,6 +59,14 @@ class LiveDashletsGalleryModalView extends ModalView {
 
         this.formatter = new LiveDashletsFormatter(this);
         this.presetList = this.options.canConfigure ? this.getAvailablePresets() : [];
+
+        // The style of every Live dashlet is chosen here, at the top of the gallery.
+        this.lookPicker = new LiveDashletsLookPicker(this);
+
+        watchLook(this, () => {
+            this.lookPicker.render();
+            this.refreshCardLook();
+        });
     }
 
     /**
@@ -112,6 +121,9 @@ class LiveDashletsGalleryModalView extends ModalView {
 
         const fragment = document.createDocumentFragment();
 
+        fragment.append(this.lookPicker.element);
+        this.lookPicker.render();
+
         if (this.presetList.length) {
             fragment.append(this.createElement(
                 'p',
@@ -159,6 +171,27 @@ class LiveDashletsGalleryModalView extends ModalView {
         section.append(this.createElement('h5', 'live-gallery-group-title', label), grid);
 
         return section;
+    }
+
+    /**
+     * The cards follow a new style or color at once, like the dashboard behind.
+     *
+     * @private
+     */
+    refreshCardLook() {
+        const look = getLook(this);
+
+        this.element?.querySelectorAll('.live-gallery-card[data-preset]').forEach(card => {
+            const preset = this.presetList.find(item => item.name === card.dataset.preset);
+            const options = preset ? preset.options || {} : {};
+            const style = isHighlighted(options.highlight, options.tileStyle) ? 'solid' : look.style;
+
+            [...card.classList]
+                .filter(name => name.startsWith('live-dashlet-style-') || name.startsWith('live-dashlet-accent-'))
+                .forEach(name => card.classList.remove(name));
+
+            card.classList.add('live-dashlet-style-' + style, 'live-dashlet-accent-' + look.color);
+        });
     }
 
     /** @private */

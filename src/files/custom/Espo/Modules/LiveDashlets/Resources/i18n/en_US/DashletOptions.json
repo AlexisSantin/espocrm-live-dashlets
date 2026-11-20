@@ -7,8 +7,6 @@
         "comparison": "Compare with",
         "lowerIsBetter": "A decrease is good news",
         "target": "Target",
-        "accentColor": "Color",
-        "tileStyle": "Style",
         "dormantDays": "Days without exchange",
         "enabledSignals": "What to include",
         "staleDays": "Task set aside after (days)",
@@ -27,21 +25,6 @@
             "toDate": "Previous period, at the same point",
             "full": "Whole previous period",
             "none": "No comparison"
-        },
-        "accentColor": {
-            "primary": "Primary",
-            "success": "Green",
-            "info": "Purple",
-            "warning": "Orange",
-            "danger": "Red",
-            "default": "Gray"
-        },
-        "tileStyle": {
-            "soft": "Soft (tinted)",
-            "minimal": "Minimal",
-            "solid": "Solid color",
-            "outline": "Outline",
-            "big": "Big figure"
         },
         "enabledSignals": {
             "tasks": "Overdue and today's tasks",
@@ -71,6 +54,6 @@
         "staleDays": "Overdue tasks older than this leave the main list and go to “To sort out”.",
         "scope": "Whose actions the dashlet shows when it opens. Everyone can change it in the dashlet; the choice is kept in their browser.",
         "showNotes": "Shows the first line of each note under the name. Everyone can turn it on or off in the dashlet.",
-        "highlight": "Fills the tile with color, to make it stand out. Keep it for one figure per dashboard. The style and the color of all tiles are set with the Style button of the dashboard."
+        "highlight": "Fills the tile with color, to make it stand out. Keep it for one figure per dashboard. The style and the color of all Live dashlets are chosen at the top of the + Add window."
     }
 }

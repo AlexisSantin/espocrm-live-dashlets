@@ -14,7 +14,7 @@ use Espo\ORM\EntityManager;
  * - It is created once: its id is remembered, so an upgrade neither duplicates it nor brings it
  *   back after the administrator deleted it.
  * - One tile only, the amount won this quarter, is highlighted. The style and the color of the tiles
- *   follow the company's choice (the Style button of the dashboard).
+ *   follow the company's choice (at the top of the + Add window).
  * - Dashlets on a disabled entity are left out. Every figure is computed with the viewer's own
  *   access rights, so the same template can be deployed to everyone.
  */

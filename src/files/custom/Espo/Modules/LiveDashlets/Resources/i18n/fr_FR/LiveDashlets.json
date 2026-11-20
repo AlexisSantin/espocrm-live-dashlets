@@ -259,12 +259,10 @@
         "taskCompleted": "Terminée"
     },
     "look": {
-        "button": "Style",
         "title": "Style des tuiles",
         "style": "Style",
         "color": "Couleur",
         "styles": {
-            "soft": "Doux",
             "minimal": "Épuré",
             "outline": "Contour",
             "big": "Grand chiffre"
@@ -281,6 +279,13 @@
         "company": "Style de l'entreprise : {style} · {color}.",
         "follow": "Revenir au style de l'entreprise",
         "applyCompany": "Appliquer à toute l'entreprise",
-        "companySaved": "Style appliqué à toute l'entreprise"
+        "companySaved": "Style appliqué à toute l'entreprise",
+        "personalShort": "Votre choix",
+        "companyShort": "Style de l'entreprise"
+    },
+    "recentScopesShort": {
+        "team": "Équipe",
+        "me": "Moi",
+        "all": "Tout"
     }
 }

@@ -3,7 +3,7 @@
 /**
  * Adds a showcase of Live Dashlets to a user's dashboard, as extra tabs: the next actions, a cockpit,
  * every ready-made indicator, the periods and calculations. Existing tabs are left untouched. The tiles take
- * the style and the color chosen with the Style button of the dashboard.
+ * the style and the color chosen at the top of the + Add window.
  * Goal targets are computed from the current figures, so that each goal status can be seen.
  *
  * Run from the EspoCRM root, as the web server user, after demo-data.php:

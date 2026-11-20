@@ -4,6 +4,8 @@
 
 import BaseDashletView from 'views/dashlets/abstract/base';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
+import {applyLookToPanel, watchLook} from 'live-dashlets:helpers/look';
+import {createSegmented} from 'live-dashlets:helpers/segmented';
 
 const ICONS = {
     call: 'fas fa-phone',
@@ -72,12 +74,6 @@ class LiveDashletsRecentView extends BaseDashletView {
             this.getContainer()?.querySelector(`[data-recent-toggle="${CSS.escape(key)}"]`)?.focus();
         },
         /** @this LiveDashletsRecentView */
-        'change .live-recent-scope': function (e) {
-            this.prefs.scope = e.currentTarget.value;
-            this.saveState();
-            this.load();
-        },
-        /** @this LiveDashletsRecentView */
         'change .live-recent-type': function (e) {
             this.prefs.type = e.currentTarget.value;
             this.saveState();
@@ -106,6 +102,9 @@ class LiveDashletsRecentView extends BaseDashletView {
     setup() {
         super.setup();
 
+        // The style and the color chosen for every Live dashlet.
+        watchLook(this, () => applyLookToPanel(this));
+
         this.formatter = new LiveDashletsFormatter(this);
 
         const scope = SCOPES.includes(this.getOption('scope')) ? this.getOption('scope') : 'team';
@@ -115,6 +114,8 @@ class LiveDashletsRecentView extends BaseDashletView {
     }
 
     afterRender() {
+        applyLookToPanel(this);
+
         this.load();
     }
 
@@ -276,10 +277,27 @@ class LiveDashletsRecentView extends BaseDashletView {
     createToolbar() {
         const bar = this.make('div', 'live-recent-toolbar');
 
-        const scope = this.createSelect('live-recent-scope', this.t('scopeLabel'), SCOPES.map(name => [
-            name,
-            this.t(name, {}, 'recentScopes'),
-        ]), this.prefs.scope);
+        const scope = createSegmented({
+            label: this.t('scopeLabel'),
+            className: 'live-recent-scope',
+            value: this.prefs.scope,
+            options: SCOPES.map(name => ({
+                value: name,
+                label: this.t(name, {}, 'recentScopesShort'),
+                title: this.t(name, {}, 'recentScopes'),
+            })),
+            onChange: name => {
+                this.prefs.scope = name;
+                this.focusScope = true;
+                this.saveState();
+                this.load();
+            },
+        });
+
+        if (this.focusScope) {
+            requestAnimationFrame(() => scope.querySelector('[aria-checked="true"]')?.focus());
+            this.focusScope = false;
+        }
 
         const counts = {};
 

@@ -4,6 +4,7 @@
 
 import BaseDashletView from 'views/dashlets/abstract/base';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
+import {applyLookToPanel, watchLook} from 'live-dashlets:helpers/look';
 
 const KINDS = {
     task: {icon: 'fas fa-tasks', accent: 'warning'},
@@ -140,10 +141,15 @@ class LiveDashletsActionsView extends BaseDashletView {
     setup() {
         super.setup();
 
+        // The style and the color chosen for every Live dashlet.
+        watchLook(this, () => applyLookToPanel(this));
+
         this.formatter = new LiveDashletsFormatter(this);
     }
 
     afterRender() {
+        applyLookToPanel(this);
+
         this.load();
     }
 
