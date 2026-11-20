@@ -257,5 +257,30 @@
         "dealWon": "Won",
         "dealLost": "Lost",
         "taskCompleted": "Done"
+    },
+    "look": {
+        "button": "Style",
+        "title": "Tile style",
+        "style": "Style",
+        "color": "Color",
+        "styles": {
+            "soft": "Soft",
+            "minimal": "Minimal",
+            "outline": "Outline",
+            "big": "Big figure"
+        },
+        "colors": {
+            "primary": "Primary",
+            "info": "Purple",
+            "success": "Green",
+            "warning": "Orange",
+            "danger": "Red",
+            "default": "Gray"
+        },
+        "personal": "Your choice, for your dashboard only.",
+        "company": "Company style: {style} · {color}.",
+        "follow": "Use the company style",
+        "applyCompany": "Apply to the whole company",
+        "companySaved": "Style applied to the whole company"
     }
 }

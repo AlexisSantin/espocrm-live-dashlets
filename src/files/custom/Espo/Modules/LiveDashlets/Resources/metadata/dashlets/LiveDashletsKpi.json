@@ -66,18 +66,6 @@
                 "view": "live-dashlets:views/dashlets/fields/date-field",
                 "tooltip": true
             },
-            "accentColor": {
-                "type": "enum",
-                "options": [
-                    "primary",
-                    "success",
-                    "info",
-                    "warning",
-                    "danger",
-                    "default"
-                ],
-                "translation": "DashletOptions.options.accentColor"
-            },
             "comparison": {
                 "type": "enum",
                 "options": [
@@ -92,27 +80,18 @@
                 "type": "bool",
                 "tooltip": true
             },
-            "tileStyle": {
-                "type": "enum",
-                "options": [
-                    "soft",
-                    "minimal",
-                    "solid",
-                    "outline",
-                    "big"
-                ],
-                "translation": "DashletOptions.options.tileStyle"
+            "highlight": {
+                "type": "bool",
+                "tooltip": true
             }
         },
         "defaults": {
             "metric": "count",
             "period": "currentMonth",
             "comparison": "toDate",
-            "accentColor": "primary",
             "lowerIsBetter": false,
             "boolFilterList": [],
-            "autorefreshInterval": 0,
-            "tileStyle": "soft"
+            "autorefreshInterval": 0
         },
         "layout": [
             {
@@ -122,14 +101,8 @@
                             "name": "title"
                         },
                         {
-                            "name": "accentColor"
+                            "name": "highlight"
                         }
-                    ],
-                    [
-                        {
-                            "name": "tileStyle"
-                        },
-                        false
                     ],
                     [
                         {

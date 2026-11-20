@@ -106,20 +106,24 @@ Like everything else, the list only shows records the viewer can read, and it on
 | Date used for the period | Which date places a record in the period: created at, close date, converted at… |
 | Compare with | The previous period at the same point, the whole previous period, or nothing |
 | Target | For a Goal |
-| Color and style | Six theme colors, five styles |
+| Highlight | Fills one tile with color to make it stand out |
 | Auto-refresh | Every 30 seconds up to every 10 minutes |
 
 ![The options of a Key Figure](docs/screenshots/options.png)
 
-### Five styles
+### One style for every tile
 
-**Soft** (the default) gives the tile a light tint of its color. **Minimal** stays neutral, with the change in a line under the figure. **Solid** fills the tile with color: keep it for one headline figure per dashboard.
+The **Style** button of the dashboard sets the style and the color of all the tiles at once: there is nothing to set tile by tile. A click on a style or a color shows on the dashboard right away.
 
-**Outline** draws a line around the tile, with no fill or shadow, and sets the figures in a monospaced font: the color only shows on the curve and the bar. **Big figure** lets the number fill the tile in a narrow font, with the change beside it in color and the comparison below. A goal in this style reads as 20 segments. Its font ships with the extension (Barlow Condensed, SIL Open Font License), so nothing is loaded from outside EspoCRM.
+- **Soft** (the default) gives the tile a light tint of its color. **Minimal** stays neutral, with the change in a line under the figure.
+- **Outline** draws a line around the tile, with no fill or shadow, and sets the figures in a monospaced font. **Big figure** lets the number fill the tile in a narrow font, with the change beside it and the comparison below; a goal reads as 20 segments. Its font ships with the extension (Barlow Condensed, SIL Open Font License), so nothing is loaded from outside EspoCRM.
+- **Highlight**, in a tile's options, fills that one tile with color. Keep it for one headline figure per dashboard.
 
-The ready-made indicators share one color, so that green, amber and red keep their meaning: they are left to trends and statuses. Any of the six theme colors can still be chosen in a tile's options.
+An administrator sets the company's style with **Apply to the whole company**, in the same panel. Each user can choose another one for their own dashboard, and go back to the company's at any time.
 
-![Soft, Minimal and Solid](docs/screenshots/styles.png)
+Green, amber and red keep their meaning on every style: they are left to trends and statuses.
+
+![The Style button sets the style and the color of every tile](docs/screenshots/styles.png)
 
 Colors come from the active theme, so tiles follow light and dark themes. The layout adapts to the height of the tile, which varies from one theme to another.
 
@@ -153,7 +157,7 @@ Adjust the targets, then deploy it to the users or teams you choose. Nothing is 
 
 ## Installation
 
-1. Download `live-dashlets-1.3.0.zip` from the [latest release](../../releases/latest).
+1. Download `live-dashlets-1.4.0.zip` from the [latest release](../../releases/latest).
 2. In EspoCRM, go to **Administration → Extensions**, upload the ZIP and click **Install**.
 3. Optional: in **Administration → Dashboard Templates**, open **Live dashboard**, adjust the goal targets and deploy it.
 
@@ -181,9 +185,7 @@ The gallery is defined in metadata, so you can add company-specific indicators w
                 "metric": "count",
                 "dateField": "closeDate",
                 "period": "currentQuarter",
-                "comparison": "toDate",
-                "accentColor": "primary",
-                "tileStyle": "soft"
+                "comparison": "toDate"
             }
         }
     ]
@@ -226,7 +228,7 @@ php demo-data.php [--seed=101] [--boost=1.25]
 php demo-data-remove.php
 ```
 
-`dev/demo-dashboard.php` then adds a showcase to a user's dashboard, as five extra tabs: the next actions, a complete cockpit, every ready-made indicator, the styles and colors with the three goal statuses, and the periods and calculations. The user's own tabs are left untouched.
+`dev/demo-dashboard.php` then adds a showcase to a user's dashboard, as four extra tabs: the next actions, a complete cockpit, every ready-made indicator, and the periods and calculations. The user's own tabs are left untouched.
 
 ```bash
 php demo-dashboard.php [--user=admin]

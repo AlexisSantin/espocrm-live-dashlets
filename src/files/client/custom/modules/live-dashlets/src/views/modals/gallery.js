@@ -5,6 +5,7 @@
 import ModalView from 'views/modal';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
 import {createSparkline} from 'live-dashlets:helpers/sparkline';
+import {getLook, isHighlighted} from 'live-dashlets:helpers/look';
 
 const CONCURRENCY = 4;
 const ACTIONS_DASHLET = 'LiveDashletsActions';
@@ -168,8 +169,9 @@ class LiveDashletsGalleryModalView extends ModalView {
     /** @private */
     createPresetCard(preset) {
         const options = preset.options || {};
-        const accent = options.accentColor || 'primary';
-        const style = options.tileStyle || 'soft';
+        const look = getLook(this);
+        const accent = look.color;
+        const style = isHighlighted(options.highlight, options.tileStyle) ? 'solid' : look.style;
 
         const card = this.createElement(
             'button',

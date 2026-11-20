@@ -15,6 +15,11 @@ class LiveDashletsMetricOptionsView extends BaseDashletOptionsModalView {
 
         this.listenTo(this.model, 'change:metric change:period', () => this.controlFields());
 
+        // A tile made solid before 1.4 is shown as highlighted: saving keeps it that way.
+        if (this.model.get('highlight') == null && this.model.get('tileStyle') === 'solid') {
+            this.model.set('highlight', true);
+        }
+
         this.controlFields();
     }
 

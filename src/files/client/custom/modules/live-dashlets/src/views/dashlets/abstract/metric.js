@@ -4,9 +4,7 @@
 
 import BaseDashletView from 'views/dashlets/abstract/base';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
-
-export const STYLE_LIST = ['soft', 'minimal', 'solid', 'outline', 'big'];
-export const ACCENT_LIST = ['primary', 'success', 'info', 'warning', 'danger', 'default'];
+import {getLook, isHighlighted, LOOK_EVENTS} from 'live-dashlets:helpers/look';
 
 /**
  * Shared logic of the KPI and goal dashlets: options, server request, number formatting and
@@ -80,6 +78,12 @@ class LiveDashletsMetricView extends BaseDashletView {
         super.setup();
 
         this.formatter = new LiveDashletsFormatter(this);
+
+        // A new style or color, for this user or the company, applies to every tile at once.
+        const redraw = () => this.isRendered() && this.reRender();
+
+        this.listenTo(this.getPreferences(), LOOK_EVENTS, redraw);
+        this.listenTo(this.getConfig(), LOOK_EVENTS, redraw);
     }
 
     /** @protected */
@@ -117,7 +121,7 @@ class LiveDashletsMetricView extends BaseDashletView {
         }
 
         const style = this.getTileStyle();
-        const accent = ACCENT_LIST.includes(this.getOption('accentColor')) ? this.getOption('accentColor') : 'primary';
+        const accent = getLook(this).color;
 
         [...panel.classList]
             .filter(name => name.startsWith('live-dashlet-style-') || name.startsWith('live-dashlet-accent-'))
@@ -131,7 +135,11 @@ class LiveDashletsMetricView extends BaseDashletView {
      * @return {string}
      */
     getTileStyle() {
-        return STYLE_LIST.includes(this.getOption('tileStyle')) ? this.getOption('tileStyle') : 'soft';
+        if (isHighlighted(this.getOption('highlight'), this.getOption('tileStyle'))) {
+            return 'solid';
+        }
+
+        return getLook(this).style;
     }
 
     /** @private */

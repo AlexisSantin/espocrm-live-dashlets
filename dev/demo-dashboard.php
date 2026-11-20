@@ -2,7 +2,8 @@
 
 /**
  * Adds a showcase of Live Dashlets to a user's dashboard, as extra tabs: the next actions, a cockpit,
- * every ready-made indicator, the styles and colors, the periods and calculations. Existing tabs are left untouched.
+ * every ready-made indicator, the periods and calculations. Existing tabs are left untouched. The tiles take
+ * the style and the color chosen with the Style button of the dashboard.
  * Goal targets are computed from the current figures, so that each goal status can be seen.
  *
  * Run from the EspoCRM root, as the web server user, after demo-data.php:
@@ -241,7 +242,6 @@ $wonDeals = [
     'period' => 'currentQuarter',
     'comparison' => 'toDate',
     'boolFilterList' => [],
-    'tileStyle' => 'soft',
 ];
 $heldCalls = [
     'entityType' => 'Call',
@@ -251,7 +251,6 @@ $heldCalls = [
     'period' => 'currentMonth',
     'comparison' => 'toDate',
     'boolFilterList' => [],
-    'tileStyle' => 'soft',
 ];
 
 $averageDeal = [
@@ -259,7 +258,6 @@ $averageDeal = [
     'title' => $t('Average deal', 'Affaire moyenne'),
     'metric' => 'avg',
     'valueField' => 'amount',
-    'accentColor' => 'primary',
 ];
 $leadPotential = [
     'title' => $t('Potential in open leads', 'Potentiel des leads ouverts'),
@@ -270,8 +268,6 @@ $leadPotential = [
     'period' => 'ever',
     'comparison' => 'none',
     'boolFilterList' => [],
-    'accentColor' => 'primary',
-    'tileStyle' => 'soft',
 ];
 
 // ---------------------------------------------------------------------------------------------
@@ -348,58 +344,7 @@ $tiles[] = $kpi($leadPotential);
 $flow($all, $tiles);
 
 // ---------------------------------------------------------------------------------------------
-// Tab 3: three styles, six colors, three goal statuses.
-// ---------------------------------------------------------------------------------------------
-
-$styles = ['id' => DEMO_PREFIX . '-styles', 'name' => $t('Styles and colors', 'Styles et couleurs'), 'layout' => []];
-
-$colorSamples = [
-    'primary' => [$t('Blue', 'Bleu'), ['entityType' => 'Lead', 'dateField' => 'createdAt']],
-    'success' => [$t('Green', 'Vert'), ['entityType' => 'Call', 'primaryFilter' => 'held', 'dateField' => 'dateStart']],
-    'info' => [$t('Purple', 'Violet'), [
-        ...$wonDeals, 'metric' => 'sum', 'valueField' => 'amount', 'period' => 'currentQuarter',
-    ]],
-    'warning' => [$t('Orange', 'Orange'), ['entityType' => 'Task', 'dateField' => 'createdAt']],
-    'danger' => [$t('Red', 'Rouge'), ['entityType' => 'Case', 'dateField' => 'createdAt', 'lowerIsBetter' => true]],
-    'default' => [$t('Gray', 'Gris'), ['entityType' => 'Account', 'dateField' => 'createdAt']],
-];
-
-$styleSamples = [
-    'soft' => [$t('Soft', 'Doux'), 'ahead', $t('on track', 'en avance')],
-    'minimal' => [$t('Minimal', 'Épuré'), 'behind', $t('behind', 'en retard')],
-    'solid' => [$t('Solid', 'Plein'), 'reached', $t('reached', 'atteint')],
-    'outline' => [$t('Outline', 'Contour'), 'behind', $t('behind', 'en retard')],
-    'big' => [$t('Big figure', 'Grand chiffre'), 'ahead', $t('on track', 'en avance')],
-];
-
-$tiles = [];
-
-foreach ($styleSamples as $style => [$styleLabel, $state, $stateLabel]) {
-    foreach ($colorSamples as $color => [$colorLabel, $sample]) {
-        $tiles[] = $kpi([
-            'metric' => 'count',
-            'period' => 'currentMonth',
-            'comparison' => 'toDate',
-            'boolFilterList' => [],
-            ...$sample,
-            'title' => "$styleLabel · $colorLabel",
-            'accentColor' => $color,
-            'tileStyle' => $style,
-        ]);
-    }
-
-    $tiles[] = ['LiveDashletsGoal', 2, $goalInState([
-        ...$heldCalls,
-        'title' => $t('Goal', 'Objectif') . " · $stateLabel",
-        'accentColor' => 'primary',
-        'tileStyle' => $style,
-    ], $state)];
-}
-
-$flow($styles, $tiles);
-
-// ---------------------------------------------------------------------------------------------
-// Tab 4: periods, comparisons and calculations.
+// Tab 3: periods, comparisons and calculations.
 // ---------------------------------------------------------------------------------------------
 
 $periods = ['id' => DEMO_PREFIX . '-periods', 'name' => $t('Periods and calculations', 'Périodes et calculs'), 'layout' => []];
@@ -413,7 +358,6 @@ $tiles[] = $kpi([
     'primaryFilter' => null,
     'period' => 'today',
     'comparison' => 'full',
-    'accentColor' => 'primary',
 ]);
 
 foreach (['currentWeek', 'currentMonth', 'currentQuarter', 'currentYear', 'lastSevenDays', 'lastThirtyDays', 'ever'] as $name) {
@@ -422,22 +366,21 @@ foreach (['currentWeek', 'currentMonth', 'currentQuarter', 'currentYear', 'lastS
         'title' => $t('Calls held', 'Appels passés') . ' · ' . $period($name),
         'period' => $name,
         'comparison' => $name === 'ever' ? 'none' : 'toDate',
-        'accentColor' => 'primary',
     ]);
 }
 
-$newLeads = [...$fromPreset('newLeads'), 'accentColor' => 'primary'];
+$newLeads = [...$fromPreset('newLeads')];
 
 $tiles[] = $kpi([...$newLeads, 'title' => $t('Vs same point last month', 'Contre le même moment')]);
 $tiles[] = $kpi([...$newLeads, 'title' => $t('Vs whole last month', 'Contre tout le mois dernier'), 'comparison' => 'full']);
 $tiles[] = $kpi([...$newLeads, 'title' => $t('No comparison', 'Sans comparaison'), 'comparison' => 'none']);
 $tiles[] = $kpi([
-    ...$fromPreset('newCases', ['tileStyle' => 'soft', 'period' => 'currentMonth']),
+    ...$fromPreset('newCases', ['period' => 'currentMonth']),
     'title' => $t('A decrease is good news', 'Une baisse est une bonne nouvelle'),
 ]);
 
-$tiles[] = $kpi([...$wonDeals, 'title' => $t('Count: deals won', 'Nombre : affaires gagnées'), 'metric' => 'count', 'accentColor' => 'primary']);
-$tiles[] = $kpi([...$wonDeals, 'title' => $t('Sum: amount won', 'Somme : montant gagné'), 'metric' => 'sum', 'valueField' => 'amount', 'accentColor' => 'primary']);
+$tiles[] = $kpi([...$wonDeals, 'title' => $t('Count: deals won', 'Nombre : affaires gagnées'), 'metric' => 'count']);
+$tiles[] = $kpi([...$wonDeals, 'title' => $t('Sum: amount won', 'Somme : montant gagné'), 'metric' => 'sum', 'valueField' => 'amount']);
 $tiles[] = $kpi([...$averageDeal, 'title' => $t('Average: deal size', 'Moyenne : affaire')]);
 $tiles[] = $kpi([
     ...$wonDeals,
@@ -448,7 +391,6 @@ $tiles[] = $kpi([
     'period' => 'ever',
     'dateField' => null,
     'comparison' => 'none',
-    'accentColor' => 'primary',
 ]);
 
 $flow($periods, $tiles);
@@ -457,7 +399,7 @@ $flow($periods, $tiles);
 // Save: the user's tabs first, then the demo.
 // ---------------------------------------------------------------------------------------------
 
-$demoTabs = [$actions, $cockpit, $all, $styles, $periods];
+$demoTabs = [$actions, $cockpit, $all, $periods];
 
 foreach ($demoTabs as $tab) {
     $dashboardLayout[] = (object) $tab;

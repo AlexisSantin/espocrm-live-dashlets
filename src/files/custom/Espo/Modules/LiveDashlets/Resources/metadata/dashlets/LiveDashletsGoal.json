@@ -66,42 +66,21 @@
                 "view": "live-dashlets:views/dashlets/fields/date-field",
                 "tooltip": true
             },
-            "accentColor": {
-                "type": "enum",
-                "options": [
-                    "primary",
-                    "success",
-                    "info",
-                    "warning",
-                    "danger",
-                    "default"
-                ],
-                "translation": "DashletOptions.options.accentColor"
-            },
             "target": {
                 "type": "float",
                 "required": true,
                 "min": 0
             },
-            "tileStyle": {
-                "type": "enum",
-                "options": [
-                    "soft",
-                    "minimal",
-                    "solid",
-                    "outline",
-                    "big"
-                ],
-                "translation": "DashletOptions.options.tileStyle"
+            "highlight": {
+                "type": "bool",
+                "tooltip": true
             }
         },
         "defaults": {
             "metric": "count",
             "period": "currentMonth",
-            "accentColor": "success",
             "boolFilterList": [],
-            "autorefreshInterval": 0,
-            "tileStyle": "soft"
+            "autorefreshInterval": 0
         },
         "layout": [
             {
@@ -111,14 +90,8 @@
                             "name": "title"
                         },
                         {
-                            "name": "accentColor"
+                            "name": "highlight"
                         }
-                    ],
-                    [
-                        {
-                            "name": "tileStyle"
-                        },
-                        false
                     ],
                     [
                         {

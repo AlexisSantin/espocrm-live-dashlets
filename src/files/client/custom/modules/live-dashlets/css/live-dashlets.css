@@ -1272,6 +1272,179 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 }
 
 /* ---------------------------------------------------------------------------------------------
+   Dashboard "Style" button and panel: one style and one color for every tile.
+   --------------------------------------------------------------------------------------------- */
+
+.live-dashlets-look {
+    display: inline-flex;
+    align-items: center;
+    gap: .45em;
+    margin-right: .5em;
+    border-radius: 999px;
+    padding-left: .9em;
+    padding-right: 1em;
+    font-weight: 600;
+}
+
+.live-dashlets-look .fas {
+    color: var(--text-muted-color);
+}
+
+.live-look {
+    position: fixed;
+    z-index: 1040;
+    display: grid;
+    gap: .55em;
+    width: min(320px, calc(100vw - 32px));
+    padding: 14px;
+    border: 1px solid var(--default-border-color, #e5e5e5);
+    border-radius: 12px;
+    background-color: var(--panel-bg, #fff);
+    box-shadow: 0 12px 32px -12px rgba(0, 0, 0, .35);
+    color: var(--text-color);
+    font-size: var(--font-size-small);
+}
+
+.live-look-heading {
+    color: var(--text-muted-color);
+    font-size: .8em;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+}
+
+.live-look-styles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+}
+
+.live-look-style {
+    display: grid;
+    justify-items: center;
+    gap: .35em;
+    padding: 6px 4px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: none;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.live-look-style:hover {
+    background-color: var(--gray-lighter);
+    background-color: color-mix(in srgb, var(--text-color) 5%, transparent);
+}
+
+.live-look-style[aria-pressed="true"] {
+    border-color: var(--ld-accent);
+    background-color: var(--gray-lighter);
+    background-color: color-mix(in srgb, var(--ld-accent) 8%, transparent);
+}
+
+.live-look-style:focus-visible,
+.live-look-color:focus-visible {
+    outline: 2px solid var(--ld-accent);
+    outline-offset: 2px;
+}
+
+.live-look-name {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* A thumbnail of each style, in the chosen color. */
+.live-look-sample {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    height: 44px;
+    padding: 6px 7px;
+    overflow: hidden;
+    border: 1px solid var(--default-border-color, #e5e5e5);
+    border-radius: 7px;
+    background-color: var(--panel-bg, #fff);
+}
+
+.live-look-sample-value {
+    color: var(--text-color);
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.live-look-sample-line {
+    height: 2px;
+    border-radius: 1px;
+    background-color: var(--ld-accent);
+}
+
+.live-look-sample-soft {
+    background:
+        linear-gradient(155deg, color-mix(in srgb, var(--ld-accent) 14%, transparent) 0%, transparent 70%),
+        var(--panel-bg, #fff);
+}
+
+.live-look-sample-minimal .live-look-sample-line {
+    background-color: var(--text-muted-color);
+    opacity: .5;
+}
+
+.live-look-sample-outline {
+    border-color: var(--text-muted-color);
+    background: transparent;
+}
+
+.live-look-sample-outline .live-look-sample-value {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-weight: 600;
+}
+
+.live-look-sample-big .live-look-sample-value {
+    font-family: "Live Dashlets Condensed", "Arial Narrow", sans-serif;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+.live-look-sample-big .live-look-sample-line {
+    display: none;
+}
+
+.live-look-colors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.live-look-color {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 2px solid var(--panel-bg, #fff);
+    border-radius: 50%;
+    background-color: var(--ld-accent);
+    box-shadow: 0 0 0 1px var(--default-border-color, #e5e5e5);
+    cursor: pointer;
+}
+
+.live-look-color[aria-pressed="true"] {
+    box-shadow: 0 0 0 2px var(--ld-accent);
+}
+
+.live-look-note {
+    margin: .2em 0 0;
+    color: var(--text-muted-color);
+}
+
+.live-look-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* ---------------------------------------------------------------------------------------------
    Gallery.
    --------------------------------------------------------------------------------------------- */
 

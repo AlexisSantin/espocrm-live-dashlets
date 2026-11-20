@@ -17,7 +17,8 @@
         "staleDays": "Tâche mise de côté après (jours)",
         "scope": "Affiché par défaut",
         "days": "Période",
-        "showNotes": "Afficher les notes"
+        "showNotes": "Afficher les notes",
+        "highlight": "Mettre en avant"
     },
     "options": {
         "metric": {
@@ -72,6 +73,7 @@
         "dormantDays": "Une affaire ouverte apparaît après ce nombre de jours sans appel, rendez-vous ou e-mail enregistré.",
         "staleDays": "Les tâches en retard depuis plus longtemps quittent la liste principale et passent dans « À trier ».",
         "scope": "Les actions de qui le dashlet montre à l'ouverture. Chacun peut changer dans le dashlet ; son choix est gardé dans son navigateur.",
-        "showNotes": "Affiche la première ligne de chaque note sous le nom. Chacun peut l'activer ou la désactiver dans le dashlet."
+        "showNotes": "Affiche la première ligne de chaque note sous le nom. Chacun peut l'activer ou la désactiver dans le dashlet.",
+        "highlight": "La tuile prend une couleur pleine pour ressortir. À garder pour un seul chiffre par tableau de bord. Le style et la couleur de toutes les tuiles se règlent avec le bouton Style du tableau de bord."
     }
 }

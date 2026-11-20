@@ -14,7 +14,8 @@
         "staleDays": "Task set aside after (days)",
         "scope": "Shown by default",
         "days": "Period",
-        "showNotes": "Show notes"
+        "showNotes": "Show notes",
+        "highlight": "Highlight"
     },
     "options": {
         "metric": {
@@ -69,6 +70,7 @@
         "dormantDays": "An open deal is listed after this many days without a recorded call, meeting or email.",
         "staleDays": "Overdue tasks older than this leave the main list and go to “To sort out”.",
         "scope": "Whose actions the dashlet shows when it opens. Everyone can change it in the dashlet; the choice is kept in their browser.",
-        "showNotes": "Shows the first line of each note under the name. Everyone can turn it on or off in the dashlet."
+        "showNotes": "Shows the first line of each note under the name. Everyone can turn it on or off in the dashlet.",
+        "highlight": "Fills the tile with color, to make it stand out. Keep it for one figure per dashboard. The style and the color of all tiles are set with the Style button of the dashboard."
     }
 }

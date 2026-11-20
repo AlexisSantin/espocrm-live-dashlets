@@ -13,7 +13,8 @@ use Espo\ORM\EntityManager;
  * - Nothing is imposed on users: the administrator chooses whom to deploy it to.
  * - It is created once: its id is remembered, so an upgrade neither duplicates it nor brings it
  *   back after the administrator deleted it.
- * - One tile only, the amount won this quarter, is in solid colour; the others are soft.
+ * - One tile only, the amount won this quarter, is highlighted. The style and the color of the tiles
+ *   follow the company's choice (the Style button of the dashboard).
  * - Dashlets on a disabled entity are left out. Every figure is computed with the viewer's own
  *   access rights, so the same template can be deployed to everyone.
  */
@@ -54,8 +55,6 @@ class AfterInstall
                     'period' => 'currentMonth',
                     'dateField' => 'createdAt',
                     'comparison' => 'toDate',
-                    'tileStyle' => 'soft',
-                    'accentColor' => 'primary',
                 ],
             ],
             [
@@ -68,8 +67,6 @@ class AfterInstall
                     'period' => 'currentMonth',
                     'dateField' => 'convertedAt',
                     'comparison' => 'toDate',
-                    'tileStyle' => 'soft',
-                    'accentColor' => 'primary',
                 ],
             ],
             [
@@ -83,8 +80,7 @@ class AfterInstall
                     'period' => 'currentQuarter',
                     'dateField' => 'closeDate',
                     'comparison' => 'toDate',
-                    'tileStyle' => 'solid',
-                    'accentColor' => 'info',
+                    'highlight' => true,
                 ],
             ],
             [
@@ -97,8 +93,6 @@ class AfterInstall
                     'period' => 'ever',
                     'comparison' => 'none',
                     'lowerIsBetter' => true,
-                    'tileStyle' => 'big',
-                    'accentColor' => 'primary',
                 ],
             ],
             [
@@ -112,8 +106,6 @@ class AfterInstall
                     'target' => 40,
                     'period' => 'currentMonth',
                     'dateField' => 'dateStart',
-                    'tileStyle' => 'soft',
-                    'accentColor' => 'primary',
                 ],
             ],
             [
@@ -127,8 +119,6 @@ class AfterInstall
                     'target' => 50000,
                     'period' => 'currentQuarter',
                     'dateField' => 'closeDate',
-                    'tileStyle' => 'soft',
-                    'accentColor' => 'primary',
                 ],
             ],
             ['name' => 'Stream', 'x' => 2, 'y' => 3, 'width' => 2, 'height' => 4, 'options' => null],

@@ -15,9 +15,7 @@
             "width": 2,
             "height": 3,
             "iconClass": "fas fa-bolt",
-            "options": {
-                "accentColor": "primary"
-            }
+            "options": {}
         },
         {
             "name": "recentActivity",
@@ -27,7 +25,6 @@
             "height": 3,
             "iconClass": "fas fa-history",
             "options": {
-                "accentColor": "primary",
                 "scope": "team",
                 "days": 7
             }
@@ -43,8 +40,6 @@
                 "metric": "count",
                 "period": "currentMonth",
                 "comparison": "toDate",
-                "accentColor": "primary",
-                "tileStyle": "soft",
                 "boolFilterList": [],
                 "dateField": "createdAt"
             }
@@ -60,8 +55,6 @@
                 "metric": "count",
                 "period": "currentMonth",
                 "comparison": "toDate",
-                "accentColor": "primary",
-                "tileStyle": "soft",
                 "boolFilterList": [],
                 "primaryFilter": "converted",
                 "dateField": "convertedAt"
@@ -78,8 +71,6 @@
                 "metric": "count",
                 "period": "currentWeek",
                 "comparison": "toDate",
-                "accentColor": "primary",
-                "tileStyle": "minimal",
                 "boolFilterList": [
                     "onlyMy"
                 ],
@@ -97,12 +88,11 @@
                 "metric": "sum",
                 "period": "currentQuarter",
                 "comparison": "toDate",
-                "accentColor": "info",
-                "tileStyle": "solid",
                 "boolFilterList": [],
                 "primaryFilter": "won",
                 "valueField": "amount",
-                "dateField": "closeDate"
+                "dateField": "closeDate",
+                "highlight": true
             }
         },
         {
@@ -116,8 +106,6 @@
                 "metric": "count",
                 "period": "currentMonth",
                 "comparison": "toDate",
-                "accentColor": "primary",
-                "tileStyle": "soft",
                 "boolFilterList": [],
                 "primaryFilter": "won",
                 "dateField": "closeDate"
@@ -134,8 +122,6 @@
                 "metric": "sum",
                 "period": "ever",
                 "comparison": "none",
-                "accentColor": "primary",
-                "tileStyle": "soft",
                 "boolFilterList": [],
                 "primaryFilter": "open",
                 "valueField": "amount"
@@ -151,8 +137,6 @@
                 "entityType": "Opportunity",
                 "metric": "sum",
                 "period": "currentQuarter",
-                "accentColor": "primary",
-                "tileStyle": "soft",
                 "boolFilterList": [],
                 "primaryFilter": "won",
                 "valueField": "amount",
@@ -171,8 +155,6 @@
                 "metric": "count",
                 "period": "currentWeek",
                 "comparison": "toDate",
-                "accentColor": "primary",
-                "tileStyle": "soft",
                 "boolFilterList": [],
                 "primaryFilter": "held",
                 "dateField": "dateStart"
@@ -188,8 +170,6 @@
                 "entityType": "Call",
                 "metric": "count",
                 "period": "currentMonth",
-                "accentColor": "primary",
-                "tileStyle": "soft",
                 "boolFilterList": [
                     "onlyMy"
                 ],
@@ -209,8 +189,6 @@
                 "metric": "count",
                 "period": "currentMonth",
                 "comparison": "toDate",
-                "accentColor": "primary",
-                "tileStyle": "soft",
                 "boolFilterList": [],
                 "primaryFilter": "held",
                 "dateField": "dateStart"
@@ -227,8 +205,6 @@
                 "metric": "count",
                 "period": "currentWeek",
                 "comparison": "toDate",
-                "accentColor": "primary",
-                "tileStyle": "minimal",
                 "boolFilterList": [],
                 "primaryFilter": "completed",
                 "dateField": "dateCompleted"
@@ -245,8 +221,6 @@
                 "metric": "count",
                 "period": "ever",
                 "comparison": "none",
-                "accentColor": "primary",
-                "tileStyle": "soft",
                 "boolFilterList": [
                     "onlyMy"
                 ],
@@ -265,8 +239,6 @@
                 "metric": "count",
                 "period": "ever",
                 "comparison": "none",
-                "accentColor": "primary",
-                "tileStyle": "soft",
                 "boolFilterList": [],
                 "primaryFilter": "open",
                 "lowerIsBetter": true
@@ -283,8 +255,6 @@
                 "metric": "count",
                 "period": "currentWeek",
                 "comparison": "toDate",
-                "accentColor": "primary",
-                "tileStyle": "minimal",
                 "boolFilterList": [],
                 "dateField": "createdAt",
                 "lowerIsBetter": true
@@ -301,8 +271,6 @@
                 "metric": "count",
                 "period": "currentMonth",
                 "comparison": "toDate",
-                "accentColor": "primary",
-                "tileStyle": "soft",
                 "boolFilterList": [],
                 "dateField": "createdAt"
             }
@@ -318,8 +286,6 @@
                 "metric": "count",
                 "period": "currentMonth",
                 "comparison": "toDate",
-                "accentColor": "primary",
-                "tileStyle": "minimal",
                 "boolFilterList": [],
                 "dateField": "createdAt"
             }
