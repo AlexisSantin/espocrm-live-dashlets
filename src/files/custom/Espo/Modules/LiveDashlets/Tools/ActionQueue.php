@@ -33,6 +33,8 @@ class ActionQueue
     private const ACTIVITY_WINDOW_DAYS = 7;
     private const NEW_LEAD_DAYS = 30;
     private const DONE_LIMIT = 30;
+    /** Calls, meetings or emails read at once for the last exchange of the deals shown. */
+    private const EXCHANGE_LIMIT = 200;
     private const WORKDAY_START = '09:00';
     private const NOTE_LENGTH = 400;
     /** A task added this long after a call or a meeting is not its next step. */
@@ -53,6 +55,8 @@ class ActionQueue
     private array $contactsByAccount = [];
     /** @var array<string, true> Accounts whose contacts are in $contactsByAccount. */
     private array $accountsLoaded = [];
+    /** @var array<string, array<string, mixed>> The last exchange of each deal shown, by deal id. */
+    private array $dealExchanges = [];
     /** A signal had more records than were read. */
     private bool $capped = false;
 
@@ -108,10 +112,11 @@ class ActionQueue
         $total = count($items);
         $urgent = count(array_filter($items, fn ($item) => $item['urgent']));
 
-        $items = array_map(
-            fn ($item) => $this->finalize($item),
-            array_slice($items, 0, $limit)
-        );
+        $items = array_slice($items, 0, $limit);
+
+        $this->loadDealExchanges($items);
+
+        $items = array_map(fn ($item) => $this->finalize($item), $items);
 
         return [
             'available' => $available !== [],
@@ -1270,10 +1275,126 @@ class ActionQueue
                 'target' => ['type' => 'Opportunity', 'id' => $deal->getId(), 'name' => $this->nameOf($deal)],
                 'score' => 60 + ($amount === null ? 7.5 : 15 * $amount / $maxAmount) + min(10, ($days - $dormantDays) / 3),
                 'snooze' => $this->followUpTask('Opportunity', $deal->getId()),
+                'touch' => ['keys' => $keys, 'date' => $touch],
             ];
         }
 
         return $items;
+    }
+
+    /**
+     * The last exchange of each deal shown, read at once: the index already gave its date, so only
+     * the calls, meetings and emails of those dates, linked to those records, are read.
+     *
+     * @param array<int, array<string, mixed>> $items
+     */
+    private function loadDealExchanges(array $items): void
+    {
+        $wanted = array_filter($items, fn ($item) => $item['kind'] === 'deal' && $item['touch']['date']);
+
+        if (!$wanted) {
+            return;
+        }
+
+        $dates = array_values(array_unique(array_map(fn ($item) => $item['touch']['date'], $wanted)));
+        $ids = [];
+
+        foreach ($wanted as $item) {
+            foreach ($item['touch']['keys'] as $key) {
+                [$type, $id] = explode(':', $key, 2);
+                $ids[$type][] = $id;
+            }
+        }
+
+        $ids = array_map(fn ($list) => array_values(array_unique($list)), $ids);
+        $parentConditions = [];
+
+        foreach ($ids as $type => $list) {
+            $parentConditions[] = ['parentType' => $type, 'parentId' => $list];
+        }
+
+        /** @var array<string, Entity> $found The exchange by "key|date". */
+        $found = [];
+        $add = function (string $key, Entity $entity, ?string $date) use (&$found): void {
+            $found[$key . '|' . $date] ??= $entity;
+        };
+
+        foreach (['Call' => ['Held', 'Not Held'], 'Meeting' => ['Held']] as $type => $statusList) {
+            if (!$this->canRead($type)) {
+                continue;
+            }
+
+            $where = ['status' => $statusList, 'dateStart' => $dates];
+            $withAccount = !empty($ids['Account']) && $this->hasAttribute($type, 'accountId');
+            $conditions = $withAccount ? [...$parentConditions, ['accountId' => $ids['Account']]] : $parentConditions;
+            $query = $this->query($type, null, false)->where([...$where, 'OR' => $conditions]);
+
+            foreach ($this->fetch($type, $query, self::EXCHANGE_LIMIT) as $entity) {
+                $add($entity->get('parentType') . ':' . $entity->get('parentId'), $entity, $entity->get('dateStart'));
+
+                if ($withAccount && $entity->get('accountId')) {
+                    $add('Account:' . $entity->get('accountId'), $entity, $entity->get('dateStart'));
+                }
+            }
+
+            // Through the people taking part.
+            foreach (['Contact' => 'contacts', 'Lead' => 'leads'] as $personType => $link) {
+                if (empty($ids[$personType])) {
+                    continue;
+                }
+
+                $subQuery = $this->query($type, null, false)->select(['id'])->order([])->where($where)->build();
+                $personQuery = $this->entityManager
+                    ->getQueryBuilder()
+                    ->select()
+                    ->from($type)
+                    ->select(['id', [$link . '.id', 'personId']])
+                    ->join($link)
+                    ->where(['id=s' => $subQuery, $link . '.id' => $ids[$personType]])
+                    ->limit(0, self::EXCHANGE_LIMIT)
+                    ->build();
+                $rows = $this->entityManager->getQueryExecutor()->execute($personQuery)->fetchAll(PDO::FETCH_ASSOC);
+
+                if (!$rows) {
+                    continue;
+                }
+
+                $byId = [];
+                $entityQuery = $this->query($type, null, false)
+                    ->where(['id' => array_values(array_unique(array_column($rows, 'id')))]);
+
+                foreach ($this->fetch($type, $entityQuery, self::EXCHANGE_LIMIT) as $entity) {
+                    $byId[$entity->getId()] = $entity;
+                }
+
+                foreach ($rows as $row) {
+                    if (isset($byId[$row['id']])) {
+                        $add($personType . ':' . $row['personId'], $byId[$row['id']], $byId[$row['id']]->get('dateStart'));
+                    }
+                }
+            }
+        }
+
+        if ($this->canRead('Email')) {
+            $query = $this->query('Email', null, false)
+                ->where(['status' => ['Sent', 'Archived'], 'dateSent' => $dates, 'OR' => $parentConditions]);
+
+            foreach ($this->fetch('Email', $query, self::EXCHANGE_LIMIT) as $email) {
+                $add($email->get('parentType') . ':' . $email->get('parentId'), $email, $email->get('dateSent'));
+            }
+        }
+
+        foreach ($wanted as $item) {
+            foreach ($item['touch']['keys'] as $key) {
+                $exchange = $found[$key . '|' . $item['touch']['date']] ?? null;
+
+                if ($exchange) {
+                    $this->dealExchanges[$item['entity']->getId()] = $this->describeExchange($exchange, $item['touch']['date']);
+
+                    break;
+                }
+            }
+        }
     }
 
     /**
@@ -1389,7 +1510,7 @@ class ActionQueue
             'person' => $person,
             'snooze' => $item['snooze'],
             'restore' => $this->restoreData($entity),
-            'context' => $this->findContext($item, $person),
+            'context' => $this->findContext($item),
             'links' => $links,
         ];
     }
@@ -1400,16 +1521,15 @@ class ActionQueue
      * through fields the user may read.
      *
      * @param array<string, mixed> $item
-     * @param ?array<string, ?string> $person
      * @return ?array{text: string, exchange: ?array{kind: string, date: string}}
      */
-    private function findContext(array $item, ?array $person): ?array
+    private function findContext(array $item): ?array
     {
         /** @var Entity $entity */
         $entity = $item['entity'];
 
         if ($item['kind'] === 'deal') {
-            $exchange = $this->findLastExchange($entity, $person['type'] ?? null, $person['id'] ?? null);
+            $exchange = $this->dealExchanges[$entity->getId()] ?? null;
 
             if ($exchange && $exchange['note'] !== '') {
                 return [
