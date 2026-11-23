@@ -33,8 +33,6 @@ class ActionQueue
     private const ACTIVITY_WINDOW_DAYS = 7;
     private const NEW_LEAD_DAYS = 30;
     private const DONE_LIMIT = 30;
-    /** Calls, meetings or emails read at once for the last exchange of the deals shown. */
-    private const EXCHANGE_LIMIT = 200;
     private const WORKDAY_START = '09:00';
     private const NOTE_LENGTH = 400;
     /** A task added this long after a call or a meeting is not its next step. */
@@ -1284,7 +1282,7 @@ class ActionQueue
 
     /**
      * The last exchange of each deal shown, read at once: the index already gave its date, so only
-     * the calls, meetings and emails of those dates, linked to those records, are read.
+     * the calls, meetings and emails of those dates, linked to those records, are looked for.
      *
      * @param array<int, array<string, mixed>> $items
      */
@@ -1307,92 +1305,111 @@ class ActionQueue
         }
 
         $ids = array_map(fn ($list) => array_values(array_unique($list)), $ids);
-        $parentConditions = [];
 
-        foreach ($ids as $type => $list) {
-            $parentConditions[] = ['parentType' => $type, 'parentId' => $list];
-        }
-
-        /** @var array<string, Entity> $found The exchange by "key|date". */
+        /** @var array<string, array{string, string}> $found Entity type and id by "key|date". */
         $found = [];
-        $add = function (string $key, Entity $entity, ?string $date) use (&$found): void {
-            $found[$key . '|' . $date] ??= $entity;
-        };
 
         foreach (['Call' => ['Held', 'Not Held'], 'Meeting' => ['Held']] as $type => $statusList) {
-            if (!$this->canRead($type)) {
-                continue;
-            }
-
-            $where = ['status' => $statusList, 'dateStart' => $dates];
-            $withAccount = !empty($ids['Account']) && $this->hasAttribute($type, 'accountId');
-            $conditions = $withAccount ? [...$parentConditions, ['accountId' => $ids['Account']]] : $parentConditions;
-            $query = $this->query($type, null, false)->where([...$where, 'OR' => $conditions]);
-
-            foreach ($this->fetch($type, $query, self::EXCHANGE_LIMIT) as $entity) {
-                $add($entity->get('parentType') . ':' . $entity->get('parentId'), $entity, $entity->get('dateStart'));
-
-                if ($withAccount && $entity->get('accountId')) {
-                    $add('Account:' . $entity->get('accountId'), $entity, $entity->get('dateStart'));
-                }
-            }
-
-            // Through the people taking part.
-            foreach (['Contact' => 'contacts', 'Lead' => 'leads'] as $personType => $link) {
-                if (empty($ids[$personType])) {
-                    continue;
-                }
-
-                $subQuery = $this->query($type, null, false)->select(['id'])->order([])->where($where)->build();
-                $personQuery = $this->entityManager
-                    ->getQueryBuilder()
-                    ->select()
-                    ->from($type)
-                    ->select(['id', [$link . '.id', 'personId']])
-                    ->join($link)
-                    ->where(['id=s' => $subQuery, $link . '.id' => $ids[$personType]])
-                    ->limit(0, self::EXCHANGE_LIMIT)
-                    ->build();
-                $rows = $this->entityManager->getQueryExecutor()->execute($personQuery)->fetchAll(PDO::FETCH_ASSOC);
-
-                if (!$rows) {
-                    continue;
-                }
-
-                $byId = [];
-                $entityQuery = $this->query($type, null, false)
-                    ->where(['id' => array_values(array_unique(array_column($rows, 'id')))]);
-
-                foreach ($this->fetch($type, $entityQuery, self::EXCHANGE_LIMIT) as $entity) {
-                    $byId[$entity->getId()] = $entity;
-                }
-
-                foreach ($rows as $row) {
-                    if (isset($byId[$row['id']])) {
-                        $add($personType . ':' . $row['personId'], $byId[$row['id']], $byId[$row['id']]->get('dateStart'));
-                    }
-                }
+            if ($this->canRead($type)) {
+                $this->indexExchanges($type, 'dateStart', ['status' => $statusList, 'dateStart' => $dates], $ids, $found);
             }
         }
 
         if ($this->canRead('Email')) {
-            $query = $this->query('Email', null, false)
-                ->where(['status' => ['Sent', 'Archived'], 'dateSent' => $dates, 'OR' => $parentConditions]);
-
-            foreach ($this->fetch('Email', $query, self::EXCHANGE_LIMIT) as $email) {
-                $add($email->get('parentType') . ':' . $email->get('parentId'), $email, $email->get('dateSent'));
-            }
+            $this->indexExchanges('Email', 'dateSent', ['status' => ['Sent', 'Archived'], 'dateSent' => $dates], $ids, $found);
         }
+
+        $chosen = [];
+        $idsByType = [];
 
         foreach ($wanted as $item) {
             foreach ($item['touch']['keys'] as $key) {
                 $exchange = $found[$key . '|' . $item['touch']['date']] ?? null;
 
                 if ($exchange) {
-                    $this->dealExchanges[$item['entity']->getId()] = $this->describeExchange($exchange, $item['touch']['date']);
+                    $chosen[$item['entity']->getId()] = [...$exchange, $item['touch']['date']];
+                    $idsByType[$exchange[0]][] = $exchange[1];
 
                     break;
                 }
+            }
+        }
+
+        $entities = [];
+
+        foreach ($idsByType as $type => $list) {
+            $list = array_values(array_unique($list));
+
+            foreach ($this->fetch($type, $this->query($type, null, false)->where(['id' => $list]), count($list)) as $entity) {
+                $entities[$type . ':' . $entity->getId()] = $entity;
+            }
+        }
+
+        foreach ($chosen as $dealId => [$type, $id, $date]) {
+            if (isset($entities[$type . ':' . $id])) {
+                $this->dealExchanges[$dealId] = $this->describeExchange($entities[$type . ':' . $id], $date);
+            }
+        }
+    }
+
+    /**
+     * Which call, meeting or email of those dates belongs to which record, as the index counts
+     * them: one row per record and date, so that no record is left out, however many there are.
+     * Emails count for their parent only.
+     *
+     * @param array<string|int, mixed> $where
+     * @param array<string, string[]> $ids
+     * @param array<string, array{string, string}> $found
+     */
+    private function indexExchanges(string $entityType, string $dateField, array $where, array $ids, array &$found): void
+    {
+        $subQuery = $this->query($entityType, null, false)
+            ->select(['id'])
+            ->order([])
+            ->where($where)
+            ->build();
+
+        $run = function (array $select, array $condition, array $group, ?string $join, callable $key) use (
+            $entityType, $dateField, $subQuery, &$found
+        ): void {
+            $builder = $this->entityManager
+                ->getQueryBuilder()
+                ->select()
+                ->from($entityType)
+                ->select([...$select, [$dateField, 'itemDate'], ['MIN:id', 'exchangeId']])
+                ->where(['id=s' => $subQuery, ...$condition])
+                ->group([...$group, $dateField]);
+
+            if ($join) {
+                $builder->join($join);
+            }
+
+            foreach ($this->entityManager->getQueryExecutor()->execute($builder->build())->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $found[$key($row) . '|' . $row['itemDate']] ??= [$entityType, $row['exchangeId']];
+            }
+        };
+
+        $run(
+            [['parentType', 'itemType'], ['parentId', 'itemId']],
+            ['parentId' => array_merge(...array_values($ids))],
+            ['parentType', 'parentId'],
+            null,
+            fn ($row) => $row['itemType'] . ':' . $row['itemId']
+        );
+
+        if ($entityType === 'Email') {
+            return;
+        }
+
+        if (!empty($ids['Account']) && $this->hasAttribute($entityType, 'accountId')) {
+            $run([['accountId', 'itemId']], ['accountId' => $ids['Account']], ['accountId'], null,
+                fn ($row) => 'Account:' . $row['itemId']);
+        }
+
+        foreach (['Contact' => 'contacts', 'Lead' => 'leads'] as $personType => $link) {
+            if (!empty($ids[$personType])) {
+                $run([[$link . '.id', 'itemId']], [$link . '.id' => $ids[$personType]], [$link . '.id'], $link,
+                    fn ($row) => $personType . ':' . $row['itemId']);
             }
         }
     }
