@@ -147,7 +147,7 @@ Installing the extension creates a **Live dashboard** template in **Administrati
 
 Adjust the targets, then deploy it. EspoCRM deploys a template to the users or the team you choose; the extension adds **Deploy to Everyone** to every template, which gives it to all active users in one click:
 - their own tabs are kept, unless you choose to replace them;
-- deploying again updates the tab they got instead of adding it a second time, including a tab deployed by an earlier version;
+- deploying again resets the tab they got to the template, layout and dashlet settings included, instead of adding it a second time, including a tab deployed by an earlier version. That is how new goal targets reach everyone; changes users made to that tab are replaced, as with EspoCRM's own deployment;
 - you can lock the dashboard of regular users (not administrators): dashlets can then no longer be added, moved or resized. As with EspoCRM's own lock, each user can still unlock it from **Edit Dashboard**.
 
 Nothing is imposed on anyone until you deploy.

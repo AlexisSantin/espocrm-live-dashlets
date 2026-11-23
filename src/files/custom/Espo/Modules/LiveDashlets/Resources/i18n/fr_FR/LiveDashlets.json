@@ -298,7 +298,7 @@
         "introOne": "Ajoute ce modèle au tableau de bord du seul utilisateur actif.",
         "introReplace": "Remplace le tableau de bord des {count} utilisateurs actifs par ce modèle.",
         "introReplaceOne": "Remplace le tableau de bord du seul utilisateur actif par ce modèle.",
-        "again": "Le déployer à nouveau met à jour l'onglet reçu, au lieu de l'ajouter une seconde fois.",
+        "again": "Le déployer à nouveau remet l'onglet reçu tel qu'il est dans le modèle, disposition et réglages des dashlets compris, au lieu de l'ajouter une seconde fois.",
         "lock": "Verrouiller leur tableau de bord",
         "lockHint": "Les dashlets ne peuvent plus être ajoutés, déplacés ni redimensionnés. Les administrateurs ne sont pas verrouillés, et chacun peut encore le déverrouiller depuis « Modifier le tableau de bord ».",
         "deploy": "Déployer",

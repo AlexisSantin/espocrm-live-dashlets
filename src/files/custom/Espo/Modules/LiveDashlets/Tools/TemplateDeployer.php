@@ -13,7 +13,9 @@ use stdClass;
  *
  * Unlike EspoCRM's own deployment, deploying again updates the tab given before instead of adding
  * it a second time: the tab is recognised by its id or, when it was deployed without one, by its
- * dashlets. Copies left by earlier deployments are removed. The lock applies to regular users only:
+ * dashlets. Copies left by earlier deployments are removed. As with EspoCRM's deployment, the tab and
+ * the settings of its dashlets become the template's again (that is how new targets reach everyone);
+ * the user's other tabs and dashlets are left as they are. The lock applies to regular users only:
  * it would only get in the way of administrators.
  */
 class TemplateDeployer
