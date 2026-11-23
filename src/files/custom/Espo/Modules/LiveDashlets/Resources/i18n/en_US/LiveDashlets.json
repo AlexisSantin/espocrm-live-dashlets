@@ -39,7 +39,9 @@
         "infoPeriod": "{field}: {start} – {end}",
         "infoAllTime": "All time, whatever the date",
         "infoTarget": "Target: {value}",
-        "infoAccess": "Only the records you can read are counted."
+        "infoAccess": "Only the records you can read are counted.",
+        "infoTeam": "Assigned to a member of the {team} team",
+        "infoTeamNone": "Not filtered by team: these records have no assigned user"
     },
     "goalStatus": {
         "reached": "Reached",
@@ -281,7 +283,9 @@
         "applyCompany": "Apply to the whole company",
         "companySaved": "Style applied to the whole company",
         "personalShort": "Your choice",
-        "companyShort": "Company style"
+        "companyShort": "Company style",
+        "team": "Team",
+        "allTeams": "All my teams"
     },
     "recentScopesShort": {
         "team": "Team",

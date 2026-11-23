@@ -124,6 +124,10 @@ An administrator makes the current choice the company's with **Apply to the whol
 
 Green, amber and red keep their meaning on every style: they are left to trends and statuses.
 
+### One team at a time
+
+For someone in several teams, the same line of the **+ Add** window chooses whose work the dashboard shows: all of their teams, or one of them. Figures, goals, the records behind them and the **Team** view of What happened then count only the records assigned to a member of that team, and each tile names the team beside its period. Next Actions stays personal. The choice is kept for each user, and the server ignores a team the user is not in.
+
 ![The top of the + Add window sets the style and the color of every dashlet](docs/screenshots/styles.png)
 
 Colors come from the active theme, so tiles follow light and dark themes. The layout adapts to the height of the tile, which varies from one theme to another.

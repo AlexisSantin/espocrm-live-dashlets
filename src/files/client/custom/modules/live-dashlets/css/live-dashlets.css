@@ -1348,6 +1348,15 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     outline-offset: 2px;
 }
 
+.live-look select.live-look-team {
+    width: auto;
+    max-width: 16em;
+    height: auto;
+    padding-top: .2em;
+    padding-bottom: .2em;
+    font-size: inherit;
+}
+
 .live-look-foot {
     display: flex;
     flex-wrap: wrap;

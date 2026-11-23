@@ -4,7 +4,7 @@
 
 import BaseDashletView from 'views/dashlets/abstract/base';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
-import {applyLookToPanel, watchLook} from 'live-dashlets:helpers/look';
+import {applyLookToPanel, getTeamFilter, TEAM_EVENT, watchLook} from 'live-dashlets:helpers/look';
 import {createSegmented} from 'live-dashlets:helpers/segmented';
 
 const ICONS = {
@@ -105,6 +105,9 @@ class LiveDashletsRecentView extends BaseDashletView {
         // The style and the color chosen for every Live dashlet.
         watchLook(this, () => applyLookToPanel(this));
 
+        // "My team" is the team chosen for the dashboard, when there is one.
+        this.listenTo(this.getPreferences(), TEAM_EVENT, () => this.load());
+
         this.formatter = new LiveDashletsFormatter(this);
 
         const scope = SCOPES.includes(this.getOption('scope')) ? this.getOption('scope') : 'team';
@@ -202,6 +205,7 @@ class LiveDashletsRecentView extends BaseDashletView {
         Espo.Ajax
             .getRequest('LiveDashlets/recent', {
                 scope: this.prefs.scope,
+                teamId: getTeamFilter(this)?.id || null,
                 days: this.getDays(),
             })
             .then(data => {
@@ -283,7 +287,9 @@ class LiveDashletsRecentView extends BaseDashletView {
             value: this.prefs.scope,
             options: SCOPES.map(name => ({
                 value: name,
-                label: this.t(name, {}, 'recentScopesShort'),
+                label: name === 'team' && getTeamFilter(this) ?
+                    getTeamFilter(this).name :
+                    this.t(name, {}, 'recentScopesShort'),
                 title: this.t(name, {}, 'recentScopes'),
             })),
             onChange: name => {

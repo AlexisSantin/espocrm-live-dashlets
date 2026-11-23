@@ -12,6 +12,7 @@ use Espo\Core\Select\SearchParams;
 use Espo\Core\Select\SelectBuilderFactory;
 use Espo\Core\Utils\Config;
 use Espo\Core\Utils\Metadata;
+use Espo\ORM\Query\SelectBuilder;
 use Espo\ORM\EntityManager;
 use Espo\ORM\Query\Select;
 use PDO;
@@ -43,6 +44,7 @@ class MetricService
         private EntityManager $entityManager,
         private SelectBuilderFactory $selectBuilderFactory,
         private PeriodResolver $periodResolver,
+        private TeamFilter $teamFilter,
     ) {}
 
     /**
@@ -61,9 +63,12 @@ class MetricService
         string $period,
         string $comparison,
         bool $withSeries = false,
+        ?string $teamId = null,
     ): array {
 
         $this->checkEntityType($entityType);
+
+        $team = $this->prepareTeam($entityType, $teamId);
 
         if (!in_array($metric, self::METRIC_LIST, true)) {
             throw new BadRequest("Unknown metric.");
@@ -165,7 +170,65 @@ class MetricService
             ] : null,
             'previousPeriod' => $previous?->toArray(),
             'series' => $series,
+            'team' => $team,
         ];
+    }
+
+    /** @var ?array{attribute: string, userIds: string[]} Narrows every query of the request. */
+    private ?array $teamWhere = null;
+
+    /**
+     * Records assigned to a member of one of the viewer's teams.
+     *
+     * @return ?array<string, mixed> What the client shows and passes on to the record list.
+     */
+    private function prepareTeam(string $entityType, ?string $teamId): ?array
+    {
+        $this->teamWhere = null;
+
+        $team = $this->teamFilter->resolve($teamId);
+
+        if (!$team) {
+            return null;
+        }
+
+        $defs = $this->entityManager->getDefs()->getEntity($entityType);
+
+        $attribute = match (true) {
+            $defs->hasAttribute('assignedUserId') && $this->acl->checkField($entityType, 'assignedUser') => 'assignedUserId',
+            $defs->hasRelation('assignedUsers') && $this->acl->checkField($entityType, 'assignedUsers') => 'assignedUsers',
+            default => null,
+        };
+
+        if ($attribute) {
+            $this->teamWhere = ['attribute' => $attribute, 'userIds' => $team['userIds']];
+        }
+
+        return [
+            'id' => $team['id'],
+            'name' => $team['name'],
+            'applied' => $attribute !== null,
+            'attribute' => $attribute,
+            'userIds' => $attribute ? $team['userIds'] : [],
+        ];
+    }
+
+    private function applyTeam(SelectBuilder $builder): void
+    {
+        if (!$this->teamWhere) {
+            return;
+        }
+
+        if ($this->teamWhere['attribute'] === 'assignedUserId') {
+            $builder->where(['assignedUserId' => $this->teamWhere['userIds']]);
+
+            return;
+        }
+
+        $builder
+            ->distinct()
+            ->join('assignedUsers', 'liveDashletsTeamUser')
+            ->where(['liveDashletsTeamUser.id' => $this->teamWhere['userIds']]);
     }
 
     /**
@@ -316,6 +379,8 @@ class MetricService
         if ($period && $dateField && $dateType) {
             $builder->where($this->buildDateWhere($dateField, $dateType, $period));
         }
+
+        $this->applyTeam($builder);
 
         return $builder->build();
     }

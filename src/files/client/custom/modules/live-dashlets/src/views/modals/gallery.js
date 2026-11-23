@@ -5,7 +5,7 @@
 import ModalView from 'views/modal';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
 import {createSparkline} from 'live-dashlets:helpers/sparkline';
-import {getLook, isHighlighted, watchLook} from 'live-dashlets:helpers/look';
+import {getLook, getTeamFilter, isHighlighted, TEAM_EVENT, watchLook} from 'live-dashlets:helpers/look';
 import LiveDashletsLookPicker from 'live-dashlets:helpers/look-picker';
 
 const CONCURRENCY = 4;
@@ -67,6 +67,9 @@ class LiveDashletsGalleryModalView extends ModalView {
             this.lookPicker.render();
             this.refreshCardLook();
         });
+
+        // Another team: the figures on the cards are those of its members.
+        this.listenTo(this.getPreferences(), TEAM_EVENT, () => this.loadPreviews());
     }
 
     /**
@@ -348,12 +351,18 @@ class LiveDashletsGalleryModalView extends ModalView {
                 comparison: preset.dashlet === 'LiveDashletsKpi' && period !== 'ever' ?
                     (options.comparison || 'toDate') : 'none',
                 series: preset.dashlet === 'LiveDashletsKpi' && period !== 'ever' ? 'true' : null,
+                teamId: getTeamFilter(this)?.id || null,
             };
 
             const request = preset.dashlet === ACTIONS_DASHLET ?
                 Espo.Ajax.getRequest('LiveDashlets/actions', {limit: 1}) :
                 preset.dashlet === RECENT_DASHLET ?
-                    Espo.Ajax.getRequest('LiveDashlets/recent', {scope: options.scope || 'team', days: 1, limit: 100}) :
+                    Espo.Ajax.getRequest('LiveDashlets/recent', {
+                        scope: options.scope || 'team',
+                        days: 1,
+                        limit: 100,
+                        teamId: getTeamFilter(this)?.id || null,
+                    }) :
                     Espo.Ajax.getRequest('LiveDashlets/metric', params);
 
             return request
@@ -486,6 +495,9 @@ class LiveDashletsGalleryModalView extends ModalView {
                     (up ? '+' : '') + this.formatter.formatNumber(percent, Math.abs(percent) < 10 ? 1 : 0) + ' %'
             ));
         }
+
+        // Drawn again for another team: the former curve goes.
+        card.querySelector(':scope > .live-dashlet-spark')?.remove();
 
         const sparkline = createSparkline(data.series);
 

@@ -1,6 +1,7 @@
 {
     "fields": {
         "liveDashletsStyle": "Live Dashlets tile style",
-        "liveDashletsColor": "Live Dashlets tile color"
+        "liveDashletsColor": "Live Dashlets tile color",
+        "liveDashletsTeam": "Live Dashlets team"
     }
 }

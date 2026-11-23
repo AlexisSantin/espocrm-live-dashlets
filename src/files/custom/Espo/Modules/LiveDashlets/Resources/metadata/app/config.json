@@ -1,0 +1,10 @@
+{
+    "params": {
+        "liveDashletsStyle": {
+            "level": "default"
+        },
+        "liveDashletsColor": {
+            "level": "default"
+        }
+    }
+}

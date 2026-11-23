@@ -22,6 +22,11 @@
                 "default"
             ],
             "default": ""
+        },
+        "liveDashletsTeam": {
+            "type": "varchar",
+            "maxLength": 64,
+            "default": ""
         }
     }
 }

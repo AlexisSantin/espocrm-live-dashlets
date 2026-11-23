@@ -60,6 +60,7 @@ class RecentActivity
         private EntityManager $entityManager,
         private SelectBuilderFactory $selectBuilderFactory,
         private PeriodResolver $periodResolver,
+        private TeamFilter $teamFilter,
     ) {
         $this->utc = new DateTimeZone('UTC');
     }
@@ -67,14 +68,18 @@ class RecentActivity
     /**
      * @return array<string, mixed>
      */
-    public function get(string $scope, int $days, int $limit): array
+    public function get(string $scope, int $days, int $limit, ?string $teamId = null): array
     {
         $this->now = $this->periodResolver->now();
 
         $scope = in_array($scope, self::SCOPE_LIST, true) ? $scope : 'team';
         $noTeam = false;
 
-        if ($scope === 'team') {
+        $team = $scope === 'team' ? $this->teamFilter->resolve($teamId) : null;
+
+        if ($team) {
+            $this->actorIds = $team['userIds'];
+        } elseif ($scope === 'team') {
             $this->actorIds = $this->teamUserIds();
             $noTeam = count($this->actorIds) === 1;
         } elseif ($scope === 'me') {
@@ -99,6 +104,7 @@ class RecentActivity
 
         return [
             'scope' => $scope,
+            'team' => $team ? ['id' => $team['id'], 'name' => $team['name']] : null,
             'noTeam' => $noTeam,
             'since' => $since->format('Y-m-d'),
             'today' => $this->today()->format('Y-m-d'),

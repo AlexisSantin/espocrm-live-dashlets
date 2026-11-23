@@ -13,7 +13,37 @@ export const LOOK_STYLES = ['minimal', 'outline', 'big'];
 export const LOOK_COLORS = ['primary', 'info', 'success', 'warning', 'danger', 'default'];
 
 /** The change events that call for drawing the tiles again. */
-export const LOOK_EVENTS = 'change:liveDashletsStyle change:liveDashletsColor';
+export const LOOK_EVENTS = 'change:liveDashletsStyle change:liveDashletsColor change:liveDashletsTeam';
+
+/** The change of the team whose work is shown. */
+export const TEAM_EVENT = 'change:liveDashletsTeam';
+
+/**
+ * The user's teams, when they belong to more than one: only then is there a team to choose.
+ *
+ * @param {import('view').default} view
+ * @return {{id: string, name: string}[]}
+ */
+export function getUserTeams(view) {
+    const user = view.getUser();
+    const ids = user.get('teamsIds') || [];
+    const names = user.get('teamsNames') || {};
+
+    return ids.length > 1 ? ids.map(id => ({id, name: names[id] || id})) : [];
+}
+
+/**
+ * The team whose work the dashboard shows: records assigned to its members. Null for all of
+ * the user's teams.
+ *
+ * @param {import('view').default} view
+ * @return {{id: string, name: string}|null}
+ */
+export function getTeamFilter(view) {
+    const id = view.getPreferences().get('liveDashletsTeam');
+
+    return getUserTeams(view).find(team => team.id === id) || null;
+}
 
 const pick = (value, list, fallback) => list.includes(value) ? value : fallback;
 

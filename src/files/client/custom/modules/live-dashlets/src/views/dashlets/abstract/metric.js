@@ -4,7 +4,7 @@
 
 import BaseDashletView from 'views/dashlets/abstract/base';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
-import {applyLookToPanel, getLook, isHighlighted, watchLook} from 'live-dashlets:helpers/look';
+import {applyLookToPanel, getLook, getTeamFilter, isHighlighted, watchLook} from 'live-dashlets:helpers/look';
 
 /**
  * Shared logic of the KPI and goal dashlets: options, server request, number formatting and
@@ -122,6 +122,7 @@ class LiveDashletsMetricView extends BaseDashletView {
             period: period,
             comparison: period === 'ever' ? 'none' : this.getComparison(),
             series: this.withSeries && period !== 'ever' ? 'true' : null,
+            teamId: getTeamFilter(this)?.id || null,
         };
     }
 
@@ -254,6 +255,13 @@ class LiveDashletsMetricView extends BaseDashletView {
             where.push({type: 'bool', value: params.boolFilterList});
         }
 
+        // Records assigned to a member of the chosen team, as on the tile.
+        if (data.team?.applied) {
+            where.push(data.team.attribute === 'assignedUserId' ?
+                {type: 'in', attribute: 'assignedUserId', value: data.team.userIds} :
+                {type: 'linkedWith', attribute: 'assignedUsers', value: data.team.userIds});
+        }
+
         if (!data.period || !params.dateField) {
             return where;
         }
@@ -379,7 +387,9 @@ class LiveDashletsMetricView extends BaseDashletView {
      * @return {HTMLElement}
      */
     createPeriod(data) {
-        const period = this.createElement('span', 'live-dashlet-period', this.getPeriodLabel());
+        // The team whose work is shown, beside the period: the figure is not the whole picture.
+        const team = data.team?.applied ? ' · ' + data.team.name : '';
+        const period = this.createElement('span', 'live-dashlet-period', this.getPeriodLabel() + team);
 
         if (data.period) {
             period.title = this.formatDate(data.period.start) + ' – ' + this.formatDate(data.period.end);
@@ -397,7 +407,12 @@ class LiveDashletsMetricView extends BaseDashletView {
      * @param {string[]} [extraLines] Lines added before the access rights line.
      */
     setInfo(data, extraLines = []) {
-        this.infoText = [...this.getInfoLines(data), ...extraLines,
+        const team = data.team ?
+            [this.translate(data.team.applied ? 'infoTeam' : 'infoTeamNone', 'labels', 'LiveDashlets')
+                .replace('{team}', data.team.name)] :
+            [];
+
+        this.infoText = [...this.getInfoLines(data), ...extraLines, ...team,
             this.translate('infoAccess', 'labels', 'LiveDashlets')].join('\n');
 
         const title = this.element ? this.element.closest('.dashlet')?.querySelector('.panel-heading .panel-title') : null;

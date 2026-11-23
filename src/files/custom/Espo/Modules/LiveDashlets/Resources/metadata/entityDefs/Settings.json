@@ -1,0 +1,25 @@
+{
+    "fields": {
+        "liveDashletsStyle": {
+            "type": "enum",
+            "options": [
+                "minimal",
+                "outline",
+                "big"
+            ],
+            "default": "minimal"
+        },
+        "liveDashletsColor": {
+            "type": "enum",
+            "options": [
+                "primary",
+                "info",
+                "success",
+                "warning",
+                "danger",
+                "default"
+            ],
+            "default": "primary"
+        }
+    }
+}

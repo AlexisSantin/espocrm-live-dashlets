@@ -44,6 +44,7 @@ class Metric implements Action
             period: $this->getString($params, 'period') ?? PeriodResolver::EVER,
             comparison: $this->getString($params, 'comparison') ?? PeriodResolver::COMPARISON_NONE,
             withSeries: ($params['series'] ?? null) === 'true',
+            teamId: $this->getString($params, 'teamId'),
         );
 
         return ResponseComposer::json($result)->setHeader('Cache-Control', 'no-store');

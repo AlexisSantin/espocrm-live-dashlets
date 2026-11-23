@@ -36,6 +36,7 @@ class Recent implements Action
             scope: (string) ($request->getQueryParam('scope') ?? 'team'),
             days: max(1, min(self::MAX_DAYS, (int) ($request->getQueryParam('days') ?? 7))),
             limit: max(1, min(self::MAX_LIMIT, (int) ($request->getQueryParam('limit') ?? 60))),
+            teamId: $request->getQueryParam('teamId') ?: null,
         );
 
         return ResponseComposer::json($result)->setHeader('Cache-Control', 'no-store');

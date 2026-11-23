@@ -39,7 +39,9 @@
         "infoPeriod": "{field} : du {start} au {end}",
         "infoAllTime": "Depuis toujours, quelle que soit la date",
         "infoTarget": "Objectif : {value}",
-        "infoAccess": "Seuls les enregistrements que vous pouvez lire sont comptés."
+        "infoAccess": "Seuls les enregistrements que vous pouvez lire sont comptés.",
+        "infoTeam": "Assigné à un membre de l'équipe {team}",
+        "infoTeamNone": "Pas de filtre d'équipe : ces fiches n'ont pas d'utilisateur assigné"
     },
     "goalStatus": {
         "reached": "Atteint",
@@ -281,7 +283,9 @@
         "applyCompany": "Appliquer à toute l'entreprise",
         "companySaved": "Style appliqué à toute l'entreprise",
         "personalShort": "Votre choix",
-        "companyShort": "Style de l'entreprise"
+        "companyShort": "Style de l'entreprise",
+        "team": "Équipe",
+        "allTeams": "Toutes mes équipes"
     },
     "recentScopesShort": {
         "team": "Équipe",

@@ -2,7 +2,7 @@
  * Live Dashlets – extension for EspoCRM.
  ************************************************************************/
 
-import {getCompanyLook, getLook, LOOK_COLORS, LOOK_STYLES} from 'live-dashlets:helpers/look';
+import {getCompanyLook, getLook, getTeamFilter, getUserTeams, LOOK_COLORS, LOOK_STYLES} from 'live-dashlets:helpers/look';
 import {createSegmented} from 'live-dashlets:helpers/segmented';
 
 /**
@@ -87,8 +87,15 @@ class LiveDashletsLookPicker {
             });
 
             this.foot = this.make('div', 'live-look-foot');
+            this.teamControl = this.createTeamControl();
 
-            root.replaceChildren(this.styleControl, this.colors, this.foot);
+            root.replaceChildren(this.styleControl, this.colors, ...(this.teamControl ? [this.teamControl] : []), this.foot);
+        }
+
+        if (this.teamControl) {
+            const team = getTeamFilter(this.view)?.id || '';
+
+            this.teamControl.liveSelect ? this.teamControl.liveSelect(team) : (this.teamControl.value = team);
         }
 
         this.styleControl.liveSelect(look.style);
@@ -120,6 +127,47 @@ class LiveDashletsLookPicker {
         }
 
         this.foot.replaceChildren(...items);
+    }
+
+    /**
+     * Whose work the dashboard shows, for a user of several teams: all of their teams, or one.
+     *
+     * @private
+     * @return {HTMLElement|null}
+     */
+    createTeamControl() {
+        const teams = getUserTeams(this.view);
+
+        if (!teams.length) {
+            return null;
+        }
+
+        const options = [{value: '', label: this.t('allTeams')}, ...teams.map(team => ({value: team.id, label: team.name}))];
+        const save = value => this.view.getPreferences().save({liveDashletsTeam: value}, {patch: true});
+
+        if (options.length <= 4) {
+            return createSegmented({
+                label: this.t('team'),
+                className: 'live-look-team',
+                value: getTeamFilter(this.view)?.id || '',
+                options: options.map(option => ({...option, attributes: {'data-look-team': option.value}})),
+                onChange: save,
+            });
+        }
+
+        const select = this.make('select', 'form-control input-sm live-look-team');
+
+        select.setAttribute('aria-label', this.t('team'));
+        options.forEach(option => {
+            const item = this.make('option', '', option.label);
+
+            item.value = option.value;
+            select.append(item);
+        });
+        select.value = getTeamFilter(this.view)?.id || '';
+        select.addEventListener('change', () => save(select.value));
+
+        return select;
     }
 
     /** @private */
