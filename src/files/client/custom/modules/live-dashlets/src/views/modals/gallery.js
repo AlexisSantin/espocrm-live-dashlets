@@ -330,10 +330,15 @@ class LiveDashletsGalleryModalView extends ModalView {
     loadPreviews() {
         const queue = [...this.presetList];
 
+        // One team for the whole run; a run started later makes this one's answers obsolete.
+        const run = this.previewRun = (this.previewRun || 0) + 1;
+        const teamId = getTeamFilter(this)?.id || null;
+        const isCurrent = () => run === this.previewRun && !!this.element;
+
         const next = () => {
             const preset = queue.shift();
 
-            if (!preset || !this.element) {
+            if (!preset || !isCurrent()) {
                 return Promise.resolve();
             }
 
@@ -351,7 +356,7 @@ class LiveDashletsGalleryModalView extends ModalView {
                 comparison: preset.dashlet === 'LiveDashletsKpi' && period !== 'ever' ?
                     (options.comparison || 'toDate') : 'none',
                 series: preset.dashlet === 'LiveDashletsKpi' && period !== 'ever' ? 'true' : null,
-                teamId: getTeamFilter(this)?.id || null,
+                teamId: teamId,
             };
 
             const request = preset.dashlet === ACTIONS_DASHLET ?
@@ -361,18 +366,20 @@ class LiveDashletsGalleryModalView extends ModalView {
                         scope: options.scope || 'team',
                         days: 1,
                         limit: 100,
-                        teamId: getTeamFilter(this)?.id || null,
+                        teamId: teamId,
                     }) :
                     Espo.Ajax.getRequest('LiveDashlets/metric', params);
 
             return request
-                .then(data => this.renderPreview(preset, data))
+                .then(data => isCurrent() && this.renderPreview(preset, data))
                 .catch(xhr => {
                     if (xhr) {
                         xhr.errorIsHandled = true;
                     }
 
-                    this.removeCard(preset.name);
+                    if (isCurrent()) {
+                        this.removeCard(preset.name);
+                    }
                 })
                 .then(next);
         };
