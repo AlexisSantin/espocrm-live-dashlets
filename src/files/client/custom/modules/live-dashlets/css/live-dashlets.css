@@ -1805,6 +1805,21 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     text-underline-offset: 2px;
 }
 
+/* Three lines: a little less room around them. */
+.live-actions-row.live-actions-row-why {
+    padding-block: .52em;
+}
+
+.live-actions-why {
+    margin-top: .1em;
+    overflow: hidden;
+    color: var(--text-muted-color);
+    font-size: var(--font-size-small);
+    font-style: italic;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
 .live-actions-reason.live-actions-urgent {
     color: var(--state-danger-text);
     font-weight: 500;

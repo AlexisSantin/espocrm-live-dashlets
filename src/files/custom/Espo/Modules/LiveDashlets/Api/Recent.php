@@ -32,11 +32,18 @@ class Recent implements Action
             throw new Forbidden();
         }
 
+        // A query value can be an array (teamId[]=...): only plain strings are taken.
+        $param = function (string $name) use ($request): ?string {
+            $value = $request->getQueryParam($name);
+
+            return is_string($value) && $value !== '' ? $value : null;
+        };
+
         $result = $this->recentActivity->get(
-            scope: (string) ($request->getQueryParam('scope') ?? 'team'),
-            days: max(1, min(self::MAX_DAYS, (int) ($request->getQueryParam('days') ?? 7))),
-            limit: max(1, min(self::MAX_LIMIT, (int) ($request->getQueryParam('limit') ?? 60))),
-            teamId: $request->getQueryParam('teamId') ?: null,
+            scope: $param('scope') ?? 'team',
+            days: max(1, min(self::MAX_DAYS, (int) ($param('days') ?? 7))),
+            limit: max(1, min(self::MAX_LIMIT, (int) ($param('limit') ?? 60))),
+            teamId: $param('teamId'),
         );
 
         return ResponseComposer::json($result)->setHeader('Cache-Control', 'no-store');

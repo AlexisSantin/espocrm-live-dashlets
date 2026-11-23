@@ -33,7 +33,9 @@ class Actions implements Action
 
         $params = $request->getQueryParams();
 
-        $signals = is_array($params['signals'] ?? null) ? $params['signals'] : ActionQueue::SIGNAL_LIST;
+        $signals = is_array($params['signals'] ?? null) ?
+            array_filter($params['signals'], 'is_string') :
+            ActionQueue::SIGNAL_LIST;
         $limit = max(1, min(self::MAX_LIMIT, (int) ($params['limit'] ?? self::MAX_LIMIT)));
         $staleDays = max(1, min(3650, (int) ($params['staleDays'] ?? 30)));
 

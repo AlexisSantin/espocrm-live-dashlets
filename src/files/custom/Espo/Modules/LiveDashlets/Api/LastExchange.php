@@ -34,10 +34,17 @@ class LastExchange implements Action
             throw new Forbidden();
         }
 
-        $type = (string) $request->getQueryParam('entityType');
-        $id = (string) $request->getQueryParam('id');
-        $personType = $request->getQueryParam('personType') ?: null;
-        $personId = $request->getQueryParam('personId') ?: null;
+        // A query value can be an array (id[]=...): only plain strings are taken.
+        $param = function (string $name) use ($request): ?string {
+            $value = $request->getQueryParam($name);
+
+            return is_string($value) && $value !== '' ? $value : null;
+        };
+
+        $type = $param('entityType') ?? '';
+        $id = $param('id') ?? '';
+        $personType = $param('personType');
+        $personId = $param('personId');
 
         if (!preg_match(self::TYPE_PATTERN, $type) || !preg_match(self::ID_PATTERN, $id)) {
             throw new BadRequest();

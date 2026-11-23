@@ -67,6 +67,7 @@ A dashlet that turns the dashboard into a to-do list for the day: who to contact
 | Open deal without a recent exchange | "Last recorded exchange 18 days ago · $12,000" | Call |
 | Meeting held without a next step | "Demo on Nov 16, no next step planned" | Plan the next step |
 
+- **Why, in one line.** Under the reason, each row says what the action is about: the details of the task, the agenda of the call or the meeting, what the lead wrote, the notes of the meeting held, or, for a deal, the last exchange ("Email on Nov 7: Quote attached"). The line only uses fields the user may read, and stays out when there is nothing to say. Folded, the list keeps to the size of the dashlet; the rows that no longer fit go under **Show more**.
 - **Call** dials the number and also shows it, ready to copy, then asks in the row how it went (answered, no answer, message left) and what comes next. Saving records the call and creates the follow-up.
 - **The menu** sends an email through EspoCRM's composer (nothing is sent automatically), postpones to the next working day, next Monday, next week or a date you pick, schedules a reminder or opens the record.
 - **A row leaves the list** once it is handled, or when a next step is planned for that record.
@@ -89,7 +90,7 @@ A dashlet that answers "what happened recently?": calls and meetings held, email
 - **One line per event.** The person and their company, the result ("Answered", "No answer", "Won · $5,120") and the time, grouped by day.
 - **The details on a click.** What was written about the call, the meeting or the email, who did it, how long it lasted, and the next step planned on the same record.
 - **Notes on demand.** The **Notes** switch adds the first line of each note under the name, for those who want more at a glance.
-- **Whose actions.** My team (by default), Me, or Everything I can see. Without a team, only your own actions are shown. The type menu narrows the list to calls, meetings, emails, additions, deals or tasks.
+- **Whose actions.** Me, My team (by default), or Everything I can see, from the narrowest to the widest. Without a team, only your own actions are shown. The type menu narrows the list to calls, meetings, emails, additions, deals or tasks.
 - **What's new.** A blue dot marks what arrived since your last visit.
 - **Only what matters.** Emails count only when they are linked to an account, a contact, a lead, a deal or a case. Contacts added together to the same account make one line.
 
@@ -225,7 +226,7 @@ The screenshots above were taken on EspoCRM 10.0.11 with data from `dev/demo-dat
 - accounts, contacts, leads and opportunities since April, with phone numbers from a range reserved for fiction;
 - calls, meetings, emails, tasks and cases since August, plus planned calls and meetings for the next two weeks.
 
-The data is shared among the active users and their teams, with activity that grows over time. Record names follow the system language (English or French). The records are created silently (no stream entries, no notifications). Accounts, contacts, leads, deals and cases are marked "Demo data (Live Dashlets)." in their description, so that `dev/demo-data-remove.php` can delete them, along with every email, call, meeting and task attached to them, including those added since. Neither script is part of the ZIP.
+The data is shared among the active users and their teams, with activity that grows over time. Record names follow the system language (English or French). The records are created silently (no stream entries, no notifications). Leads, deals, tasks and planned calls get a realistic description, or none, as Next Actions shows it. The script lists what it creates in `data/live-dashlets-demo.json`, and marks accounts, contacts and cases "Demo data (Live Dashlets)." in their description, so that `dev/demo-data-remove.php` can delete them, along with every email, call, meeting and task attached to them, including those added since. Neither script is part of the ZIP.
 
 ```bash
 # From the EspoCRM root, as the web server user. Use only on a test instance.

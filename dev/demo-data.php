@@ -11,8 +11,9 @@
  * --boost multiplies the number of leads in the current month (default 1.25). Raise it when existing
  * data makes the previous month look busier.
  *
- * Every account, contact, lead, deal and case has DESCRIPTION in its description: demo-data-remove.php
- * deletes them with the activities attached to them. Phone numbers are in the +33 1 99 00 range, reserved for fiction.
+ * Every account, contact and case has DESCRIPTION in its description, and MANIFEST lists every record
+ * created: demo-data-remove.php deletes them with the activities attached to them. Leads, deals, tasks
+ * and planned calls get a realistic description instead, or none, as Next Actions shows it. Phone numbers are in the +33 1 99 00 range, reserved for fiction.
  * Records are saved silently (no stream notes, no notifications) and dated in the past.
  */
 
@@ -23,6 +24,7 @@ use Espo\Core\Utils\Config;
 use Espo\ORM\EntityManager;
 
 const DESCRIPTION = 'Demo data (Live Dashlets).';
+const MANIFEST = 'data/live-dashlets-demo.json';
 
 $app = new Application();
 $app->setupSystemUser();
@@ -187,6 +189,12 @@ function textFor(array $list, string $seed): string
     return $list[crc32($seed) % count($list)];
 }
 
+/** Some records get a text, others none, from the record only: the random sequence stays the same. */
+function maybeTextFor(array $list, string $seed, float $share): ?string
+{
+    return crc32('#' . $seed) % 100 < $share * 100 ? textFor($list, $seed) : null;
+}
+
 function format(DateTimeImmutable $value): string
 {
     return $value->format('Y-m-d H:i:s');
@@ -322,6 +330,37 @@ $taskTopics = $french ?
         'Rédiger la proposition', 'Planifier la formation', 'Vérifier la facturation', 'Préparer le compte rendu'] :
     ['Send the quote', 'Prepare the demo', 'Update the account', 'Follow up with the contact', 'Write the proposal',
         'Schedule the training', 'Check the invoicing', 'Write the meeting notes'];
+// What Next Actions shows under a row: what the lead asked for, what the deal is about, what the
+// task means, what a planned call or meeting is for.
+$leadNeeds = $french ?
+    ['Demande un devis pour 25 utilisateurs.', 'A téléchargé le guide d\'achat, souhaite une démo.',
+        'Rencontré au salon, intéressé par la formation des équipes.', 'Veut remplacer son outil actuel avant janvier.',
+        'Recommandé par un client, préfère être appelé le matin.', 'Question sur les tarifs pour une association.'] :
+    ['Asked for a quote for 25 users.', 'Downloaded the buyer\'s guide, wants a demo.',
+        'Met at the trade show, interested in team training.', 'Wants to replace their current tool before January.',
+        'Referred by a customer, prefers calls in the morning.', 'Asked about pricing for a non-profit.'];
+$dealContexts = $french ?
+    ['Déploiement sur trois sites, décision en comité de pilotage.', 'Remplace un suivi fait sur tableur.',
+        'Extension à l\'équipe support après un pilote réussi.', 'En concurrence avec le prestataire actuel sur le prix.',
+        'Budget attendu sur le prochain exercice.'] :
+    ['Rollout across three sites, decided by the steering committee.', 'Replaces a process run on spreadsheets.',
+        'Extension to the support team after a successful pilot.', 'Competing with their current supplier on price.',
+        'Budget expected in the next financial year.'];
+$taskDetails = array_combine($taskTopics, $french ?
+    ['Reprendre la remise de 10 % évoquée au dernier appel.', 'Montrer l\'import des contacts et les tableaux de bord.',
+        'Nouveau standard et nouvelle adresse de facturation.', 'Pas de réponse depuis l\'envoi de la proposition.',
+        'Deux options : licences seules ou avec accompagnement.', 'Douze personnes, de préférence un mardi.',
+        'Le client signale un doublon sur la dernière facture.', 'À envoyer aux participants avant vendredi.'] :
+    ['Include the 10% discount mentioned on the last call.', 'Show the contact import and the dashboards.',
+        'New switchboard number and billing address.', 'No answer since the proposal was sent.',
+        'Two options: licences only, or with onboarding.', 'Twelve people, preferably on a Tuesday.',
+        'The customer reports a duplicate on the last invoice.', 'Send them to the attendees before Friday.']);
+$agendas = $french ?
+    ['Passer en revue le devis révisé.', 'Confirmer la date de déploiement.',
+        'Répondre à leurs questions sur la migration des données.', 'Présenter l\'option support premium.'] :
+    ['Go through the revised quote.', 'Confirm the rollout date.', 'Answer their questions on data migration.',
+        'Present the premium support option.'];
+
 $caseTopics = $french ?
     ['Accès impossible', 'Erreur à l\'export', 'Question sur la facture', 'Demande de formation',
         'Lenteur de l\'application', 'Import de contacts', 'Mot de passe oublié', 'Synchronisation des emails',
@@ -459,6 +498,8 @@ foreach (days($start, $today) as $day) {
             'opportunityAmountCurrency' => $currency,
         ] + owner($users, $weights['sales']);
 
+        $data['description'] = maybeTextFor($leadNeeds, $data['firstName'] . ' ' . $data['lastName'] . format($createdAt), 0.75);
+
         $data['emailAddress'] = $email($data['firstName'], $data['lastName'], $data['accountName']);
         $data['phoneNumber'] = $phone();
 
@@ -534,6 +575,7 @@ foreach (days($start, $today) as $day) {
             'leadSource' => pick($sources),
             'assignedUserId' => $account['assignedUserId'],
             'teamsIds' => $account['teamsIds'],
+            'description' => maybeTextFor($dealContexts, $account['name'] . format($createdAt), 0.6),
         ], $createdAt, $created);
     }
 }
@@ -591,8 +633,8 @@ foreach (['Call', 'Meeting'] as $entityType) {
 
                     $data['description'] = textFor($notes, $data['name'] . $data['dateStart']);
                 } else {
-                    // A note added when closing it must not follow a demo marker.
-                    $data['description'] = null;
+                    // What it is for, as written when it was planned.
+                    $data['description'] = maybeTextFor($agendas, $data['name'] . $data['dateStart'], 0.6);
                 }
 
                 $createdAt = $isPast ? $dateStart : $now->modify('-' . mt_rand(0, 5) . ' days');
@@ -654,12 +696,15 @@ foreach (days($activityStart, $today) as $day) {
         $owner = owner($users, $weights['sales']);
         $dateEnd = at($createdAt->modify('+' . mt_rand(1, 14) . ' days'));
 
+        $topic = pick($taskTopics);
+
         $data = [
-            'name' => pick($taskTopics) . ' — ' . $account['name'],
+            'name' => $topic . ' — ' . $account['name'],
             'priority' => pickWeighted(['Low' => 2, 'Normal' => 5, 'High' => 2, 'Urgent' => 1]),
             'dateEnd' => format($dateEnd),
             'parentType' => 'Account',
             'parentId' => $account['id'],
+            'description' => maybeTextFor([$taskDetails[$topic]], $account['name'] . format($createdAt), 0.7),
         ] + $owner;
 
         if ($dateEnd <= $now) {
@@ -712,6 +757,8 @@ foreach (days($activityStart, $today) as $day) {
         ] + owner($users, $weights['support']), $createdAt, $created);
     }
 }
+
+file_put_contents(MANIFEST, json_encode($created));
 
 $counts = array_map('count', $created);
 

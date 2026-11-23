@@ -137,7 +137,8 @@
         "snoozeQuestion": "Postpone to which date?",
         "copyNumber": "Copy",
         "copied": "Copied",
-        "actionCountMore": "{count}+ actions"
+        "actionCountMore": "{count}+ actions",
+        "contextExchange": "{exchange}: {text}"
     },
     "actionButtons": {
         "call": "Call",

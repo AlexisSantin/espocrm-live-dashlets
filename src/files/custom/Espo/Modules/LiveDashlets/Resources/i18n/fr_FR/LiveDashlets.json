@@ -137,7 +137,8 @@
         "snoozeQuestion": "Reporter à quelle date ?",
         "copyNumber": "Copier",
         "copied": "Copié",
-        "actionCountMore": "{count}+ actions"
+        "actionCountMore": "{count}+ actions",
+        "contextExchange": "{exchange} : {text}"
     },
     "actionButtons": {
         "call": "Appeler",

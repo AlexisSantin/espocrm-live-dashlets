@@ -33,6 +33,7 @@ const NEXT_STEPS = ['in3Days', 'in7Days', 'meeting', 'none'];
 const UNDO_DELAY = 8000;
 const CONFIRM_DELAY = 5000;
 const MAX_RECAPS = 8;
+const MIN_FITTED_ROWS = 3;
 const DONE_LIMIT = 30;
 
 const DONE_ICONS = {
@@ -187,7 +188,7 @@ class LiveDashletsActionsView extends BaseDashletView {
         let text = this.translate(key, category, 'LiveDashlets');
 
         for (const [name, value] of Object.entries(values)) {
-            text = text.replace(`{${name}}`, value);
+            text = text.replace(`{${name}}`, () => value);
         }
 
         return text;
@@ -334,6 +335,7 @@ class LiveDashletsActionsView extends BaseDashletView {
         }
 
         container.replaceChildren(fragment);
+        this.fitRows(container);
 
         if (focus) {
             container.querySelector(focus)?.focus();
@@ -391,15 +393,63 @@ class LiveDashletsActionsView extends BaseDashletView {
         const others = data.items.length - visible.length;
 
         if (others > 0 || this.expanded) {
-            const more = this.make('button', 'live-actions-more-link');
+            fragment.append(this.createMoreLink(others));
+        }
+    }
 
-            more.type = 'button';
-            more.dataset.liveAction = 'toggleMore';
-            more.textContent = this.expanded ?
-                this.t('actionLabels', 'showLess') :
-                this.t('actionLabels', others === 1 ? 'showOneMore' : 'showMore', {count: others});
+    /** @private */
+    createMoreLink(others) {
+        const more = this.make('button', 'live-actions-more-link');
 
-            fragment.append(more);
+        more.type = 'button';
+        more.dataset.liveAction = 'toggleMore';
+        more.textContent = this.expanded ?
+            this.t('actionLabels', 'showLess') :
+            this.t('actionLabels', others === 1 ? 'showOneMore' : 'showMore', {count: others});
+
+        return more;
+    }
+
+    /**
+     * Folded, the list keeps to the dashlet: rows that say why take more room, so the last ones
+     * go under "Show more" rather than making the dashlet scroll. An open panel may scroll.
+     *
+     * @private
+     */
+    fitRows(container) {
+        const body = container.closest('.dashlet-body');
+
+        if (this.expanded || this.panel || !body || !body.clientHeight) {
+            return;
+        }
+
+        const rows = [...container.querySelectorAll(':scope > .live-actions-row')];
+        const fits = () => body.scrollHeight <= body.clientHeight + 1;
+        let dropped = 0;
+
+        while (!fits() && rows.length - dropped > MIN_FITTED_ROWS) {
+            const row = rows[rows.length - 1 - dropped];
+
+            if (row.contains(document.activeElement)) {
+                break;
+            }
+
+            row.remove();
+            dropped++;
+        }
+
+        if (!dropped) {
+            return;
+        }
+
+        const others = this.queue.items.length - rows.length + dropped;
+        const link = this.createMoreLink(others);
+        const current = container.querySelector(':scope > .live-actions-more-link');
+
+        if (current) {
+            current.replaceWith(link);
+        } else {
+            rows[rows.length - 1 - dropped].after(link);
         }
     }
 
@@ -754,6 +804,24 @@ class LiveDashletsActionsView extends BaseDashletView {
 
         reason.append(...this.createReason(item));
         main.append(title, reason);
+
+        // Why act, from the record itself or the last exchange. An open panel shows that exchange.
+        if (item.context && !(item.context.exchange && this.panel?.key === item.key)) {
+            const exchange = item.context.exchange;
+            const text = exchange ?
+                this.t('actionLabels', 'contextExchange', {
+                    exchange: this.t('actionExchange', exchange.kind, {
+                        date: this.formatter.formatShortDate(exchange.date),
+                    }),
+                    text: item.context.text,
+                }) :
+                item.context.text;
+            const context = this.make('div', 'live-actions-why', text);
+
+            context.title = text;
+            main.append(context);
+            row.classList.add('live-actions-row-why');
+        }
 
         const buttons = this.make('div', 'live-actions-buttons');
 

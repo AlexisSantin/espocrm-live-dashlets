@@ -51,6 +51,8 @@ class ActionQueue
     private array $planned = [];
     /** @var array<string, string[]> */
     private array $contactsByAccount = [];
+    /** @var array<string, true> Accounts whose contacts are in $contactsByAccount. */
+    private array $accountsLoaded = [];
     /** A signal had more records than were read. */
     private bool $capped = false;
 
@@ -171,6 +173,17 @@ class ActionQueue
         if (!$record) {
             throw new Forbidden();
         }
+
+        return $this->findLastExchange($record, $personType, $personId);
+    }
+
+    /**
+     * @return ?array<string, mixed>
+     */
+    private function findLastExchange(Entity $record, ?string $personType, ?string $personId): ?array
+    {
+        $type = $record->getEntityType();
+        $id = $record->getId();
 
         $ids = [$type => [$id]];
         $accountId = $type === 'Account' ? $id : ($record->hasAttribute('accountId') ? $record->get('accountId') : null);
@@ -790,9 +803,14 @@ class ActionQueue
      */
     private function loadContactsOfAccounts(array $accountIds): void
     {
+        // Each account once: the last exchange of each deal asks again for its account.
+        $accountIds = array_values(array_diff(array_unique($accountIds), array_keys($this->accountsLoaded)));
+
         if (!$accountIds || !$this->canRead('Contact')) {
             return;
         }
+
+        $this->accountsLoaded += array_fill_keys($accountIds, true);
 
         $query = $this->query('Contact', null, false)
             ->select(['id', 'accountId'])
@@ -1371,8 +1389,39 @@ class ActionQueue
             'person' => $person,
             'snooze' => $item['snooze'],
             'restore' => $this->restoreData($entity),
+            'context' => $this->findContext($item, $person),
             'links' => $links,
         ];
+    }
+
+    /**
+     * Why act: the task's details, the agenda of a call or a meeting, what a lead asked for,
+     * what was said at a meeting, or, for a deal, the note of the last exchange. Read only
+     * through fields the user may read.
+     *
+     * @param array<string, mixed> $item
+     * @param ?array<string, ?string> $person
+     * @return ?array{text: string, exchange: ?array{kind: string, date: string}}
+     */
+    private function findContext(array $item, ?array $person): ?array
+    {
+        /** @var Entity $entity */
+        $entity = $item['entity'];
+
+        if ($item['kind'] === 'deal') {
+            $exchange = $this->findLastExchange($entity, $person['type'] ?? null, $person['id'] ?? null);
+
+            if ($exchange && $exchange['note'] !== '') {
+                return [
+                    'text' => $exchange['note'],
+                    'exchange' => ['kind' => $exchange['kind'], 'date' => $exchange['date']],
+                ];
+            }
+        }
+
+        $text = $this->noteOf($entity, 160);
+
+        return $text !== '' ? ['text' => $text, 'exchange' => null] : null;
     }
 
     /**

@@ -29,7 +29,8 @@ const TYPES = {
     tasks: ['task'],
 };
 
-const SCOPES = ['team', 'me', 'all'];
+// From the narrowest to the widest.
+const SCOPES = ['me', 'team', 'all'];
 
 const TONES = {
     held: 'good',
