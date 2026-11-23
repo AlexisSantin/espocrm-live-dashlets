@@ -18,5 +18,15 @@
         "method": "get",
         "route": "LiveDashlets/recent",
         "actionClassName": "Espo\\Modules\\LiveDashlets\\Api\\Recent"
+    },
+    {
+        "method": "get",
+        "route": "LiveDashlets/deployTemplate",
+        "actionClassName": "Espo\\Modules\\LiveDashlets\\Api\\DeployTemplate"
+    },
+    {
+        "method": "post",
+        "route": "LiveDashlets/deployTemplate",
+        "actionClassName": "Espo\\Modules\\LiveDashlets\\Api\\DeployTemplate"
     }
 ]

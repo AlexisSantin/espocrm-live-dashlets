@@ -140,12 +140,17 @@ Colors come from the active theme, so tiles follow light and dark themes. The la
 Installing the extension creates a **Live dashboard** template in **Administration → Dashboard Templates**. On a new installation it contains:
 - the next actions;
 - new and converted leads this month;
-- the amount won this quarter, as the one solid tile;
-- open cases, as a big figure;
+- the amount won this quarter, highlighted;
+- open cases;
 - two goals, "My calls this month" and "Quarterly revenue";
 - the stream and tasks.
 
-Adjust the targets, then deploy it to the users or teams you choose. Nothing is imposed on anyone.
+Adjust the targets, then deploy it. EspoCRM deploys a template to the users or the team you choose; the extension adds **Deploy to Everyone** to every template, which gives it to all active users in one click:
+- their own tabs are kept, unless you choose to replace them;
+- deploying again updates the tab they got instead of adding it a second time, including a tab deployed by an earlier version;
+- you can lock the dashboard of regular users (not administrators): dashlets can then no longer be added, moved or resized. As with EspoCRM's own lock, each user can still unlock it from **Edit Dashboard**.
+
+Nothing is imposed on anyone until you deploy.
 
 ### Details that matter
 
@@ -163,9 +168,9 @@ Adjust the targets, then deploy it to the users or teams you choose. Nothing is 
 
 ## Installation
 
-1. Download `live-dashlets-1.4.1.zip` from the [latest release](../../releases/latest).
+1. Download `live-dashlets-1.4.2.zip` from the [latest release](../../releases/latest).
 2. In EspoCRM, go to **Administration → Extensions**, upload the ZIP and click **Install**.
-3. Optional: in **Administration → Dashboard Templates**, open **Live dashboard**, adjust the goal targets and deploy it.
+3. Optional: in **Administration → Dashboard Templates**, open **Live dashboard**, adjust the goal targets and deploy it, to chosen users or with **Deploy to Everyone**.
 
 Requirements: EspoCRM 10.0.3 or later, PHP 8.3 or later. Tested on EspoCRM 10.0.3 and 10.0.11.
 

@@ -292,5 +292,17 @@
         "team": "Équipe",
         "me": "Moi",
         "all": "Tout"
+    },
+    "deploy": {
+        "intro": "Ajoute ce modèle au tableau de bord des {count} utilisateurs actifs.",
+        "introOne": "Ajoute ce modèle au tableau de bord du seul utilisateur actif.",
+        "introReplace": "Remplace le tableau de bord des {count} utilisateurs actifs par ce modèle.",
+        "introReplaceOne": "Remplace le tableau de bord du seul utilisateur actif par ce modèle.",
+        "again": "Le déployer à nouveau met à jour l'onglet reçu, au lieu de l'ajouter une seconde fois.",
+        "lock": "Verrouiller leur tableau de bord",
+        "lockHint": "Les dashlets ne peuvent plus être ajoutés, déplacés ni redimensionnés. Les administrateurs ne sont pas verrouillés, et chacun peut encore le déverrouiller depuis « Modifier le tableau de bord ».",
+        "deploy": "Déployer",
+        "done": "Déployé pour {count} utilisateurs.",
+        "doneOne": "Déployé pour 1 utilisateur."
     }
 }

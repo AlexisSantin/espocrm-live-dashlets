@@ -13,6 +13,8 @@ use Espo\ORM\EntityManager;
  * - Nothing is imposed on users: the administrator chooses whom to deploy it to.
  * - It is created once: its id is remembered, so an upgrade neither duplicates it nor brings it
  *   back after the administrator deleted it.
+ * - Its tab has an id, so that deploying it again updates the tab users got instead of adding it
+ *   a second time. A template created by an earlier version gets that id on upgrade.
  * - One tile only, the amount won this quarter, is highlighted. The style and the color of the tiles
  *   follow the company's choice (at the top of the + Add window).
  * - Dashlets on a disabled entity are left out. Every figure is computed with the viewer's own
@@ -26,12 +28,15 @@ class AfterInstall
     {
         $config = $container->getByClass(Config::class);
 
+        $entityManager = $container->getByClass(EntityManager::class);
+
         if ($config->has(self::CONFIG_KEY)) {
+            $this->addTabIds($entityManager, (string) $config->get(self::CONFIG_KEY));
+
             return;
         }
 
         $metadata = $container->getByClass(Metadata::class);
-        $entityManager = $container->getByClass(EntityManager::class);
 
         $isFrench = str_starts_with((string) $config->get('language'), 'fr');
         $t = fn (string $en, string $fr) => $isFrench ? $fr : $en;
@@ -162,6 +167,7 @@ class AfterInstall
             'name' => $t('Live dashboard', 'Tableau de bord vivant'),
             'layout' => [
                 (object) [
+                    'id' => $this->newTabId(),
                     'name' => $t('Activity', 'Activité'),
                     'layout' => $layout,
                 ],
@@ -173,5 +179,38 @@ class AfterInstall
 
         $configWriter->set(self::CONFIG_KEY, $template->getId());
         $configWriter->save();
+    }
+
+    /**
+     * Templates created before 1.4.2 had a tab without an id: EspoCRM then added it again at each
+     * deployment.
+     */
+    private function addTabIds(EntityManager $entityManager, string $templateId): void
+    {
+        $template = $templateId ? $entityManager->getEntityById('DashboardTemplate', $templateId) : null;
+
+        if (!$template) {
+            return;
+        }
+
+        $layout = json_decode((string) json_encode($template->get('layout') ?? []));
+        $changed = false;
+
+        foreach (is_array($layout) ? $layout : [] as $tab) {
+            if ($tab instanceof stdClass && empty($tab->id)) {
+                $tab->id = $this->newTabId();
+                $changed = true;
+            }
+        }
+
+        if ($changed) {
+            $template->set('layout', $layout);
+            $entityManager->saveEntity($template);
+        }
+    }
+
+    private function newTabId(): string
+    {
+        return 'live' . bin2hex(random_bytes(5));
     }
 }

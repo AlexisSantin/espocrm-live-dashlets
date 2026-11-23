@@ -292,5 +292,17 @@
         "team": "Team",
         "me": "Me",
         "all": "All"
+    },
+    "deploy": {
+        "intro": "Adds this template to the dashboard of the {count} active users.",
+        "introOne": "Adds this template to the dashboard of the only active user.",
+        "introReplace": "Replaces the dashboard of the {count} active users with this template.",
+        "introReplaceOne": "Replaces the dashboard of the only active user with this template.",
+        "again": "Deploying it again updates the tab they got, instead of adding it a second time.",
+        "lock": "Lock their dashboard",
+        "lockHint": "Dashlets can no longer be added, moved or resized. Administrators are not locked, and each user can still unlock it from Edit Dashboard.",
+        "deploy": "Deploy",
+        "done": "Deployed for {count} users.",
+        "doneOne": "Deployed for 1 user."
     }
 }

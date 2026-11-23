@@ -1,7 +1,7 @@
 {
     "module": "LiveDashlets",
     "name": "Live Dashlets",
-    "description": "KPI and goal dashlets for EspoCRM: a one-click gallery of ready-made indicators with live previews, trend curves, click-through to the records behind each figure and five tile styles. Every figure respects the viewer's access rights. Installs a ready-to-deploy dashboard template.",
+    "description": "KPI, goal, Next Actions and What happened dashlets for EspoCRM: a one-click gallery of ready-made indicators with live previews, trend curves, click-through to the records behind each figure, and one style for every dashlet. Every figure respects the viewer's access rights. Installs a dashboard template that can be deployed to everyone in one click.",
     "author": "Alexis SANTIN",
     "bundled": true,
     "acceptableVersions": [

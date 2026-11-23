@@ -2199,3 +2199,9 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
         transition: none;
     }
 }
+
+/* Deploy a dashboard template to everyone. */
+.live-deploy-dialog .live-deploy-note {
+    margin: .4em 0 0;
+    font-size: var(--font-size-small);
+}

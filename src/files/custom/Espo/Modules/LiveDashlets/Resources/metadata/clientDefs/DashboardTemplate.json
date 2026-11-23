@@ -1,0 +1,16 @@
+{
+    "menu": {
+        "detail": {
+            "buttons": [
+                "__APPEND__",
+                {
+                    "name": "deployToEveryone",
+                    "action": "deployToEveryone",
+                    "label": "Deploy to Everyone",
+                    "handler": "live-dashlets:handlers/deploy-everyone",
+                    "actionFunction": "deploy"
+                }
+            ]
+        }
+    }
+}
