@@ -140,7 +140,13 @@
         "copyNumber": "Copy",
         "copied": "Copied",
         "actionCountMore": "{count}+ actions",
-        "contextExchange": "{exchange}: {text}"
+        "contextExchange": "{exchange}: {text}",
+        "filterLabel": "Which actions",
+        "typeLabel": "Kind of action",
+        "why": "Why",
+        "filterEmpty": "Nothing here for now.",
+        "openName": "Open {name}",
+        "snoozeMenu": "Postpone"
     },
     "actionButtons": {
         "call": "Call",
@@ -247,7 +253,8 @@
         "emails": "Emails",
         "added": "Additions",
         "deals": "Deals",
-        "tasks": "Tasks"
+        "tasks": "Tasks",
+        "notes": "Stream notes"
     },
     "recentResults": {
         "callHeld": "Answered",
@@ -261,7 +268,8 @@
         "accountAdded": "New account",
         "dealWon": "Won",
         "dealLost": "Lost",
-        "taskCompleted": "Done"
+        "taskCompleted": "Done",
+        "notePosted": "Note"
     },
     "look": {
         "title": "Tile style",
@@ -306,5 +314,84 @@
         "deploy": "Deploy",
         "done": "Deployed for {count} users.",
         "doneOne": "Deployed for 1 user."
+    },
+    "actionFilters": {
+        "all": "All",
+        "late": "Late",
+        "today": "Today"
+    },
+    "actionGroups": {
+        "late": "Late",
+        "today": "Today",
+        "follow": "To follow up"
+    },
+    "actionTypes": {
+        "all": "All types",
+        "tasks": "Tasks",
+        "calls": "Calls",
+        "meetings": "Meetings",
+        "leads": "Leads",
+        "deals": "Deals"
+    },
+    "actionWhen": {
+        "taskOverdue": "{count} days late",
+        "taskOverdueOne": "1 day late",
+        "taskOverdueToday": "Late",
+        "taskToday": "Today",
+        "taskTodayAt": "{time}",
+        "activityToday": "{time}",
+        "activityLate": "Due {time}",
+        "activityMissed": "Due {date}",
+        "leadNew": "Never contacted",
+        "leadNewToday": "Never contacted",
+        "leadNewYesterday": "Never contacted",
+        "dealDormant": "{count} days quiet",
+        "dealDormantNoAmount": "{count} days quiet",
+        "dealNoExchange": "No exchange",
+        "dealNoExchangeNoAmount": "No exchange",
+        "followUp": "No next step"
+    },
+    "createLabels": {
+        "button": "Create",
+        "title": "Create an action",
+        "typeLabel": "What to create",
+        "task": "Task",
+        "call": "Call",
+        "meeting": "Meeting",
+        "note": "Note",
+        "what": "What?",
+        "noteText": "Note",
+        "placeholder_task": "Send the revised quote",
+        "placeholder_call": "Quote follow-up",
+        "placeholder_meeting": "Product demo",
+        "placeholder_note": "What was said, what to remember",
+        "for": "For",
+        "forRequired": "On the record",
+        "forPlaceholder": "Search a contact, an account, a deal…",
+        "removeParent": "Remove",
+        "searching": "Searching…",
+        "noResult": "No record found",
+        "when": "When",
+        "today": "Today",
+        "tomorrow": "Tomorrow",
+        "monday": "Monday",
+        "nextWeek": "In a week",
+        "date": "A date…",
+        "time": "Time",
+        "submit_task": "Create the task",
+        "submit_call": "Create the call",
+        "submit_meeting": "Create the meeting",
+        "submit_note": "Post the note",
+        "cancel": "Cancel",
+        "enterHint": "Enter to create",
+        "more": "More fields…",
+        "nameRequired": "Say what needs doing.",
+        "noteRequired": "Write the note.",
+        "parentRequired": "Choose the record to post the note on.",
+        "dateRequired": "Choose a date.",
+        "created_task": "Task created",
+        "created_call": "Call created",
+        "created_meeting": "Meeting created",
+        "created_note": "Note posted"
     }
 }

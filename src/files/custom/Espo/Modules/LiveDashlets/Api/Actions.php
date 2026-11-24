@@ -50,6 +50,10 @@ class Actions implements Action
             staleDays: $staleDays,
             signalList: array_values(array_intersect(ActionQueue::SIGNAL_LIST, $signals)),
             withDone: !empty($params['withDone']),
+            group: in_array($params['group'] ?? null, ActionQueue::GROUP_LIST, true) ? $params['group'] : null,
+            kindList: is_array($params['kinds'] ?? null) ?
+                array_values(array_intersect(ActionQueue::KIND_LIST, array_filter($params['kinds'], 'is_string'))) :
+                [],
         );
 
         return ResponseComposer::json($result)->setHeader('Cache-Control', 'no-store');

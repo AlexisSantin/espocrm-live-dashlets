@@ -45,7 +45,11 @@ class RecentActivity
         'Account' => ['createdBy'],
         'Opportunity' => ['assignedUser'],
         'Task' => ['assignedUser'],
+        'Note' => ['createdBy'],
     ];
+
+    /** The start of a note posted to people rather than on a record, as its title. */
+    private const POST_TITLE_LENGTH = 80;
 
     private DateTimeImmutable $now;
     private DateTimeZone $utc;
@@ -94,6 +98,7 @@ class RecentActivity
             ...$this->additions($since),
             ...$this->deals($since),
             ...$this->tasks($since),
+            ...$this->posts($since),
         ];
 
         usort($events, fn ($a, $b) => strcmp($b['at'], $a['at']));
@@ -285,6 +290,72 @@ class RecentActivity
     }
 
     /**
+     * Notes posted in the stream, on a record or to people. EspoCRM's own rule decides which the
+     * user may read: the stream of the record, or the people and teams the note was posted to.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    private function posts(DateTimeImmutable $since): array
+    {
+        if (!$this->entityManager->hasRepository('Note')) {
+            return [];
+        }
+
+        $where = [
+            'type' => 'Post',
+            'createdAt>=' => $this->toUtc($since),
+            'createdAt<=' => $this->toUtc($this->now),
+        ];
+
+        if ($this->actorIds !== null) {
+            $where['createdById'] = $this->actorIds;
+        }
+
+        // More than needed: some are left out by the reading rule.
+        $notes = $this->entityManager
+            ->getRDBRepository('Note')
+            ->where($where)
+            ->order([['createdAt', 'DESC']])
+            ->limit(0, self::FETCH_LIMIT * 2)
+            ->find();
+
+        $events = [];
+
+        foreach ($notes as $note) {
+            if (count($events) >= self::FETCH_LIMIT) {
+                break;
+            }
+
+            if (!$this->acl->checkEntityRead($note)) {
+                continue;
+            }
+
+            $type = $note->get('parentType');
+            $id = $note->get('parentId');
+            $parent = $type && $id ? $this->readableEntity($type, $id) : null;
+
+            if ($type && $id && !$parent) {
+                continue;
+            }
+
+            $events[] = $this->event($note, 'note', 'posted', $note->get('createdAt'), [
+                'target' => $parent ? ['type' => $type, 'id' => $id, 'name' => $this->nameOf($parent)] : null,
+                'person' => $parent && in_array($type, ['Contact', 'Lead'], true) ? $parent : null,
+                'note' => $this->postOf($note),
+            ]);
+        }
+
+        return $events;
+    }
+
+    private function postOf(Entity $note): string
+    {
+        $text = trim((string) preg_replace('/\s+/u', ' ', (string) $note->get('post')));
+
+        return mb_strlen($text) > self::NOTE_LENGTH ? rtrim(mb_substr($text, 0, self::NOTE_LENGTH - 1)) . '…' : $text;
+    }
+
+    /**
      * @param array<string, mixed> $extra
      * @return array<string, mixed>
      */
@@ -424,6 +495,10 @@ class RecentActivity
         } elseif (in_array($event['kind'], ['contact', 'lead', 'account', 'deal', 'task'], true)) {
             $title = $label;
             $titleLink = $own;
+        } elseif ($event['kind'] === 'note' && !$target) {
+            // Posted to people: what it says.
+            $title = $event['note'] !== '' ? $this->excerpt($event['note'], self::POST_TITLE_LENGTH) : null;
+            $titleLink = null;
         } else {
             $title = $target['name'] ?? $label;
             $titleLink = $target ? $this->readableLink($target['type'], $target['id']) : $own;
@@ -469,7 +544,8 @@ class RecentActivity
             'links' => [
                 'title' => $titleLink,
                 'subtitle' => $subtitleLink,
-                'record' => $own,
+                // A note has no page of its own.
+                'record' => $event['kind'] === 'note' ? null : $own,
             ],
         ];
     }
@@ -502,6 +578,11 @@ class RecentActivity
         }
 
         return [null, null];
+    }
+
+    private function excerpt(string $text, int $length): string
+    {
+        return mb_strlen($text) > $length ? rtrim(mb_substr($text, 0, $length - 1)) . '…' : $text;
     }
 
     private function withoutSuffix(?string $text, ?string $name): ?string

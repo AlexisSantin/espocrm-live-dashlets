@@ -140,7 +140,13 @@
         "copyNumber": "Copier",
         "copied": "Copié",
         "actionCountMore": "{count}+ actions",
-        "contextExchange": "{exchange} : {text}"
+        "contextExchange": "{exchange} : {text}",
+        "filterLabel": "Quelles actions",
+        "typeLabel": "Type d'action",
+        "why": "Pourquoi",
+        "filterEmpty": "Rien ici pour l'instant.",
+        "openName": "Ouvrir {name}",
+        "snoozeMenu": "Reporter"
     },
     "actionButtons": {
         "call": "Appeler",
@@ -247,7 +253,8 @@
         "emails": "E-mails",
         "added": "Ajouts",
         "deals": "Affaires",
-        "tasks": "Tâches"
+        "tasks": "Tâches",
+        "notes": "Notes du flux"
     },
     "recentResults": {
         "callHeld": "Répondu",
@@ -261,7 +268,8 @@
         "accountAdded": "Nouveau compte",
         "dealWon": "Gagnée",
         "dealLost": "Perdue",
-        "taskCompleted": "Terminée"
+        "taskCompleted": "Terminée",
+        "notePosted": "Note"
     },
     "look": {
         "title": "Style des tuiles",
@@ -306,5 +314,84 @@
         "deploy": "Déployer",
         "done": "Déployé pour {count} utilisateurs.",
         "doneOne": "Déployé pour 1 utilisateur."
+    },
+    "actionFilters": {
+        "all": "Tout",
+        "late": "En retard",
+        "today": "Aujourd'hui"
+    },
+    "actionGroups": {
+        "late": "En retard",
+        "today": "Aujourd'hui",
+        "follow": "À relancer"
+    },
+    "actionTypes": {
+        "all": "Tous les types",
+        "tasks": "Tâches",
+        "calls": "Appels",
+        "meetings": "Rendez-vous",
+        "leads": "Prospects",
+        "deals": "Affaires"
+    },
+    "actionWhen": {
+        "taskOverdue": "Retard {count} j",
+        "taskOverdueOne": "Retard 1 j",
+        "taskOverdueToday": "En retard",
+        "taskToday": "Aujourd'hui",
+        "taskTodayAt": "{time}",
+        "activityToday": "{time}",
+        "activityLate": "Prévu {time}",
+        "activityMissed": "Prévu le {date}",
+        "leadNew": "Jamais contacté",
+        "leadNewToday": "Jamais contacté",
+        "leadNewYesterday": "Jamais contacté",
+        "dealDormant": "{count} j sans échange",
+        "dealDormantNoAmount": "{count} j sans échange",
+        "dealNoExchange": "Aucun échange",
+        "dealNoExchangeNoAmount": "Aucun échange",
+        "followUp": "Pas de suite"
+    },
+    "createLabels": {
+        "button": "Créer",
+        "title": "Créer une action",
+        "typeLabel": "Que créer ?",
+        "task": "Tâche",
+        "call": "Appel",
+        "meeting": "Rendez-vous",
+        "note": "Note",
+        "what": "Quoi ?",
+        "noteText": "Note",
+        "placeholder_task": "Envoyer le devis révisé",
+        "placeholder_call": "Point sur le devis",
+        "placeholder_meeting": "Démonstration",
+        "placeholder_note": "Ce qui s'est dit, ce qu'il faut retenir",
+        "for": "Pour",
+        "forRequired": "Sur la fiche",
+        "forPlaceholder": "Rechercher un contact, un compte, une affaire…",
+        "removeParent": "Retirer",
+        "searching": "Recherche…",
+        "noResult": "Aucune fiche trouvée",
+        "when": "Quand",
+        "today": "Aujourd'hui",
+        "tomorrow": "Demain",
+        "monday": "Lundi",
+        "nextWeek": "Dans une semaine",
+        "date": "Une date…",
+        "time": "Heure",
+        "submit_task": "Créer la tâche",
+        "submit_call": "Créer l'appel",
+        "submit_meeting": "Créer le rendez-vous",
+        "submit_note": "Publier la note",
+        "cancel": "Annuler",
+        "enterHint": "Entrée pour créer",
+        "more": "Plus de champs…",
+        "nameRequired": "Indiquez ce qu'il faut faire.",
+        "noteRequired": "Écrivez la note.",
+        "parentRequired": "Choisissez la fiche où publier la note.",
+        "dateRequired": "Choisissez une date.",
+        "created_task": "Tâche créée",
+        "created_call": "Appel créé",
+        "created_meeting": "Rendez-vous créé",
+        "created_note": "Note publiée"
     }
 }

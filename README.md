@@ -61,18 +61,22 @@ A dashlet that turns the dashboard into a to-do list for the day: who to contact
 
 ![Next Actions: who to contact, why, and a button to do it](docs/screenshots/next-actions.png)
 
-| Situation | Reason shown | Main action |
-|---|---|---|
-| Task overdue or due today | "3 days overdue" | Complete |
-| Call or meeting today, or planned and never closed | "Today at 2:30 PM" | Call, open or close out |
-| New lead never contacted | "Created yesterday, never contacted" | Call |
-| Open deal without a recent exchange | "Last recorded exchange 18 days ago · $12,000" | Call |
-| Meeting held without a next step | "Demo on Nov 16, no next step planned" | Plan the next step |
+| Situation | Group | When | Main action |
+|---|---|---|---|
+| Task overdue or due today | Late or Today | "3 days late", "Today" | Complete |
+| Call or meeting today, or planned and never closed | Today or Late | "2:30 PM", "Due 9:30 AM" | Call, open or close out |
+| New lead never contacted | To follow up | "Never contacted" | Call |
+| Open deal without a recent exchange | To follow up | "18 days quiet" | Call |
+| Meeting held without a next step | To follow up | "No next step" | Plan the next step |
 
-- **Why, in one line.** Under the reason, each row says what the action is about: the details of the task, the agenda of the call or the meeting, what the lead wrote, the notes of the meeting held, or, for a deal, the last exchange ("Email on Nov 7: Quote attached"). The line only uses fields the user may read, and stays out when there is nothing to say. Folded, the list keeps to the size of the dashlet; the rows that no longer fit go under **Show more**.
-- **Call** dials the number and also shows it, ready to copy, then asks in the row how it went (answered, no answer, message left) and what comes next. Saving records the call and creates the follow-up.
-- **The menu** sends an email through EspoCRM's composer (nothing is sent automatically), postpones to the next working day, next Monday, next week or a date you pick, schedules a reminder or opens the record.
-- **A row leaves the list** once it is handled, or when a next step is planned for that record.
+- **Laid out like What happened.** The rows are grouped under **Late**, **Today** and **To follow up**, one line each: what to do and for whom, when, and the main action as a button at the end of the line. **All / Late / Today**, with their counts, and the type menu (tasks, calls, meetings, leads, deals) narrow the list.
+- **Why, in one line.** Under the name, each row says what the action is about: the details of the task, the agenda of the call or the meeting, what the lead wrote, the notes of the meeting held, or, for a deal, the last exchange ("Email on Nov 7: Quote attached"). The **Why** switch shows or hides that line. It only uses fields the user may read, and stays out when there is nothing to say.
+- **A click opens the row**: the full reason with its links, the last exchange, the phone number ready to copy, and every action: call or complete, send an email through EspoCRM's composer (nothing is sent automatically), schedule a reminder, postpone to the next working day, next Monday, next week or a date you pick, open the records.
+- **Call** dials the number, then asks in the row how it went (answered, no answer, message left) and what comes next. Saving records the call and creates the follow-up.
+- **+ Create**, in the dashlet's heading, adds a task, a call, a meeting or a note in a few keystrokes: what, for whom (searched among the records you can read), and when (today, tomorrow, Monday or a date). Enter creates it, assigned to you, and it can be undone. **More fields…** opens EspoCRM's full window with what you typed. A note is posted on the chosen record's stream.
+
+![+ Create: a task for an account, tomorrow, in a few keystrokes](docs/screenshots/next-actions-create.png)
+- **A row leaves the list** once it is handled, or when a next step is planned for that record. Folded, the list keeps to the size of the dashlet; the rows that no longer fit go under **Show more**.
 
 ![The call panel shows the number and the last exchange](docs/screenshots/next-actions-call.png)
 
@@ -87,12 +91,13 @@ A dashlet that turns the dashboard into a to-do list for the day: who to contact
 
 ### What happened
 
-A dashlet that answers "what happened recently?": calls and meetings held, emails, contacts and accounts added, deals won or lost, tasks completed. One line per event says who, what, the result and the time; a click shows the rest.
+A dashlet that answers "what happened recently?": calls and meetings held, emails, notes posted in the stream, contacts and accounts added, deals won or lost, tasks completed. One line per event says who, what, the result and the time; a click shows the rest.
 
 - **One line per event.** The person and their company, the result ("Answered", "No answer", "Won · $5,120") and the time, grouped by day.
 - **The details on a click.** What was written about the call, the meeting or the email, who did it, how long it lasted, and the next step planned on the same record.
 - **Notes on demand.** The **Notes** switch adds the first line of each note under the name, for those who want more at a glance.
-- **Whose actions.** Me, My team (by default), or Everything I can see, from the narrowest to the widest. Without a team, only your own actions are shown. The type menu narrows the list to calls, meetings, emails, additions, deals or tasks.
+- **The stream's notes.** A note posted on a record shows under that record, with its text; a note posted to people or teams shows its first words. Who may see a note follows EspoCRM's own rule: the record's stream, or the people it was posted to.
+- **Whose actions.** Me, My team (by default), or Everything I can see, from the narrowest to the widest. Without a team, only your own actions are shown. The type menu narrows the list to calls, meetings, emails, additions, deals, tasks or stream notes.
 - **What's new.** A blue dot marks what arrived since your last visit.
 - **Only what matters.** Emails count only when they are linked to an account, a contact, a lead, a deal or a case. Contacts added together to the same account make one line.
 
@@ -174,7 +179,7 @@ Nothing is imposed on anyone until you deploy.
 
 ## Installation
 
-1. Download `live-dashlets-1.5.1.zip` from the [latest release](../../releases/latest).
+1. Download `live-dashlets-1.6.0.zip` from the [latest release](../../releases/latest).
 2. In EspoCRM, go to **Administration → Extensions**, upload the ZIP and click **Install**.
 3. Optional: in **Administration → Dashboard Templates**, open **Live dashboard**, adjust the goal targets and deploy it, to chosen users or with **Deploy to Everyone**.
 

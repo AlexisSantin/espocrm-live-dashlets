@@ -5,6 +5,7 @@
 import BaseDashletView from 'views/dashlets/abstract/base';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
 import {applyLookToPanel, watchLook} from 'live-dashlets:helpers/look';
+import {createSegmented} from 'live-dashlets:helpers/segmented';
 
 const KINDS = {
     task: {icon: 'fas fa-tasks', accent: 'warning'},
@@ -34,8 +35,36 @@ const UNDO_DELAY = 8000;
 const CONFIRM_DELAY = 5000;
 const MAX_RECAPS = 8;
 const MIN_FITTED_ROWS = 3;
-/** What a template's preview still allows: folding and copying change no record. */
-const PREVIEW_ACTIONS = ['toggleMore', 'toggleStale', 'toggleDone', 'hideDone', 'copyPhone', 'cancelPanel'];
+/** What a template's preview still allows: opening, folding and copying change no record. */
+const PREVIEW_ACTIONS = ['toggleMore', 'toggleStale', 'toggleDone', 'hideDone', 'copyPhone', 'cancelPanel', 'toggleRow'];
+
+/** The groups of the list, in their order. */
+const GROUPS = ['late', 'today', 'follow'];
+
+/** The segmented filter. */
+const FILTERS = ['all', 'late', 'today'];
+
+/** The type menu: which kinds of actions each choice shows. */
+const TYPES = {
+    all: null,
+    tasks: ['task'],
+    calls: ['call'],
+    meetings: ['meeting', 'followUp'],
+    leads: ['lead'],
+    deals: ['deal'],
+};
+
+/** What + Create makes, in the order of its choices. */
+const CREATE_TYPES = {
+    task: 'Task',
+    call: 'Call',
+    meeting: 'Meeting',
+    note: 'Note',
+};
+
+const CALL_MINUTES = 15;
+const MEETING_MINUTES = 60;
+const SEARCH_DELAY = 250;
 const DONE_LIMIT = 30;
 
 const DONE_ICONS = {
@@ -100,6 +129,29 @@ class LiveDashletsActionsView extends BaseDashletView {
     /** Fresh data arrived while a menu was open: drawing it would close the menu. */
     renderPending = false
 
+    /** @type {{filter: string, type: string, why: boolean}} */
+    prefs = {filter: 'all', type: 'all', why: true}
+
+    /** Rows opened to show their details. */
+    openKeys = new Set()
+
+    /**
+     * The last exchange of each opened row: undefined while loading, null when there is none,
+     * false when unavailable.
+     */
+    exchanges = {}
+
+    /**
+     * What + Create is making.
+     *
+     * @type {{type: string, name: string, parent: Object|null, when: string, date: string, time: string,
+     *     timeTouched: boolean, query: string, results: Object[]|null, searching: boolean, busy: boolean,
+     *     error: string|null}|null}
+     */
+    composer = null
+
+    searchNumber = 0
+
     events = {
         ...(this.events || {}),
         /** @this LiveDashletsActionsView */
@@ -146,6 +198,63 @@ class LiveDashletsActionsView extends BaseDashletView {
                 this.renderList();
             }
         },
+        /** @this LiveDashletsActionsView */
+        'change .live-actions-type': function (e) {
+            this.prefs.type = e.currentTarget.value;
+            this.expanded = false;
+            this.saveState();
+            this.load();
+        },
+        /** @this LiveDashletsActionsView */
+        'click .live-actions-why-switch': function () {
+            this.prefs.why = !this.prefs.why;
+            this.saveState();
+            this.renderList();
+            this.getContainer()?.querySelector('.live-actions-why-switch')?.focus();
+        },
+        /** @this LiveDashletsActionsView */
+        'submit .live-actions-composer': function (e) {
+            e.preventDefault();
+            this.createFromComposer();
+        },
+        /** @this LiveDashletsActionsView */
+        'keydown .live-actions-composer': function (e) {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                this.closeComposer();
+            }
+        },
+        /** @this LiveDashletsActionsView */
+        'input .live-actions-create-name': function (e) {
+            if (this.composer) {
+                this.composer.name = e.currentTarget.value;
+            }
+        },
+        /** @this LiveDashletsActionsView */
+        'input .live-actions-create-search': function (e) {
+            this.searchParents(e.currentTarget.value);
+        },
+        // Enter picks the first record found rather than creating without one.
+        /** @this LiveDashletsActionsView */
+        'keydown .live-actions-create-search': function (e) {
+            if (e.key === 'Enter' && this.composer?.results?.length) {
+                e.preventDefault();
+                this.pickParent(0);
+            }
+        },
+        /** @this LiveDashletsActionsView */
+        'input .live-actions-create-date': function (e) {
+            if (this.composer) {
+                this.composer.date = e.currentTarget.value;
+            }
+        },
+        /** @this LiveDashletsActionsView */
+        'input .live-actions-create-time': function (e) {
+            if (this.composer) {
+                this.composer.time = e.currentTarget.value;
+                this.composer.timeTouched = true;
+            }
+        },
     }
 
     setup() {
@@ -155,6 +264,95 @@ class LiveDashletsActionsView extends BaseDashletView {
         watchLook(this, () => applyLookToPanel(this));
 
         this.formatter = new LiveDashletsFormatter(this);
+        this.prefs = {...this.prefs, ...this.readState()};
+    }
+
+    /**
+     * + Create, in the dashlet's heading, beside its menu.
+     */
+    setupButtonList() {
+        super.setupButtonList();
+
+        if (!this.getCreateTypes().length) {
+            return;
+        }
+
+        const escape = text => String(text).replace(/[&<>"']/g, char => `&#${char.charCodeAt(0)};`);
+
+        this.buttonList.push({
+            name: 'liveCreate',
+            html: '<span class="fas fa-plus" aria-hidden="true"></span><span>' +
+                escape(this.t('createLabels', 'button')) + '</span>',
+            title: this.t('createLabels', 'title'),
+        });
+    }
+
+    // noinspection JSUnusedGlobalSymbols
+    actionLiveCreate() {
+        if (this.isPreview()) {
+            Espo.Ui.notify(this.t('messages', 'previewOnly'), 'info', 3000);
+
+            return;
+        }
+
+        if (this.composer) {
+            this.closeComposer();
+
+            return;
+        }
+
+        this.composer = {
+            type: this.getCreateTypes()[0],
+            name: '',
+            parent: null,
+            when: 'today',
+            date: '',
+            time: '',
+            timeTouched: false,
+            query: '',
+            results: null,
+            searching: false,
+            busy: false,
+            error: null,
+        };
+
+        if (this.queue) {
+            this.renderList();
+        }
+
+        this.getContainer()?.querySelector('.live-actions-create-name')?.focus();
+    }
+
+    /** @private */
+    storageKey() {
+        return `liveDashlets.actions.state.${this.getUser().id}.${this.options.id || ''}`;
+    }
+
+    /** @private */
+    readState() {
+        try {
+            const state = JSON.parse(localStorage.getItem(this.storageKey()) || '{}');
+
+            return {
+                ...(FILTERS.includes(state.filter) ? {filter: state.filter} : {}),
+                ...(state.type in TYPES ? {type: state.type} : {}),
+                ...(typeof state.why === 'boolean' ? {why: state.why} : {}),
+            };
+        } catch (e) {
+            return {};
+        }
+    }
+
+    /** @private */
+    saveState() {
+        try {
+            localStorage.setItem(this.storageKey(), JSON.stringify(this.prefs));
+        } catch (e) {}
+    }
+
+    /** @private */
+    isFiltered() {
+        return this.prefs.filter !== 'all' || this.prefs.type !== 'all';
     }
 
     afterRender() {
@@ -176,6 +374,7 @@ class LiveDashletsActionsView extends BaseDashletView {
         // Never under the user's hands.
         if (
             this.panel ||
+            this.composer ||
             this.undoOffer ||
             this.staleSection.confirming ||
             this.staleSection.archiving ||
@@ -263,6 +462,8 @@ class LiveDashletsActionsView extends BaseDashletView {
                     staleDays: this.getStaleDays(),
                     withDone: 1,
                     signals: this.getOption('enabledSignals') || undefined,
+                    group: this.prefs.filter !== 'all' ? this.prefs.filter : undefined,
+                    kinds: TYPES[this.prefs.type] || undefined,
                 }),
                 stale.open ? this.fetchStale() : null,
             ])
@@ -284,6 +485,8 @@ class LiveDashletsActionsView extends BaseDashletView {
                 if (this.panel && !listed.some(item => item.key === this.panel.key)) {
                     this.panel = null;
                 }
+
+                this.openKeys = new Set([...this.openKeys].filter(key => listed.some(item => item.key === key)));
 
                 if (this.element.querySelector('.live-actions-menu.open')) {
                     this.renderPending = true;
@@ -338,15 +541,26 @@ class LiveDashletsActionsView extends BaseDashletView {
 
         const focus = this.getFocusSelector(container);
         const fragment = document.createDocumentFragment();
+        const list = this.make('div', 'live-actions-list');
+        let others = 0;
 
-        if (data.items.length) {
-            this.appendItems(fragment);
-        } else {
-            this.recaps.forEach(recap => fragment.append(this.createDone(recap.data, recap.id)));
-            fragment.append(this.createEmptyState());
+        fragment.append(this.createToolbar());
+
+        if (this.composer) {
+            fragment.append(this.createComposer());
         }
 
-        this.appendFolds(fragment);
+        if (data.items.length) {
+            others = this.appendItems(list);
+        } else {
+            this.recaps.forEach(recap => list.append(this.createDone(recap.data, recap.id)));
+            list.append(this.isFiltered() ?
+                this.make('div', 'live-dashlet-message text-muted live-actions-filter-empty', this.t('actionLabels', 'filterEmpty')) :
+                this.createEmptyState());
+        }
+
+        fragment.append(list);
+        this.appendFooter(fragment, others);
 
         if (this.undoOffer) {
             fragment.append(this.createUndo());
@@ -379,40 +593,121 @@ class LiveDashletsActionsView extends BaseDashletView {
         return (key ? `[data-key="${CSS.escape(key)}"] ` : '') + `[data-live-action="${action}"]`;
     }
 
-    /** @private */
-    appendItems(fragment) {
+    /**
+     * The rows under their group's title, What happened style.
+     *
+     * @private
+     * @return {number} Rows left out while folded.
+     */
+    appendItems(list) {
         const data = this.queue;
-        const limit = this.getOption('displayRecords') || 6;
+        const limit = this.getOption('displayRecords') || 10;
         const visible = this.expanded ? data.items : data.items.slice(0, limit);
 
         const placed = new Set();
+        let group = null;
 
         const appendRecaps = accept => {
             this.recaps.filter(recap => !placed.has(recap) && accept(recap)).forEach(recap => {
                 placed.add(recap);
-                fragment.append(this.createDone(recap.data, recap.id));
+                list.append(this.createDone(recap.data, recap.id));
             });
         };
 
-        fragment.append(this.createSummary());
-
         visible.forEach((item, index) => {
             appendRecaps(recap => recap.beforeKey === item.key);
-            fragment.append(this.createRow(item, index === 0));
 
-            if (this.panel?.key === item.key) {
-                fragment.append(this.createPanel(item));
+            if (item.group && item.group !== group) {
+                group = item.group;
+                list.append(this.createGroupTitle(group));
             }
+
+            list.append(this.createRow(item, index === 0));
         });
 
         appendRecaps(() => true);
 
         // Only what can really be shown: the server sends a limited number of rows.
-        const others = data.items.length - visible.length;
+        return data.items.length - visible.length;
+    }
 
-        if (others > 0 || this.expanded) {
-            fragment.append(this.createMoreLink(others));
+    /** @private */
+    createGroupTitle(group) {
+        const title = this.make('h4', 'live-actions-group-title', this.t('actionGroups', group));
+
+        title.dataset.group = group;
+
+        return title;
+    }
+
+    /**
+     * The filter, the type and the reason switch, as in What happened.
+     *
+     * @private
+     */
+    createToolbar() {
+        const bar = this.make('div', 'live-actions-toolbar');
+        const counts = this.queue.counts || {groups: {}, kinds: {}};
+
+        const countOf = name => name === 'all' ?
+            GROUPS.reduce((sum, group) => sum + (counts.groups[group] || 0), 0) :
+            counts.groups[name] || 0;
+
+        const filter = createSegmented({
+            label: this.t('actionLabels', 'filterLabel'),
+            className: 'live-actions-filter',
+            value: this.prefs.filter,
+            options: FILTERS.map(name => ({
+                value: name,
+                label: `${this.t('actionFilters', name)} ${countOf(name)}`,
+            })),
+            onChange: name => {
+                this.prefs.filter = name;
+                this.expanded = false;
+                this.focusFilter = true;
+                this.saveState();
+                this.load();
+            },
+        });
+
+        if (this.focusFilter) {
+            requestAnimationFrame(() => filter.querySelector('[aria-checked="true"]')?.focus());
+            this.focusFilter = false;
         }
+
+        const kindCount = name => (TYPES[name] || Object.keys(counts.kinds))
+            .reduce((sum, kind) => sum + (counts.kinds[kind] || 0), 0);
+
+        const type = this.make('select', 'form-control input-sm live-actions-type');
+        const typeLabel = this.t('actionLabels', 'typeLabel');
+
+        type.setAttribute('aria-label', typeLabel);
+        type.title = typeLabel;
+
+        Object.keys(TYPES)
+            .filter(name => name === 'all' || kindCount(name) || name === this.prefs.type)
+            .forEach(name => {
+                // "All" already counts them in the filter.
+                const text = name === 'all' ?
+                    this.t('actionTypes', name) :
+                    `${this.t('actionTypes', name)} (${kindCount(name)})`;
+                const option = this.make('option', null, text);
+
+                option.value = name;
+                option.selected = name === this.prefs.type;
+                type.append(option);
+            });
+
+        const why = this.make('button', 'live-actions-why-switch');
+
+        why.type = 'button';
+        why.setAttribute('role', 'switch');
+        why.setAttribute('aria-checked', String(this.prefs.why));
+        why.append(this.make('span', 'live-recent-switch'), this.t('actionLabels', 'why'));
+
+        bar.append(filter, type, why);
+
+        return bar;
     }
 
     /** @private */
@@ -429,31 +724,42 @@ class LiveDashletsActionsView extends BaseDashletView {
     }
 
     /**
-     * Folded, the list keeps to the dashlet: rows that say why take more room, so the last ones
-     * go under "Show more" rather than making the dashlet scroll. An open panel may scroll.
+     * Folded, the list keeps to the dashlet: the last rows go under "Show more" rather than
+     * making the dashlet scroll. An open row, panel or composer may scroll.
      *
      * @private
      */
     fitRows(container) {
         const body = container.closest('.dashlet-body');
+        const list = container.querySelector(':scope > .live-actions-list');
 
-        if (this.expanded || this.panel || !body || !body.clientHeight) {
+        if (this.expanded || this.panel || this.composer || !body || !list || !body.clientHeight) {
             return;
         }
 
-        const rows = [...container.querySelectorAll(':scope > .live-actions-row')];
+        const rows = [...list.querySelectorAll(':scope > .live-actions-row')];
         const fits = () => body.scrollHeight <= body.clientHeight + 1;
         let dropped = 0;
 
         while (!fits() && rows.length - dropped > MIN_FITTED_ROWS) {
             const row = rows[rows.length - 1 - dropped];
 
-            if (row.contains(document.activeElement)) {
+            // An opened row, and those above it, stay.
+            if (row.contains(document.activeElement) || row.classList.contains('live-actions-open')) {
                 break;
             }
 
             row.remove();
             dropped++;
+
+            // A group without rows left loses its title.
+            list.querySelectorAll(':scope > .live-actions-group-title').forEach(title => {
+                const next = title.nextElementSibling;
+
+                if (!next || next.classList.contains('live-actions-group-title')) {
+                    title.remove();
+                }
+            });
         }
 
         if (!dropped) {
@@ -462,13 +768,22 @@ class LiveDashletsActionsView extends BaseDashletView {
 
         const others = this.queue.items.length - rows.length + dropped;
         const link = this.createMoreLink(others);
-        const current = container.querySelector(':scope > .live-actions-more-link');
+        const current = container.querySelector('.live-actions-footer .live-actions-more-link');
 
         if (current) {
             current.replaceWith(link);
-        } else {
-            rows[rows.length - 1 - dropped].after(link);
+
+            return;
         }
+
+        let footer = container.querySelector(':scope > .live-actions-footer');
+
+        if (!footer) {
+            footer = this.make('div', 'live-actions-footer');
+            list.after(footer);
+        }
+
+        footer.prepend(link);
     }
 
     /**
@@ -510,28 +825,28 @@ class LiveDashletsActionsView extends BaseDashletView {
     }
 
     /**
-     * The two folded parts share one line, so that the list keeps its room.
+     * One line under the list: more rows on the left, the folded parts on the right.
      *
      * @private
      */
-    appendFolds(fragment) {
+    appendFooter(fragment, others) {
         const {staleCount, done} = this.queue;
         const stale = this.staleSection;
+        const footer = this.make('div', 'live-actions-footer');
 
-        if (!staleCount && !done.length) {
-            return;
+        if (others > 0 || this.expanded) {
+            footer.append(this.createMoreLink(others));
         }
-
-        const bar = this.make('div', 'live-actions-folds');
 
         if (staleCount) {
             const days = this.getStaleDays();
 
-            bar.append(this.createFoldToggle(
+            footer.append(this.createFoldToggle(
                 'stale',
                 'toggleStale',
                 stale.open,
                 this.t('actionLabels', 'staleTitle'),
+                String(staleCount),
                 staleCount === 1 ?
                     this.t('actionLabels', 'staleOne', {days}) :
                     this.t('actionLabels', 'staleCount', {count: staleCount, days})
@@ -541,18 +856,21 @@ class LiveDashletsActionsView extends BaseDashletView {
         if (done.length) {
             const countKey = done.length >= DONE_LIMIT ? 'doneLatest' : 'doneCount';
 
-            bar.append(this.createFoldToggle(
+            footer.append(this.createFoldToggle(
                 'done-today',
                 'toggleDone',
                 this.doneOpen,
                 this.t('actionLabels', 'doneTitle'),
+                done.length >= DONE_LIMIT ? `${DONE_LIMIT}+` : String(done.length),
                 done.length === 1 ?
                     this.t('actionLabels', 'doneOne') :
                     this.t('actionLabels', countKey, {count: done.length})
             ));
         }
 
-        fragment.append(bar);
+        if (footer.childNodes.length) {
+            fragment.append(footer);
+        }
 
         if (staleCount && stale.open) {
             fragment.append(this.createStale());
@@ -564,16 +882,18 @@ class LiveDashletsActionsView extends BaseDashletView {
     }
 
     /** @private */
-    createFoldToggle(name, action, isOpen, title, text) {
+    createFoldToggle(name, action, isOpen, title, count, description) {
         const toggle = this.make('button', `live-actions-fold-toggle live-actions-${name}-toggle`);
 
         toggle.type = 'button';
+        toggle.title = description;
         toggle.dataset.liveAction = action;
         toggle.setAttribute('aria-expanded', String(isOpen));
         toggle.append(
             this.icon(`fas fa-chevron-${isOpen ? 'down' : 'right'}`),
             this.make('b', null, title),
-            this.make('span', null, text)
+            this.make('span', 'live-actions-fold-count', count),
+            this.make('span', 'sr-only', description)
         );
 
         return toggle;
@@ -754,24 +1074,6 @@ class LiveDashletsActionsView extends BaseDashletView {
     }
 
     /** @private */
-    createSummary() {
-        const {total, urgent, capped} = this.queue;
-        const summary = this.make('div', 'live-actions-summary');
-        const countKey = capped ? 'actionCountMore' : (total === 1 ? 'oneAction' : 'actionCount');
-
-        summary.append(this.make('b', null, this.t('actionLabels', countKey, {count: total})));
-
-        if (urgent) {
-            summary.append(
-                this.make('span', null, '·'),
-                this.make('span', 'live-actions-late', this.t('actionLabels', 'lateCount', {count: urgent}))
-            );
-        }
-
-        return summary;
-    }
-
-    /** @private */
     createEmptyState() {
         const box = this.make('div', 'live-actions-empty live-dashlet-accent-success');
         const icon = this.make('span', 'live-dashlet-icon');
@@ -793,60 +1095,242 @@ class LiveDashletsActionsView extends BaseDashletView {
         return box;
     }
 
-    /** @private */
+    /**
+     * One line, as in What happened: what to do, why, when, and the main action. A click on the
+     * line opens the details and every other action.
+     *
+     * @private
+     */
     createRow(item, isFirst) {
         const kind = KINDS[item.kind];
-        const accent = item.kind === 'task' && item.urgent ? 'danger' : kind.accent;
-
-        const row = this.make('article', `live-actions-row live-dashlet-accent-${accent}`);
+        const isOpen = this.openKeys.has(item.key) || this.panel?.key === item.key;
+        const row = this.make('article', 'live-actions-row' + (isOpen ? ' live-actions-open' : ''));
 
         row.dataset.key = item.key;
 
-        const icon = this.make('span', 'live-dashlet-icon');
+        const line = this.make('div', 'live-actions-line');
+        const toggle = this.make('button', 'live-actions-toggle');
+
+        toggle.type = 'button';
+        toggle.dataset.liveAction = 'toggleRow';
+        toggle.setAttribute('aria-expanded', String(isOpen));
+
+        const icon = this.make('span', `live-actions-icon live-actions-kind-${item.kind}` +
+            (item.urgent ? ' live-actions-urgent' : ''));
 
         icon.append(this.icon(kind.icon));
 
-        const main = this.make('div', 'live-actions-main');
-        const title = this.make('div', 'live-actions-title');
+        const text = this.make('span', 'live-actions-text');
+        const title = this.make('span', 'live-actions-title');
 
-        title.append(this.withLink(this.make('b', null, this.getItemTitle(item)), item.links.title));
+        title.append(this.make('b', null, this.getItemTitle(item)));
 
         if (item.subtitle) {
-            const subtitle = this.make('span', 'live-actions-sub');
-
-            subtitle.append(this.withLink(document.createTextNode(item.subtitle), item.links.subtitle));
-            title.append(subtitle);
+            title.append(' ', this.make('span', 'live-actions-sub', item.subtitle));
         }
 
+        text.append(title);
+
+        if (this.prefs.why && item.context && !isOpen) {
+            const why = this.getWhyText(item);
+            const whyLine = this.make('span', 'live-actions-why', why);
+
+            whyLine.title = why;
+            text.append(whyLine);
+        }
+
+        const when = this.make('span', 'live-actions-when' + (item.urgent ? ' live-actions-urgent' : ''), this.getWhen(item));
+
+        toggle.append(icon, text, when);
+        line.append(toggle);
+
+        // Opened, the details hold the same action with its label.
+        if (!isOpen || this.panel?.key === item.key) {
+            line.append(this.createPrimary(item, isFirst, true));
+        }
+
+        row.append(line);
+
+        if (this.panel?.key === item.key) {
+            row.append(this.createPanel(item));
+        } else if (isOpen) {
+            row.append(this.createDetail(item));
+        }
+
+        return row;
+    }
+
+    /**
+     * Why act, from the record itself or the last exchange.
+     *
+     * @private
+     */
+    getWhyText(item) {
+        const exchange = item.context.exchange;
+
+        if (!exchange) {
+            return item.context.text;
+        }
+
+        return this.t('actionLabels', 'contextExchange', {
+            exchange: this.t('actionExchange', exchange.kind, {
+                date: this.formatter.formatShortDate(exchange.date),
+            }),
+            text: item.context.text,
+        });
+    }
+
+    /**
+     * When, in a few words: the full reason is in the details.
+     *
+     * @private
+     */
+    getWhen(item) {
+        const values = this.getReasonValues(item);
+
+        return this.t('actionWhen', values.key, values.vars);
+    }
+
+    /**
+     * What a row says once opened, and every action on it.
+     *
+     * @private
+     */
+    createDetail(item) {
+        const detail = this.make('div', 'live-actions-detail');
         const reason = this.make('div', 'live-actions-reason' + (item.urgent ? ' live-actions-urgent' : ''));
 
         reason.append(...this.createReason(item));
-        main.append(title, reason);
+        detail.append(reason);
 
-        // Why act, from the record itself or the last exchange. An open panel shows that exchange.
-        if (item.context && !(item.context.exchange && this.panel?.key === item.key)) {
-            const exchange = item.context.exchange;
-            const text = exchange ?
-                this.t('actionLabels', 'contextExchange', {
-                    exchange: this.t('actionExchange', exchange.kind, {
-                        date: this.formatter.formatShortDate(exchange.date),
-                    }),
-                    text: item.context.text,
-                }) :
-                item.context.text;
-            const context = this.make('div', 'live-actions-why', text);
-
-            context.title = text;
-            main.append(context);
-            row.classList.add('live-actions-row-why');
+        if (item.context) {
+            detail.append(this.make('p', 'live-actions-detail-why', this.getWhyText(item)));
         }
 
-        const buttons = this.make('div', 'live-actions-buttons');
+        // A deal's reason already is its last exchange.
+        if (!item.context?.exchange) {
+            const context = this.createContext(this.exchanges[item.key]);
 
-        buttons.append(this.createPrimary(item, isFirst), this.createMenu(item));
-        row.append(icon, main, buttons);
+            if (context) {
+                detail.append(context);
+            }
+        }
 
-        return row;
+        if (item.person?.phone && this.getPrimaryAction(item) === 'call') {
+            detail.append(this.createPhone(item.person.phone));
+        }
+
+        const actions = this.make('div', 'live-actions-detail-actions');
+        const acl = this.getAcl();
+
+        const button = (action, iconClass, text) => {
+            const element = this.make('button', 'btn btn-sm btn-default');
+
+            element.type = 'button';
+            element.dataset.liveAction = action;
+            element.append(this.icon(iconClass), this.make('span', null, text));
+
+            return element;
+        };
+
+        actions.append(this.createPrimary(item, true, false));
+
+        if (item.person?.email && acl.checkScope('Email', 'create')) {
+            actions.append(button('email', 'fas fa-envelope', this.t('actionButtons', 'email')));
+        }
+
+        if (acl.checkScope('Task', 'create') && item.target) {
+            actions.append(button('schedule', 'fas fa-calendar-plus', this.t('actionButtons', 'schedule')));
+        }
+
+        if (item.snooze) {
+            actions.append(this.createSnoozeMenu(item));
+        }
+
+        detail.append(actions);
+
+        const links = this.make('div', 'live-actions-links');
+        const linked = [];
+
+        const addLink = (name, link) => {
+            if (!link || linked.some(other => other.type === link.type && other.id === link.id)) {
+                return;
+            }
+
+            linked.push(link);
+            links.append(this.withLink(this.make('span', null, this.t('actionLabels', 'openName', {name})), link));
+        };
+
+        addLink(this.getItemTitle(item), item.links.title);
+
+        if (item.subtitle) {
+            addLink(item.subtitle, item.links.subtitle);
+        }
+
+        addLink(this.translate(item.entityType, 'scopeNames'), {type: item.entityType, id: item.id});
+
+        detail.append(links);
+
+        return detail;
+    }
+
+    /**
+     * Opening a row loads its last exchange once.
+     *
+     * @private
+     */
+    toggleRow(item) {
+        if (this.panel?.key === item.key) {
+            this.panel = null;
+            this.openKeys.delete(item.key);
+        } else if (this.openKeys.has(item.key)) {
+            this.openKeys.delete(item.key);
+        } else {
+            this.openKeys.add(item.key);
+            this.loadRowExchange(item);
+        }
+
+        this.renderList();
+    }
+
+    /** @private */
+    async loadRowExchange(item) {
+        if (item.context?.exchange || item.key in this.exchanges) {
+            return;
+        }
+
+        this.exchanges[item.key] = undefined;
+
+        let exchange;
+
+        try {
+            const data = await Espo.Ajax.getRequest('LiveDashlets/lastExchange', {
+                entityType: item.entityType,
+                id: item.id,
+                personType: item.person?.type,
+                personId: item.person?.id,
+            });
+
+            exchange = data.exchange;
+        } catch (xhr) {
+            if (xhr) {
+                xhr.errorIsHandled = true;
+            }
+
+            exchange = false;
+        }
+
+        this.exchanges[item.key] = exchange;
+
+        const detail = this.getContainer()?.querySelector(`[data-key="${CSS.escape(item.key)}"] .live-actions-detail`);
+        const current = detail?.querySelector('.live-actions-context');
+        const context = this.createContext(exchange);
+
+        if (current && context) {
+            current.replaceWith(context);
+        } else {
+            current?.remove();
+        }
     }
 
     /**
@@ -962,14 +1446,20 @@ class LiveDashletsActionsView extends BaseDashletView {
         return 'open';
     }
 
-    /** @private */
-    createPrimary(item, isFirst) {
+    /**
+     * The main action: an icon at the end of the row, a labelled button in its details.
+     *
+     * @private
+     */
+    createPrimary(item, isFirst, compact = false) {
         const action = this.getPrimaryAction(item);
         const [iconClass, label] = PRIMARY[action];
         const phone = action === 'call' ? item.person?.phone : null;
         const isLink = action === 'open' || phone;
+        const style = isFirst ? 'btn-primary' : 'btn-default';
 
-        const button = this.make(isLink ? 'a' : 'button', `btn btn-sm ${isFirst ? 'btn-primary' : 'btn-default'} live-actions-cta`);
+        const button = this.make(isLink ? 'a' : 'button', `btn btn-sm ${style} live-actions-cta` +
+            (compact ? ' live-actions-cta-compact' : ''));
 
         if (action === 'open') {
             button.href = this.getRecordUrl(item);
@@ -988,7 +1478,7 @@ class LiveDashletsActionsView extends BaseDashletView {
         const text = this.t('actionButtons', label);
 
         button.title = text;
-        button.append(this.icon(iconClass), this.make('span', 'live-actions-cta-label', text));
+        button.append(this.icon(iconClass), this.make('span', compact ? 'sr-only' : 'live-actions-cta-label', text));
 
         return button;
     }
@@ -999,31 +1489,27 @@ class LiveDashletsActionsView extends BaseDashletView {
     }
 
     /** @private */
-    createMenu(item) {
+    createSnoozeMenu(item) {
         const group = this.make('div', 'btn-group live-actions-menu');
-        const toggle = this.make('button', 'btn btn-sm btn-text dropdown-toggle');
+        const toggle = this.make('button', 'btn btn-sm btn-default dropdown-toggle');
 
         toggle.type = 'button';
         toggle.dataset.toggle = 'dropdown';
-        toggle.setAttribute('aria-label', this.t('actionButtons', 'more'));
-        toggle.append(this.icon('fas fa-ellipsis-h'));
+        toggle.append(
+            this.icon('fas fa-clock'),
+            this.make('span', null, this.t('actionLabels', 'snoozeMenu')),
+            this.icon('fas fa-caret-down')
+        );
 
-        const menu = this.make('ul', 'dropdown-menu pull-right');
+        const menu = this.make('ul', 'dropdown-menu');
 
-        const add = (iconClass, text, action, {href = null, date = null} = {}) => {
+        const add = (iconClass, text, action, date = null) => {
             const entry = this.make('li');
             const link = this.make('a');
 
             link.setAttribute('role', 'button');
             link.tabIndex = 0;
-
-            if (action) {
-                link.dataset.liveAction = action;
-            }
-
-            if (href) {
-                link.href = href;
-            }
+            link.dataset.liveAction = action;
 
             if (date) {
                 link.dataset.date = date;
@@ -1034,33 +1520,13 @@ class LiveDashletsActionsView extends BaseDashletView {
             menu.append(entry);
         };
 
-        const addDivider = () => {
-            if (menu.children.length) {
-                menu.append(this.make('li', 'divider'));
-            }
-        };
+        menu.append(this.make('li', 'dropdown-header', this.t('actionLabels', 'snoozeTo')));
 
-        if (item.person?.email && this.getAcl().checkScope('Email', 'create')) {
-            add('fas fa-envelope', this.t('actionButtons', 'email'), 'email');
-        }
+        this.queue.dates.snooze.forEach(date => {
+            add('fas fa-clock', this.formatter.formatWeekdayDate(date), 'snooze', date);
+        });
 
-        if (this.getAcl().checkScope('Task', 'create') && item.target) {
-            add('fas fa-calendar-plus', this.t('actionButtons', 'schedule'), 'schedule');
-        }
-
-        if (item.snooze) {
-            addDivider();
-            menu.append(this.make('li', 'dropdown-header', this.t('actionLabels', 'snoozeTo')));
-
-            this.queue.dates.snooze.forEach(date => {
-                add('fas fa-clock', this.formatter.formatWeekdayDate(date), 'snooze', {date});
-            });
-
-            add('fas fa-calendar-alt', this.t('actionLabels', 'snoozePick'), 'snoozePick');
-        }
-
-        addDivider();
-        add('fas fa-external-link-alt', this.t('actionButtons', 'open'), null, {href: this.getRecordUrl(item)});
+        add('fas fa-calendar-alt', this.t('actionLabels', 'snoozePick'), 'snoozePick');
 
         group.append(toggle, menu);
 
@@ -1204,6 +1670,671 @@ class LiveDashletsActionsView extends BaseDashletView {
     }
 
     // -----------------------------------------------------------------------------------------
+    // Creating.
+    // -----------------------------------------------------------------------------------------
+
+    /**
+     * What the user may create, in the order of + Create's choices.
+     *
+     * @private
+     * @return {string[]}
+     */
+    getCreateTypes() {
+        return Object.keys(CREATE_TYPES).filter(type => {
+            const entityType = CREATE_TYPES[type];
+
+            if (type === 'note') {
+                // Whether the user may post on a record is checked on that record.
+                return !!this.getMetadata().get(['scopes', 'Note', 'entity']);
+            }
+
+            return this.getAcl().checkScope(entityType, 'create');
+        });
+    }
+
+    /**
+     * @private
+     * @return {boolean} Whether the action was the composer's.
+     */
+    runComposerAction(action, element) {
+        const composer = this.composer;
+
+        switch (action) {
+            case 'createCancel':
+                this.closeComposer();
+
+                return true;
+            case 'createMore':
+                this.openFullForm();
+
+                return true;
+            case 'pickParent':
+                this.pickParent(Number(element.dataset.index));
+
+                return true;
+            case 'clearParent':
+                composer.parent = null;
+                this.refreshComposer('.live-actions-create-search');
+
+                return true;
+            case 'pickWhen':
+                composer.when = element.dataset.value;
+                composer.error = null;
+                this.refreshComposer(`[data-live-action="pickWhen"][data-value="${element.dataset.value}"]`);
+
+                if (composer.when === 'date') {
+                    this.getContainer()?.querySelector('.live-actions-create-date')?.focus();
+                }
+
+                return true;
+        }
+
+        return false;
+    }
+
+    /** @private */
+    closeComposer() {
+        clearTimeout(this.searchTimer);
+
+        this.composer = null;
+        this.renderList();
+        this.element?.querySelector('.panel-heading [data-action="liveCreate"]')?.focus();
+    }
+
+    /**
+     * Redraws the composer alone: the list under it stays as it is.
+     *
+     * @private
+     */
+    refreshComposer(focusSelector = null) {
+        const current = this.getContainer()?.querySelector('.live-actions-composer');
+
+        if (!current || !this.composer) {
+            return;
+        }
+
+        const form = this.createComposer();
+
+        current.replaceWith(form);
+
+        if (focusSelector) {
+            form.querySelector(focusSelector)?.focus();
+        }
+    }
+
+    /** @private */
+    createComposer() {
+        const composer = this.composer;
+        const types = this.getCreateTypes();
+        const form = this.make('form', 'live-actions-composer');
+
+        form.noValidate = true;
+        form.setAttribute('aria-label', this.t('createLabels', 'title'));
+
+        if (types.length > 1) {
+            form.append(createSegmented({
+                label: this.t('createLabels', 'typeLabel'),
+                className: 'live-actions-create-type',
+                value: composer.type,
+                options: types.map(type => ({value: type, label: this.t('createLabels', type)})),
+                onChange: type => {
+                    composer.type = type;
+                    composer.error = null;
+                    composer.results = null;
+                    this.refreshComposer('.live-actions-create-type [aria-checked="true"]');
+                },
+            }));
+        }
+
+        const isNote = composer.type === 'note';
+        const what = this.make('label', 'live-actions-field');
+        const name = this.make('input', 'form-control live-actions-create-name');
+
+        name.type = 'text';
+        name.value = composer.name;
+        name.maxLength = isNote ? 2000 : 255;
+        name.placeholder = this.t('createLabels', `placeholder_${composer.type}`);
+        name.autocomplete = 'off';
+
+        what.append(this.make('span', 'live-actions-field-label', this.t('createLabels', isNote ? 'noteText' : 'what')), name);
+        form.append(what, this.createParentField());
+
+        if (!isNote) {
+            form.append(this.createWhenField());
+        }
+
+        if (composer.error) {
+            const error = this.make('p', 'live-actions-create-error', composer.error);
+
+            error.setAttribute('role', 'alert');
+            form.append(error);
+        }
+
+        const footer = this.make('div', 'live-actions-composer-footer');
+        const submit = this.make('button', 'btn btn-sm btn-primary', this.t('createLabels', `submit_${composer.type}`));
+        const cancel = this.make('button', 'btn btn-sm btn-text', this.t('createLabels', 'cancel'));
+
+        submit.type = 'submit';
+        submit.disabled = composer.busy;
+        cancel.type = 'button';
+        cancel.dataset.liveAction = 'createCancel';
+
+        footer.append(submit, cancel, this.make('small', 'live-actions-create-hint', this.t('createLabels', 'enterHint')));
+
+        if (!isNote) {
+            const more = this.make('button', 'btn btn-sm btn-link live-actions-create-more', this.t('createLabels', 'more'));
+
+            more.type = 'button';
+            more.dataset.liveAction = 'createMore';
+            footer.append(more);
+        }
+
+        form.append(footer);
+
+        return form;
+    }
+
+    /**
+     * The record it is about: searched among what the user can read.
+     *
+     * @private
+     */
+    createParentField() {
+        const composer = this.composer;
+        const field = this.make('div', 'live-actions-field live-actions-create-parent');
+        const id = `live-actions-for-${this.cid}`;
+        const label = this.make('label', 'live-actions-field-label',
+            this.t('createLabels', composer.type === 'note' ? 'forRequired' : 'for'));
+
+        label.htmlFor = id;
+        field.append(label);
+
+        if (composer.parent) {
+            const chip = this.make('span', 'live-actions-create-chip');
+            const clear = this.make('button', 'live-actions-create-clear');
+
+            clear.type = 'button';
+            clear.id = id;
+            clear.dataset.liveAction = 'clearParent';
+            clear.title = this.t('createLabels', 'removeParent');
+            clear.setAttribute('aria-label', `${this.t('createLabels', 'removeParent')} · ${composer.parent.name}`);
+            clear.append(this.icon('fas fa-times'));
+
+            chip.append(
+                this.icon(this.getScopeIcon(composer.parent.type)),
+                this.make('span', 'live-actions-create-chip-name', composer.parent.name),
+                this.make('span', 'live-actions-create-scope', this.translate(composer.parent.type, 'scopeNames')),
+                clear
+            );
+
+            field.append(chip);
+
+            return field;
+        }
+
+        const input = this.make('input', 'form-control live-actions-create-search');
+
+        input.type = 'search';
+        input.id = id;
+        input.value = composer.query;
+        input.autocomplete = 'off';
+        input.placeholder = this.t('createLabels', 'forPlaceholder');
+        input.setAttribute('aria-controls', `${id}-results`);
+
+        field.append(input, this.createParentResults(`${id}-results`));
+
+        return field;
+    }
+
+    /** @private */
+    createParentResults(id) {
+        const composer = this.composer;
+        const list = this.make('div', 'live-actions-create-results');
+
+        list.id = id;
+        list.setAttribute('aria-live', 'polite');
+
+        if (composer.searching) {
+            list.append(this.make('div', 'live-actions-create-empty', this.t('createLabels', 'searching')));
+        } else if (composer.results && !composer.results.length) {
+            list.append(this.make('div', 'live-actions-create-empty', this.t('createLabels', 'noResult')));
+        }
+
+        (composer.results || []).forEach((result, index) => {
+            const button = this.make('button', 'live-actions-create-result');
+
+            button.type = 'button';
+            button.dataset.liveAction = 'pickParent';
+            button.dataset.index = String(index);
+            button.append(
+                this.icon(this.getScopeIcon(result.type)),
+                this.make('span', 'live-actions-create-chip-name', result.name),
+                this.make('span', 'live-actions-create-scope', this.translate(result.type, 'scopeNames'))
+            );
+
+            list.append(button);
+        });
+
+        list.hidden = !composer.searching && composer.results === null;
+
+        return list;
+    }
+
+    /** @private */
+    getScopeIcon(entityType) {
+        return this.getMetadata().get(['clientDefs', entityType, 'iconClass']) || 'fas fa-file';
+    }
+
+    /**
+     * What the chosen type can be about: its parent's types, the people of a call or a meeting,
+     * any record with a stream for a note.
+     *
+     * @private
+     */
+    canBeParent(entityType) {
+        const type = this.composer?.type;
+
+        if (type === 'note') {
+            return !!this.getMetadata().get(['scopes', entityType, 'stream']);
+        }
+
+        const parentList = this.getMetadata().get(['entityDefs', CREATE_TYPES[type], 'fields', 'parent', 'entityList']) || [];
+
+        return parentList.includes(entityType) ||
+            (type !== 'task' && ['Contact', 'Lead'].includes(entityType));
+    }
+
+    /** @private */
+    searchParents(query) {
+        const composer = this.composer;
+
+        if (!composer) {
+            return;
+        }
+
+        composer.query = query;
+        clearTimeout(this.searchTimer);
+
+        const number = ++this.searchNumber;
+
+        if (query.trim().length < 2) {
+            composer.results = null;
+            composer.searching = false;
+            this.refreshResults();
+
+            return;
+        }
+
+        composer.searching = true;
+        this.refreshResults();
+
+        this.searchTimer = setTimeout(async () => {
+            let list = [];
+
+            try {
+                const data = await Espo.Ajax.getRequest('GlobalSearch', {q: query.trim(), maxSize: 12});
+
+                list = (data.list || [])
+                    .map(record => ({type: record._scope, id: record.id, name: record.name || record.id}))
+                    .filter(record => record.type && this.canBeParent(record.type))
+                    .slice(0, 6);
+            } catch (xhr) {
+                if (xhr) {
+                    xhr.errorIsHandled = true;
+                }
+            }
+
+            if (number !== this.searchNumber || this.composer !== composer) {
+                return;
+            }
+
+            composer.searching = false;
+            composer.results = list;
+            this.refreshResults();
+        }, SEARCH_DELAY);
+    }
+
+    /** @private */
+    refreshResults() {
+        const current = this.getContainer()?.querySelector('.live-actions-create-results');
+
+        if (current) {
+            current.replaceWith(this.createParentResults(current.id));
+        }
+    }
+
+    /** @private */
+    pickParent(index) {
+        const composer = this.composer;
+        const record = composer?.results?.[index];
+
+        if (!record) {
+            return;
+        }
+
+        composer.parent = record;
+        composer.results = null;
+        composer.query = '';
+        composer.error = null;
+
+        this.refreshComposer(composer.name.trim() ? '[type="submit"]' : '.live-actions-create-name');
+    }
+
+    /** @private */
+    createWhenField() {
+        const composer = this.composer;
+        const field = this.make('div', 'live-actions-field live-actions-create-when');
+        const label = this.t('createLabels', 'when');
+        const chips = this.make('div', 'live-actions-chips');
+
+        chips.setAttribute('role', 'group');
+        chips.setAttribute('aria-label', label);
+
+        this.getWhenChoices().forEach(choice => {
+            const chip = this.make('button', 'live-actions-chip', this.t('createLabels', choice));
+
+            chip.type = 'button';
+            chip.dataset.liveAction = 'pickWhen';
+            chip.dataset.value = choice;
+            chip.setAttribute('aria-pressed', String(composer.when === choice));
+
+            chips.append(chip);
+        });
+
+        field.append(this.make('span', 'live-actions-field-label', label), chips);
+
+        const inputs = this.make('div', 'live-actions-create-moment');
+
+        if (composer.when === 'date') {
+            const date = this.make('input', 'form-control live-actions-create-date');
+
+            date.type = 'date';
+            date.min = this.queue.dates.today;
+            date.value = composer.date;
+            date.setAttribute('aria-label', this.t('createLabels', 'date'));
+            inputs.append(date);
+        }
+
+        if (composer.type !== 'task') {
+            const time = this.make('input', 'form-control live-actions-create-time');
+
+            time.type = 'time';
+            time.value = this.getComposerTime();
+            time.setAttribute('aria-label', this.t('createLabels', 'time'));
+            inputs.append(time);
+        }
+
+        if (inputs.childNodes.length) {
+            field.append(inputs);
+        }
+
+        return field;
+    }
+
+    /**
+     * Today, tomorrow, next Monday (or in a week when tomorrow is Monday), or a date.
+     *
+     * @private
+     * @return {string[]}
+     */
+    getWhenChoices() {
+        return ['today', 'tomorrow', this.getDaysToMonday() === 1 ? 'nextWeek' : 'monday', 'date'];
+    }
+
+    /** @private */
+    getDaysToMonday() {
+        const weekday = new Date(`${this.queue.dates.today}T12:00:00Z`).getUTCDay();
+
+        return ((8 - weekday) % 7) || 7;
+    }
+
+    /**
+     * @private
+     * @return {string|null} Y-m-d, in the user's time zone.
+     */
+    getComposerDate() {
+        const today = this.queue.dates.today;
+
+        switch (this.composer.when) {
+            case 'today':
+                return today;
+            case 'tomorrow':
+                return this.formatter.addDays(today, 1);
+            case 'monday':
+                return this.formatter.addDays(today, this.getDaysToMonday());
+            case 'nextWeek':
+                return this.formatter.addDays(today, 7);
+        }
+
+        return this.composer.date || null;
+    }
+
+    /**
+     * The next round hour today, 9:00 on another day, unless the user chose a time.
+     *
+     * @private
+     */
+    getComposerTime() {
+        const composer = this.composer;
+
+        if (composer.timeTouched && composer.time) {
+            return composer.time;
+        }
+
+        if (this.getComposerDate() !== this.queue.dates.today) {
+            return '09:00';
+        }
+
+        const next = this.getDateTime().getNowMoment().add(1, 'hour').startOf('hour');
+
+        return next.hour() >= 8 && next.hour() <= 20 ? next.format('HH:mm') : '09:00';
+    }
+
+    /** @private */
+    toUtcAt(date, time) {
+        const [year, month, day] = date.split('-').map(Number);
+        const [hour, minute] = time.split(':').map(Number);
+
+        return this.getDateTime().getNowMoment()
+            .set({year, month: month - 1, date: day, hour, minute, second: 0, millisecond: 0})
+            .clone().utc().format('YYYY-MM-DD HH:mm:ss');
+    }
+
+    /**
+     * What to send: assigned to the user, about the chosen record, on the chosen day.
+     *
+     * @private
+     * @return {{entityType: string, attributes: Object}}
+     */
+    getCreateRequest(name, date) {
+        const composer = this.composer;
+        const parent = composer.parent;
+        const user = this.getUser();
+
+        if (composer.type === 'note') {
+            return {
+                entityType: 'Note',
+                attributes: {type: 'Post', post: name, parentType: parent.type, parentId: parent.id},
+            };
+        }
+
+        const entityType = CREATE_TYPES[composer.type];
+        const parentList = this.getMetadata().get(['entityDefs', entityType, 'fields', 'parent', 'entityList']) || [];
+
+        const attributes = {
+            name,
+            assignedUserId: user.id,
+            assignedUserName: user.get('name'),
+        };
+
+        if (parent && parentList.includes(parent.type)) {
+            attributes.parentType = parent.type;
+            attributes.parentId = parent.id;
+            attributes.parentName = parent.name;
+        }
+
+        if (composer.type === 'task') {
+            return {entityType, attributes: {...attributes, status: 'Not Started', dateEndDate: date}};
+        }
+
+        const start = this.toUtcAt(date, this.getComposerTime());
+
+        Object.assign(attributes, {
+            status: 'Planned',
+            dateStart: start,
+            dateEnd: this.addMinutes(start, composer.type === 'call' ? CALL_MINUTES : MEETING_MINUTES),
+            usersIds: [user.id],
+            usersNames: {[user.id]: user.get('name')},
+        });
+
+        if (composer.type === 'call') {
+            attributes.direction = 'Outbound';
+        }
+
+        if (parent?.type === 'Contact') {
+            attributes.contactsIds = [parent.id];
+            attributes.contactsNames = {[parent.id]: parent.name};
+        }
+
+        if (parent?.type === 'Lead') {
+            attributes.leadsIds = [parent.id];
+            attributes.leadsNames = {[parent.id]: parent.name};
+        }
+
+        return {entityType, attributes};
+    }
+
+    /**
+     * Checked here first, so that the message stays in the composer.
+     *
+     * @private
+     * @return {string|null}
+     */
+    getComposerError(name) {
+        const composer = this.composer;
+
+        if (!name) {
+            return this.t('createLabels', composer.type === 'note' ? 'noteRequired' : 'nameRequired');
+        }
+
+        if (composer.type === 'note' && !composer.parent) {
+            return this.t('createLabels', 'parentRequired');
+        }
+
+        if (composer.type !== 'note' && !this.getComposerDate()) {
+            return this.t('createLabels', 'dateRequired');
+        }
+
+        return null;
+    }
+
+    /** @private */
+    async createFromComposer() {
+        const composer = this.composer;
+
+        if (!composer || composer.busy) {
+            return;
+        }
+
+        const name = composer.name.trim();
+        const error = this.getComposerError(name);
+
+        if (error) {
+            composer.error = error;
+
+            const focus = !name ? '.live-actions-create-name' :
+                (composer.type === 'note' ? '.live-actions-create-search' : '.live-actions-create-date');
+
+            this.refreshComposer(focus);
+
+            return;
+        }
+
+        const {entityType, attributes} = this.getCreateRequest(name, composer.type === 'note' ? null : this.getComposerDate());
+
+        composer.busy = true;
+        composer.error = null;
+        this.refreshComposer();
+
+        let created;
+
+        try {
+            created = await Espo.Ajax.postRequest(entityType, attributes);
+        } catch (xhr) {
+            composer.busy = false;
+            this.refreshComposer('.live-actions-create-name');
+
+            return;
+        }
+
+        if (this.composer !== composer) {
+            return;
+        }
+
+        clearTimeout(this.searchTimer);
+        this.composer = null;
+
+        const text = this.t('createLabels', `created_${composer.type}`);
+        const remove = this.getRemoveCreated(entityType, created.id);
+
+        if (remove) {
+            this.offerUndo(text, remove);
+        } else {
+            Espo.Ui.success(text);
+        }
+
+        await this.load();
+
+        this.highlightRow(`${entityType}:${created.id}:`);
+        this.focusUndo(true);
+    }
+
+    /**
+     * The record just created, if it is on the list.
+     *
+     * @private
+     */
+    highlightRow(keyPrefix) {
+        const row = this.getContainer()?.querySelector(`.live-actions-row[data-key^="${CSS.escape(keyPrefix)}"]`);
+
+        if (!row) {
+            return;
+        }
+
+        row.scrollIntoView({block: 'nearest'});
+        row.classList.add('live-actions-just-added');
+
+        setTimeout(() => row.classList.remove('live-actions-just-added'), 2200);
+    }
+
+    /**
+     * EspoCRM's own window, with what the composer already holds.
+     *
+     * @private
+     */
+    openFullForm() {
+        const composer = this.composer;
+
+        if (!composer || composer.type === 'note') {
+            return;
+        }
+
+        const name = composer.name.trim();
+        const date = this.getComposerDate() || this.queue.dates.today;
+        const {entityType, attributes} = this.getCreateRequest(name, date);
+
+        if (!name) {
+            delete attributes.name;
+        }
+
+        clearTimeout(this.searchTimer);
+        this.composer = null;
+        this.renderList();
+
+        this.showCreate(entityType, attributes);
+    }
+
+    // -----------------------------------------------------------------------------------------
     // Actions.
     // -----------------------------------------------------------------------------------------
 
@@ -1296,6 +2427,10 @@ class LiveDashletsActionsView extends BaseDashletView {
             return;
         }
 
+        if (this.runComposerAction(action, element)) {
+            return;
+        }
+
         const item = this.getItem(element);
 
         if (!item) {
@@ -1303,6 +2438,9 @@ class LiveDashletsActionsView extends BaseDashletView {
         }
 
         switch (action) {
+            case 'toggleRow':
+                this.toggleRow(item);
+                break;
             case 'call':
                 this.openPanel(item, 'call');
                 break;

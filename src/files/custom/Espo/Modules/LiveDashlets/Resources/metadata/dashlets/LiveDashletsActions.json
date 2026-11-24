@@ -48,7 +48,7 @@
         },
         "defaults": {
             "autorefreshInterval": 5,
-            "displayRecords": 6,
+            "displayRecords": 10,
             "dormantDays": 14,
             "enabledSignals": [
                 "tasks",

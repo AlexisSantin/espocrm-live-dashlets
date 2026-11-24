@@ -16,6 +16,7 @@ const ICONS = {
     account: 'fas fa-building',
     deal: 'fas fa-trophy',
     task: 'fas fa-check',
+    note: 'far fa-sticky-note',
 };
 
 /** The type menu: which kinds of events each choice shows. */
@@ -27,6 +28,7 @@ const TYPES = {
     added: ['contact', 'lead', 'account'],
     deals: ['deal'],
     tasks: ['task'],
+    notes: ['note'],
 };
 
 // From the narrowest to the widest.
@@ -480,7 +482,7 @@ class LiveDashletsRecentView extends BaseDashletView {
             return this.t(`${event.kind}Group`, {count: event.count});
         }
 
-        return event.title || this.translate(event.links.record.type, 'scopeNames');
+        return event.title || this.translate(event.links.record?.type || 'Note', 'scopeNames');
     }
 
     /** @private */
@@ -499,7 +501,7 @@ class LiveDashletsRecentView extends BaseDashletView {
 
     /** What the record is: "Call · Follow-up", "Email · Re: proposal". @private */
     getRecordLabel(event) {
-        const type = this.translate(event.links.record.type, 'scopeNames');
+        const type = this.translate(event.links.record?.type || 'Note', 'scopeNames');
 
         return event.label && event.label !== this.getEventTitle(event) ? `${type} · ${event.label}` : type;
     }

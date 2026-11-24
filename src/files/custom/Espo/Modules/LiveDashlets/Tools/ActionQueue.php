@@ -27,6 +27,10 @@ use PDO;
 class ActionQueue
 {
     public const SIGNAL_LIST = ['tasks', 'activities', 'leads', 'deals', 'followUps'];
+    /** Overdue, due today, and the people and deals to follow up. */
+    public const GROUP_LIST = ['late', 'today', 'follow'];
+    public const KIND_LIST = ['task', 'call', 'meeting', 'lead', 'deal', 'followUp'];
+    private const TODAY_CODES = ['taskToday', 'taskTodayAt', 'activityToday'];
 
     /** Records read per signal before ranking; past this, the count is shown as "N+". */
     private const CANDIDATE_LIMIT = 300;
@@ -71,6 +75,8 @@ class ActionQueue
 
     /**
      * @param string[] $signalList
+     * @param ?string $group One of GROUP_LIST, or null for every group.
+     * @param string[] $kindList Kinds to keep, from KIND_LIST; empty for every kind.
      * @return array<string, mixed>
      */
     public function get(
@@ -78,7 +84,9 @@ class ActionQueue
         int $dormantDays,
         int $staleDays,
         array $signalList,
-        bool $withDone = false
+        bool $withDone = false,
+        ?string $group = null,
+        array $kindList = []
     ): array {
         $this->prepare($staleDays);
 
@@ -105,10 +113,37 @@ class ActionQueue
             ...$this->followUpItems($meetings),
         ];
 
-        usort($items, fn ($a, $b) => $b['score'] <=> $a['score']);
+        $items = array_map(fn ($item) => [...$item, 'group' => $this->groupOf($item)], $items);
+
+        // Shown under their group's title: late, today, to follow up, the most pressing first.
+        $groupOrder = array_flip(self::GROUP_LIST);
+
+        usort($items, fn ($a, $b) =>
+            [$groupOrder[$a['group']], $b['score']] <=> [$groupOrder[$b['group']], $a['score']]);
 
         $total = count($items);
         $urgent = count(array_filter($items, fn ($item) => $item['urgent']));
+
+        // Each count follows the other filter: the groups of the chosen kinds, the kinds of the
+        // chosen group.
+        $inGroup = fn ($item) => $group === null || $item['group'] === $group;
+        $inKinds = fn ($item) => !$kindList || in_array($item['kind'], $kindList, true);
+
+        $groupCounts = array_fill_keys(self::GROUP_LIST, 0);
+        $kindCounts = array_fill_keys(self::KIND_LIST, 0);
+
+        foreach ($items as $item) {
+            if ($inKinds($item)) {
+                $groupCounts[$item['group']]++;
+            }
+
+            if ($inGroup($item)) {
+                $kindCounts[$item['kind']]++;
+            }
+        }
+
+        $items = array_values(array_filter($items, fn ($item) => $inGroup($item) && $inKinds($item)));
+        $matching = count($items);
 
         $items = array_slice($items, 0, $limit);
 
@@ -120,6 +155,8 @@ class ActionQueue
             'available' => $available !== [],
             'items' => $items,
             'total' => $total,
+            'matching' => $matching,
+            'counts' => ['groups' => $groupCounts, 'kinds' => $kindCounts],
             'capped' => $this->capped,
             'urgent' => $urgent,
             'staleCount' => $staleCount,
@@ -133,6 +170,18 @@ class ActionQueue
                 'snooze' => $this->snoozeDates(),
             ],
         ];
+    }
+
+    /**
+     * @param array<string, mixed> $item
+     */
+    private function groupOf(array $item): string
+    {
+        if ($item['urgent']) {
+            return 'late';
+        }
+
+        return in_array($item['reason']['code'], self::TODAY_CODES, true) ? 'today' : 'follow';
     }
 
     /**
@@ -1521,6 +1570,7 @@ class ActionQueue
                 $item['subtitle'] : null,
             'reason' => $item['reason'],
             'urgent' => $item['urgent'],
+            'group' => $item['group'] ?? $this->groupOf($item),
             'primaryAction' => $item['primaryAction'],
             'canEdit' => $this->acl->checkEntityEdit($entity),
             'target' => $item['target'],
