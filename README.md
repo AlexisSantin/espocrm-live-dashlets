@@ -179,7 +179,7 @@ Nothing is imposed on anyone until you deploy.
 
 ## Installation
 
-1. Download `live-dashlets-1.6.0.zip` from the [latest release](../../releases/latest).
+1. Download `live-dashlets-1.6.1.zip` from the [latest release](../../releases/latest).
 2. In EspoCRM, go to **Administration → Extensions**, upload the ZIP and click **Install**.
 3. Optional: in **Administration → Dashboard Templates**, open **Live dashboard**, adjust the goal targets and deploy it, to chosen users or with **Deploy to Everyone**.
 

@@ -666,9 +666,12 @@ class LiveDashletsActionsView extends BaseDashletView {
         const bar = this.make('div', 'live-actions-toolbar');
         const counts = this.queue.counts || {groups: {}, kinds: {}};
 
-        const countOf = name => name === 'all' ?
+        // Past the server's limit, the counts are only a minimum.
+        const plus = this.queue.capped ? '+' : '';
+
+        const countOf = name => (name === 'all' ?
             GROUPS.reduce((sum, group) => sum + (counts.groups[group] || 0), 0) :
-            counts.groups[name] || 0;
+            counts.groups[name] || 0) + plus;
 
         const filter = createSegmented({
             label: this.t('actionLabels', 'filterLabel'),
@@ -707,7 +710,7 @@ class LiveDashletsActionsView extends BaseDashletView {
                 // "All" already counts them in the filter.
                 const text = name === 'all' ?
                     this.t('actionTypes', name) :
-                    `${this.t('actionTypes', name)} (${kindCount(name)})`;
+                    `${this.t('actionTypes', name)} (${kindCount(name)}${plus})`;
                 const option = this.make('option', null, text);
 
                 option.value = name;
@@ -2120,7 +2123,8 @@ class LiveDashletsActionsView extends BaseDashletView {
             case 'monday':
                 return this.formatter.addDays(today, this.getDaysToMonday());
             case 'nextWeek':
-                return this.formatter.addDays(today, 7);
+                // Offered on Sundays: the Monday after tomorrow's.
+                return this.formatter.addDays(today, 7 + this.getDaysToMonday());
         }
 
         return this.composer.date || null;

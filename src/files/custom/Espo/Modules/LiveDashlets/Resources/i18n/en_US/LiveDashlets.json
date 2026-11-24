@@ -375,7 +375,7 @@
         "today": "Today",
         "tomorrow": "Tomorrow",
         "monday": "Monday",
-        "nextWeek": "In a week",
+        "nextWeek": "Monday next week",
         "date": "A date…",
         "time": "Time",
         "submit_task": "Create the task",

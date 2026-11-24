@@ -331,6 +331,11 @@ class RecentActivity
         ];
 
         if ($this->actorIds !== null) {
+            // Whose note it is can't be told from a field the user may not read.
+            if (!$this->readableActorFields('Note')) {
+                return [];
+            }
+
             $where['createdById'] = $this->actorIds;
         }
 
