@@ -152,6 +152,10 @@ Adjust the targets, then deploy it. EspoCRM deploys a template to the users or t
 
 Nothing is imposed on anyone until you deploy.
 
+**A template looks like the dashboard.** In **Administration → Dashboard Templates**, a template is shown as the dashboard itself, over the whole width: each dashlet with its figures, in the company's style. The figures are yours, as a preview; each user will see their own. Editing works as on the dashboard: **+ Add** opens the same gallery, each dashlet has its own edit and remove buttons, and dashlets are moved and resized by dragging. In a template, Next Actions does not act on any record: its buttons only say it is a preview.
+
+![A dashboard template, edited as the dashboard](docs/screenshots/template.png)
+
 ### Details that matter
 
 - **Animations.** Figures count up, curves draw themselves, bars fill in, and a reached goal gets a light sweep. Nothing loops. Nothing moves when the system asks for reduced motion.
@@ -168,7 +172,7 @@ Nothing is imposed on anyone until you deploy.
 
 ## Installation
 
-1. Download `live-dashlets-1.4.2.zip` from the [latest release](../../releases/latest).
+1. Download `live-dashlets-1.5.0.zip` from the [latest release](../../releases/latest).
 2. In EspoCRM, go to **Administration → Extensions**, upload the ZIP and click **Install**.
 3. Optional: in **Administration → Dashboard Templates**, open **Live dashboard**, adjust the goal targets and deploy it, to chosen users or with **Deploy to Everyone**.
 

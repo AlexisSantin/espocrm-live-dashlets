@@ -1,0 +1,7 @@
+{
+    "fields": {
+        "layout": {
+            "view": "live-dashlets:views/dashboard-template/fields/layout"
+        }
+    }
+}

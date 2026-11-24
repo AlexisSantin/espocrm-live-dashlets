@@ -41,7 +41,8 @@
         "infoTarget": "Target: {value}",
         "infoAccess": "Only the records you can read are counted.",
         "infoTeam": "Assigned to a member of the {team} team",
-        "infoTeamNone": "Not filtered by team: these records have no assigned user"
+        "infoTeamNone": "Not filtered by team: these records have no assigned user",
+        "templatePreview": "Preview with your data: each user will see their own."
     },
     "goalStatus": {
         "reached": "Reached",
@@ -57,7 +58,8 @@
         "galleryIntro": "Click an indicator to add it to your dashboard, ready to use. Figures shown are yours.",
         "customKpi": "Pick the entity, the filter and the period yourself.",
         "customGoal": "Set your own target on any figure.",
-        "nativeDashlets": "Stream, calendar, lists, charts…"
+        "nativeDashlets": "Stream, calendar, lists, charts…",
+        "previewOnly": "Preview: actions are not carried out in a dashboard template."
     },
     "presets": {
         "newLeads": "New leads",

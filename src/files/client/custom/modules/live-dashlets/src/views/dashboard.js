@@ -3,6 +3,7 @@
  ************************************************************************/
 
 import DashboardView from 'views/dashboard';
+import {findTopPosition} from 'live-dashlets:helpers/grid-position';
 
 /**
  * The home dashboard, with a visible "Add" button that opens the gallery of ready-made
@@ -209,7 +210,7 @@ class LiveDashletsDashboardView extends DashboardView {
             const name = preset.dashlet;
             const w = (preset.width || 1) * this.WIDTH_MULTIPLIER;
             const h = (preset.height || 1) * this.HEIGHT_MULTIPLIER;
-            const position = this.findTopPosition(w, h);
+            const position = findTopPosition(this.grid, w, h, this.HEIGHT_MULTIPLIER);
 
             const $item = this.prepareGridstackItem(id, name);
 
@@ -227,48 +228,6 @@ class LiveDashletsDashboardView extends DashboardView {
                 resolve();
             });
         });
-    }
-
-    /**
-     * Where a new tile goes: right after the small tiles at the top of the dashboard, filling
-     * rows from left to right. A tall dashlet (stream, lists…) in the way moves down; a small
-     * tile never does. The grid has gravity, so empty cells only exist at the bottom of columns.
-     *
-     * @private
-     * @return {{x: number, y: number}}
-     */
-    findTopPosition(w, h) {
-        const nodes = (this.grid.engine && this.grid.engine.nodes) || [];
-        const columns = 12;
-
-        const isTall = node => node.h > this.HEIGHT_MULTIPLIER;
-
-        const tallTopList = nodes.filter(isTall).map(node => node.y);
-        const bottom = nodes.reduce((max, node) => Math.max(max, node.y + node.h), 0);
-        const limit = tallTopList.length ? Math.min(...tallTopList) : bottom;
-
-        const unique = list => [...new Set(list)].sort((a, b) => a - b);
-
-        const yList = unique([0, ...nodes.map(node => node.y), ...nodes.map(node => node.y + node.h)])
-            .filter(y => y <= limit);
-
-        const xList = unique([0, 3, 6, 9, ...nodes.map(node => node.x + node.w)])
-            .filter(x => x + w <= columns);
-
-        for (const y of yList) {
-            for (const x of xList) {
-                const blockerList = nodes.filter(node =>
-                    node.x < x + w && x < node.x + node.w &&
-                    node.y < y + h && y < node.y + node.h
-                );
-
-                if (blockerList.every(node => isTall(node) && node.y >= y)) {
-                    return {x: x, y: y};
-                }
-            }
-        }
-
-        return {x: 0, y: limit};
     }
 
     /** @private */

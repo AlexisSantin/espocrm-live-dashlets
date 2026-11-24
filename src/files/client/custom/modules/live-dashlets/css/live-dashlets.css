@@ -2205,3 +2205,48 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     margin: .4em 0 0;
     font-size: var(--font-size-small);
 }
+
+/* A dashboard template shown as the dashboard (Administration → Dashboard Templates). */
+.record .record-grid:has(.live-template-layout) {
+    grid-template-columns: 100%;
+}
+
+.live-template-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5em;
+    margin-bottom: var(--12px, 12px);
+}
+
+.live-template-note {
+    font-size: var(--font-size-small);
+}
+
+.live-template-bar .live-template-tabs {
+    margin-left: auto;
+}
+
+.live-template-layout > .dashlets {
+    min-height: 2em;
+}
+
+.live-template-layout > .dashlets > .grid-stack-item > .live-template-tools {
+    position: absolute;
+    z-index: 3;
+    display: flex;
+    gap: .25em;
+}
+
+/* While editing, the template's own tools replace the dashlet's menu. */
+.live-template-editing .dashlet > .panel-heading > .btn-group {
+    visibility: hidden;
+}
+
+.live-template-editing .dashlet > .panel-heading {
+    cursor: move;
+}
+
+.live-template-layout .live-actions-buttons .btn {
+    cursor: default;
+}

@@ -34,6 +34,8 @@ const UNDO_DELAY = 8000;
 const CONFIRM_DELAY = 5000;
 const MAX_RECAPS = 8;
 const MIN_FITTED_ROWS = 3;
+/** What a template's preview still allows: folding and copying change no record. */
+const PREVIEW_ACTIONS = ['toggleMore', 'toggleStale', 'toggleDone', 'hideDone', 'copyPhone', 'cancelPanel'];
 const DONE_LIMIT = 30;
 
 const DONE_ICONS = {
@@ -192,6 +194,15 @@ class LiveDashletsActionsView extends BaseDashletView {
         }
 
         return text;
+    }
+
+    /**
+     * Shown in a dashboard template's editor rather than on a dashboard.
+     *
+     * @private
+     */
+    isPreview() {
+        return !!this.element?.closest('.live-template-layout');
     }
 
     /** @private */
@@ -1232,6 +1243,13 @@ class LiveDashletsActionsView extends BaseDashletView {
 
     /** @private */
     runAction(action, element) {
+        // In a dashboard template, a preview: nothing is done to the records.
+        if (this.isPreview() && !PREVIEW_ACTIONS.includes(action)) {
+            Espo.Ui.notify(this.t('messages', 'previewOnly'), 'info', 3000);
+
+            return;
+        }
+
         if (action === 'toggleMore') {
             this.expanded = !this.expanded;
             this.renderList();

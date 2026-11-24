@@ -41,7 +41,8 @@
         "infoTarget": "Objectif : {value}",
         "infoAccess": "Seuls les enregistrements que vous pouvez lire sont comptés.",
         "infoTeam": "Assigné à un membre de l'équipe {team}",
-        "infoTeamNone": "Pas de filtre d'équipe : ces fiches n'ont pas d'utilisateur assigné"
+        "infoTeamNone": "Pas de filtre d'équipe : ces fiches n'ont pas d'utilisateur assigné",
+        "templatePreview": "Aperçu avec vos données : chaque utilisateur verra les siennes."
     },
     "goalStatus": {
         "reached": "Atteint",
@@ -57,7 +58,8 @@
         "galleryIntro": "Cliquez sur un indicateur pour l'ajouter, prêt à l'emploi, à votre tableau de bord. Les chiffres affichés sont les vôtres.",
         "customKpi": "Choisissez vous-même l'entité, le filtre et la période.",
         "customGoal": "Fixez votre propre cible sur n'importe quel chiffre.",
-        "nativeDashlets": "Flux, calendrier, listes, graphiques…"
+        "nativeDashlets": "Flux, calendrier, listes, graphiques…",
+        "previewOnly": "Aperçu : les actions ne sont pas exécutées dans un modèle de tableau de bord."
     },
     "presets": {
         "newLeads": "Nouveaux leads",
