@@ -104,7 +104,14 @@ class LiveDashletsActionsView extends BaseDashletView {
         ...(this.events || {}),
         /** @this LiveDashletsActionsView */
         'click [data-live-action]': function (e) {
-            this.runAction(e.currentTarget.dataset.liveAction, e.currentTarget);
+            const action = e.currentTarget.dataset.liveAction;
+
+            // In a template's preview, a call link must not dial either.
+            if (this.isPreview() && !PREVIEW_ACTIONS.includes(action)) {
+                e.preventDefault();
+            }
+
+            this.runAction(action, e.currentTarget);
         },
         // A plain click previews the record; Ctrl, Cmd or the middle button open it in a new tab.
         /** @this LiveDashletsActionsView */

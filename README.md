@@ -6,7 +6,7 @@
 ![EspoCRM 10.0.3+](https://img.shields.io/badge/EspoCRM-10.0.3%2B-5c7cfa.svg)
 ![PHP 8.3+](https://img.shields.io/badge/PHP-8.3%2B-777bb4.svg)
 
-![A dashboard built with Live Dashlets](docs/screenshots/dashboard.png)
+![From an empty tab to a working dashboard: the gallery, one style for every tile, a goal of your own, one team at a time](docs/demo.gif)
 
 ## Why Live Dashlets
 
@@ -18,6 +18,8 @@ Live Dashlets adds two dashlet types, **Key Figure** and **Goal**, which you con
 - **Figures that tell a story.** Each figure shows its change against the same point of the previous period, as a badge and as a cumulative curve.
 - **One click to drill down.** Clicking a tile lists the records behind the figure.
 - **Same permissions as everywhere else.** Two people can see different numbers on the same tile, because each one only counts the records they are allowed to read.
+
+![A dashboard built with Live Dashlets](docs/screenshots/dashboard.png)
 
 ## Features
 
@@ -172,7 +174,7 @@ Nothing is imposed on anyone until you deploy.
 
 ## Installation
 
-1. Download `live-dashlets-1.5.0.zip` from the [latest release](../../releases/latest).
+1. Download `live-dashlets-1.5.1.zip` from the [latest release](../../releases/latest).
 2. In EspoCRM, go to **Administration → Extensions**, upload the ZIP and click **Install**.
 3. Optional: in **Administration → Dashboard Templates**, open **Live dashboard**, adjust the goal targets and deploy it, to chosen users or with **Deploy to Everyone**.
 
