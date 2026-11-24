@@ -70,6 +70,9 @@ class RecentActivity
 
     /** The start of a note posted to people rather than on a record, as its title. */
     private const POST_TITLE_LENGTH = 80;
+    /** Notes read at a time, and at most, to find those the user may see. */
+    private const POST_BATCH = 100;
+    private const POST_BATCH_LIMIT = 10;
 
     private DateTimeImmutable $now;
     private DateTimeZone $utc;
@@ -331,45 +334,70 @@ class RecentActivity
             $where['createdById'] = $this->actorIds;
         }
 
-        // More than needed: some are left out by the reading rule.
-        $notes = $this->entityManager
-            ->getRDBRepository('Note')
-            ->where($where)
-            ->order([['createdAt', 'DESC']])
-            ->limit(0, self::FETCH_LIMIT * 2)
-            ->find();
-
         $events = [];
 
-        foreach ($notes as $note) {
-            if (count($events) >= self::FETCH_LIMIT) {
+        // Batch after batch: the reading rule leaves some out. Bounded, for very busy streams.
+        for ($batch = 0; $batch < self::POST_BATCH_LIMIT && count($events) < self::FETCH_LIMIT; $batch++) {
+            $notes = iterator_to_array($this->entityManager
+                ->getRDBRepository('Note')
+                ->where($where)
+                ->order([['createdAt', 'DESC'], ['id', 'DESC']])
+                ->limit($batch * self::POST_BATCH, self::POST_BATCH)
+                ->find(), false);
+
+            foreach ($notes as $note) {
+                if (count($events) >= self::FETCH_LIMIT) {
+                    break;
+                }
+
+                $event = $this->postEvent($note);
+
+                if ($event) {
+                    $events[] = $event;
+                }
+            }
+
+            if (count($notes) < self::POST_BATCH) {
                 break;
             }
-
-            if (!$this->acl->checkEntityRead($note)) {
-                continue;
-            }
-
-            $type = $note->get('parentType');
-            $id = $note->get('parentId');
-            $parent = $type && $id ? $this->readableEntity($type, $id) : null;
-
-            if ($type && $id && !$parent) {
-                continue;
-            }
-
-            $events[] = $this->event($note, 'note', 'posted', $note->get('createdAt'), [
-                'target' => $parent ? ['type' => $type, 'id' => $id, 'name' => $this->nameOf($parent)] : null,
-                'person' => $parent && in_array($type, ['Contact', 'Lead'], true) ? $parent : null,
-                'note' => $this->postOf($note),
-            ]);
         }
 
         return $events;
     }
 
+    /**
+     * @return ?array<string, mixed> Null when the user may not see it.
+     */
+    private function postEvent(Entity $note): ?array
+    {
+        if (!$this->acl->checkEntityRead($note)) {
+            return null;
+        }
+
+        $type = $note->get('parentType');
+        $id = $note->get('parentId');
+        $parent = $type && $id ? $this->readableEntity($type, $id) : null;
+
+        if ($type && $id && !$parent) {
+            return null;
+        }
+
+        return $this->event($note, 'note', 'posted', $note->get('createdAt'), [
+            'target' => $parent ? ['type' => $type, 'id' => $id, 'name' => $this->nameOf($parent)] : null,
+            'person' => $parent && in_array($type, ['Contact', 'Lead'], true) ? $parent : null,
+            'note' => $this->postOf($note),
+        ]);
+    }
+
+    /**
+     * The text of a note, if the user may read the field.
+     */
     private function postOf(Entity $note): string
     {
+        if (!$this->acl->checkField('Note', 'post')) {
+            return '';
+        }
+
         $text = trim((string) preg_replace('/\s+/u', ' ', (string) $note->get('post')));
 
         return mb_strlen($text) > self::NOTE_LENGTH ? rtrim(mb_substr($text, 0, self::NOTE_LENGTH - 1)) . '…' : $text;
