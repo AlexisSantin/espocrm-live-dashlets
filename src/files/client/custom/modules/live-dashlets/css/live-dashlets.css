@@ -2545,6 +2545,28 @@ body .dashlet.panel:not(.live-dashlet-look-native) > .panel-heading .btn-group >
     background: none;
 }
 
+/* At rest, a tile shows its figure, its change or its bar, and nothing more. The period, the
+   status, what it is compared to and what is left come with the pointer or the keyboard focus,
+   in place: nothing moves. Screens without a pointer show everything. */
+@media (hover: hover) {
+    .live-dashlet-look-native .live-dashlet-kpi .live-dashlet-head,
+    .live-dashlet-look-native .live-dashlet-kpi .live-dashlet-compare,
+    .live-dashlet-look-native .live-dashlet-goal .live-dashlet-head,
+    .live-dashlet-look-native .live-dashlet-goal-foot {
+        opacity: 0;
+        transition: opacity .15s ease;
+    }
+
+    .dashlet.live-dashlet-look-native:hover .live-dashlet-head,
+    .dashlet.live-dashlet-look-native:hover .live-dashlet-compare,
+    .dashlet.live-dashlet-look-native:hover .live-dashlet-goal-foot,
+    .dashlet.live-dashlet-look-native:focus-within .live-dashlet-head,
+    .dashlet.live-dashlet-look-native:focus-within .live-dashlet-compare,
+    .dashlet.live-dashlet-look-native:focus-within .live-dashlet-goal-foot {
+        opacity: 1;
+    }
+}
+
 /* Goals: EspoCRM's label for the status; the bar in the accent, green once reached. */
 .live-dashlet-label {
     flex: none;

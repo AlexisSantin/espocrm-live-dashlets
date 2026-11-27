@@ -124,7 +124,7 @@ Like everything else, the list only shows records the viewer can read, and it on
 
 The top of the **+ Add** window sets the style and the color of every Live dashlet at once: the figures and goals, **Next Actions** and **What happened**. The cards of the window preview each style, and a click shows on the dashboard right away; there is nothing to set dashlet by dashlet.
 
-- **EspoCRM** (the default) looks like the rest of EspoCRM: its font sizes, buttons, labels and checkboxes, in the theme's colors. Figures are a little larger than the text, the change is plain green or red text, goals give their status with EspoCRM's labels, and the icons of Next Actions and What happened are small and grey, red only for what is late.
+- **EspoCRM** (the default) looks like the rest of EspoCRM: its font sizes, buttons, labels and checkboxes, in the theme's colors. Figures are a little larger than the text, the change is plain green or red text, goals give their status with EspoCRM's labels, and the icons of Next Actions and What happened are small and grey, red only for what is late. At rest, a tile shows its figure and its change, or a goal its bar; the period, the status, what the figure is compared to and what is left appear with the pointer or the keyboard focus, in place. Touch screens show everything.
 - **Minimal** stays neutral, with the change in a line under the figure.
 - **Outline** draws a line around the dashlet, with no fill or shadow, and sets the figures in a monospaced font.
 - **Big figure** lets the number fill the tile in a narrow font, with the change beside it and the comparison below; a goal reads as 20 segments. Its font ships with the extension (Barlow Condensed, SIL Open Font License), so nothing is loaded from outside EspoCRM.
