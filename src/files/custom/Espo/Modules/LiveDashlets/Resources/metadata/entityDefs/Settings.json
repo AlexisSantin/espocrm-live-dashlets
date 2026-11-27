@@ -3,11 +3,12 @@
         "liveDashletsStyle": {
             "type": "enum",
             "options": [
+                "native",
                 "minimal",
                 "outline",
                 "big"
             ],
-            "default": "minimal"
+            "default": "native"
         },
         "liveDashletsColor": {
             "type": "enum",

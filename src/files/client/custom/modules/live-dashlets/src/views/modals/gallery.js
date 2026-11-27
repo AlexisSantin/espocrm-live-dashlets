@@ -141,6 +141,8 @@ class LiveDashletsGalleryModalView extends ModalView {
 
         const fragment = document.createDocumentFragment();
 
+        root.classList.toggle('live-dashlet-look-native', getLook(this).style === 'native');
+
         fragment.append(this.lookPicker.element);
         this.lookPicker.render();
 
@@ -200,6 +202,9 @@ class LiveDashletsGalleryModalView extends ModalView {
      */
     refreshCardLook() {
         const look = getLook(this);
+
+        // The EspoCRM style: the cards and the choices above them use EspoCRM's components.
+        this.element?.querySelector('.live-gallery')?.classList.toggle('live-dashlet-look-native', look.style === 'native');
 
         this.element?.querySelectorAll('.live-gallery-card[data-preset]').forEach(card => {
             const preset = this.presetList.find(item => item.name === card.dataset.preset);

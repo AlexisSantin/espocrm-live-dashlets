@@ -21,7 +21,7 @@
 
 import BaseDashletView from 'views/dashlets/abstract/base';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
-import {applyLookToPanel, watchLook} from 'live-dashlets:helpers/look';
+import {applyLookToPanel, isNativeLook, watchLook} from 'live-dashlets:helpers/look';
 import {createSegmented} from 'live-dashlets:helpers/segmented';
 
 const KINDS = {
@@ -223,11 +223,19 @@ class LiveDashletsActionsView extends BaseDashletView {
             this.load();
         },
         /** @this LiveDashletsActionsView */
-        'click .live-actions-why-switch': function () {
+        'click button.live-actions-why-switch': function () {
             this.prefs.why = !this.prefs.why;
             this.saveState();
             this.renderList();
             this.getContainer()?.querySelector('.live-actions-why-switch')?.focus();
+        },
+        // The EspoCRM style: a checkbox.
+        /** @this LiveDashletsActionsView */
+        'change .live-actions-why-switch input': function (e) {
+            this.prefs.why = e.currentTarget.checked;
+            this.saveState();
+            this.renderList();
+            this.getContainer()?.querySelector('.live-actions-why-switch input')?.focus();
         },
         /** @this LiveDashletsActionsView */
         'submit .live-actions-composer': function (e) {
@@ -277,8 +285,15 @@ class LiveDashletsActionsView extends BaseDashletView {
     setup() {
         super.setup();
 
-        // The style and the color chosen for every Live dashlet.
-        watchLook(this, () => applyLookToPanel(this));
+        // The style and the color chosen for every Live dashlet; the EspoCRM style has its own
+        // controls.
+        watchLook(this, () => {
+            applyLookToPanel(this);
+
+            if (this.queue && this.getContainer()) {
+                this.renderList();
+            }
+        });
 
         this.formatter = new LiveDashletsFormatter(this);
         this.prefs = {...this.prefs, ...this.readState()};
@@ -298,7 +313,8 @@ class LiveDashletsActionsView extends BaseDashletView {
 
         this.buttonList.push({
             name: 'liveCreate',
-            html: '<span class="fas fa-plus" aria-hidden="true"></span><span>' +
+            // The EspoCRM style shows the + alone, as EspoCRM's own heading buttons.
+            html: '<span class="fas fa-plus" aria-hidden="true"></span><span class="live-actions-create-text">' +
                 escape(this.t('createLabels', 'button')) + '</span>',
             title: this.t('createLabels', 'title'),
         });
@@ -673,9 +689,11 @@ class LiveDashletsActionsView extends BaseDashletView {
             GROUPS.reduce((sum, group) => sum + (counts.groups[group] || 0), 0) :
             counts.groups[name] || 0) + plus;
 
+        const native = isNativeLook(this);
         const filter = createSegmented({
             label: this.t('actionLabels', 'filterLabel'),
             className: 'live-actions-filter',
+            native,
             value: this.prefs.filter,
             options: FILTERS.map(name => ({
                 value: name,
@@ -718,12 +736,21 @@ class LiveDashletsActionsView extends BaseDashletView {
                 type.append(option);
             });
 
-        const why = this.make('button', 'live-actions-why-switch');
+        const why = this.make(native ? 'label' : 'button', 'live-actions-why-switch');
 
-        why.type = 'button';
-        why.setAttribute('role', 'switch');
-        why.setAttribute('aria-checked', String(this.prefs.why));
-        why.append(this.make('span', 'live-recent-switch'), this.t('actionLabels', 'why'));
+        if (native) {
+            // EspoCRM's own checkbox.
+            const box = this.make('input', 'form-checkbox form-checkbox-small');
+
+            box.type = 'checkbox';
+            box.checked = this.prefs.why;
+            why.append(box, this.make('span', null, this.t('actionLabels', 'why')));
+        } else {
+            why.type = 'button';
+            why.setAttribute('role', 'switch');
+            why.setAttribute('aria-checked', String(this.prefs.why));
+            why.append(this.make('span', 'live-recent-switch'), this.t('actionLabels', 'why'));
+        }
 
         bar.append(filter, type, why);
 
@@ -1555,13 +1582,13 @@ class LiveDashletsActionsView extends BaseDashletView {
 
     /** @private */
     createChips(name, values, selected, isLocked = false) {
-        const chips = this.make('div', 'live-actions-chips');
+        const chips = this.make('div', this.getChipsClass());
 
         chips.setAttribute('role', 'group');
 
         values.forEach(value => {
             const label = this.panel.mode === 'meeting' && value === 'held' ? 'meetingHeld' : value;
-            const chip = this.make('button', 'live-actions-chip', this.t('actionOutcome', label));
+            const chip = this.make('button', this.getChipClass(value === selected), this.t('actionOutcome', label));
 
             chip.type = 'button';
             chip.dataset.liveChoice = name;
@@ -1795,6 +1822,7 @@ class LiveDashletsActionsView extends BaseDashletView {
             form.append(createSegmented({
                 label: this.t('createLabels', 'typeLabel'),
                 className: 'live-actions-create-type',
+                native: isNativeLook(this),
                 value: composer.type,
                 options: types.map(type => ({value: type, label: this.t('createLabels', type)})),
                 onChange: type => {
@@ -2045,13 +2073,13 @@ class LiveDashletsActionsView extends BaseDashletView {
         const composer = this.composer;
         const field = this.make('div', 'live-actions-field live-actions-create-when');
         const label = this.t('createLabels', 'when');
-        const chips = this.make('div', 'live-actions-chips');
+        const chips = this.make('div', this.getChipsClass());
 
         chips.setAttribute('role', 'group');
         chips.setAttribute('aria-label', label);
 
         this.getWhenChoices().forEach(choice => {
-            const chip = this.make('button', 'live-actions-chip', this.t('createLabels', choice));
+            const chip = this.make('button', this.getChipClass(composer.when === choice), this.t('createLabels', choice));
 
             chip.type = 'button';
             chip.dataset.liveAction = 'pickWhen';
@@ -2895,7 +2923,24 @@ class LiveDashletsActionsView extends BaseDashletView {
 
         chip.closest('.live-actions-chips').querySelectorAll('[data-live-choice]').forEach(item => {
             item.setAttribute('aria-pressed', String(item === chip));
+            item.classList.toggle('active', item === chip && item.classList.contains('btn'));
         });
+    }
+
+    /**
+     * Choices shown as chips or, in the EspoCRM style, as EspoCRM's text buttons.
+     *
+     * @private
+     */
+    getChipsClass() {
+        return isNativeLook(this) ? 'btn-group live-actions-chips' : 'live-actions-chips';
+    }
+
+    /** @private */
+    getChipClass(isSelected) {
+        return isNativeLook(this) ?
+            'btn btn-text btn-sm live-actions-chip' + (isSelected ? ' active' : '') :
+            'live-actions-chip';
     }
 
     /**

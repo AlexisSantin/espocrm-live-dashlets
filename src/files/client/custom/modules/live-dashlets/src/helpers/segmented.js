@@ -20,7 +20,8 @@
  ************************************************************************/
 
 /**
- * A segmented control with a sliding thumb: one choice among a few, all visible.
+ * One choice among a few, all visible: a segmented control with a sliding thumb or, for the
+ * EspoCRM style, EspoCRM's own text buttons, the chosen one underlined as the dashboard tabs.
  * Keyboard: the arrow keys, Home and End move the choice, as in a radio group.
  *
  * @param {{
@@ -28,28 +29,32 @@
  *   options: {value: string, label: string, title?: string, attributes?: Object<string, string>}[],
  *   value: string,
  *   className?: string,
+ *   native?: boolean,
  *   onChange: function(string): void,
  * }} params
  * @return {HTMLElement}
  */
-export function createSegmented({label, options, value, className, onChange}) {
+export function createSegmented({label, options, value, className, native = false, onChange}) {
     const root = document.createElement('div');
-    const thumb = document.createElement('span');
 
-    root.className = 'live-seg' + (className ? ' ' + className : '');
+    root.className = (native ? 'btn-group live-seg-native' : 'live-seg') + (className ? ' ' + className : '');
     root.setAttribute('role', 'radiogroup');
     root.setAttribute('aria-label', label);
     root.style.setProperty('--seg-count', String(options.length));
 
-    thumb.className = 'live-seg-thumb';
-    thumb.setAttribute('aria-hidden', 'true');
-    root.append(thumb);
+    if (!native) {
+        const thumb = document.createElement('span');
+
+        thumb.className = 'live-seg-thumb';
+        thumb.setAttribute('aria-hidden', 'true');
+        root.append(thumb);
+    }
 
     const buttons = options.map(option => {
         const button = document.createElement('button');
 
         button.type = 'button';
-        button.className = 'live-seg-option';
+        button.className = native ? 'btn btn-text btn-sm live-seg-option' : 'live-seg-option';
         button.dataset.value = option.value;
         button.textContent = option.label;
         button.setAttribute('role', 'radio');
@@ -74,6 +79,7 @@ export function createSegmented({label, options, value, className, onChange}) {
 
         buttons.forEach((button, i) => {
             button.setAttribute('aria-checked', String(i === index));
+            button.classList.toggle('active', native && i === index);
             button.tabIndex = i === index ? 0 : -1;
         });
 

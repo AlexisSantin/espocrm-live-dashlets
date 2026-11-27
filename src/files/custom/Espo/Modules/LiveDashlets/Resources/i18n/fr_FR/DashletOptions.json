@@ -16,7 +16,8 @@
         "scope": "Affiché par défaut",
         "days": "Période",
         "showNotes": "Afficher les notes",
-        "highlight": "Mettre en avant"
+        "highlight": "Mettre en avant",
+        "team": "Équipe"
     },
     "options": {
         "metric": {
@@ -57,6 +58,7 @@
         "staleDays": "Les tâches en retard depuis plus longtemps quittent la liste principale et passent dans « À trier ».",
         "scope": "Les actions de qui le dashlet montre à l'ouverture. Chacun peut changer dans le dashlet ; son choix est gardé dans son navigateur.",
         "showNotes": "Affiche la première ligne de chaque note sous le nom. Chacun peut l'activer ou la désactiver dans le dashlet.",
-        "highlight": "La tuile prend une couleur pleine pour ressortir. À garder pour un seul chiffre par tableau de bord. Le style et la couleur de tous les dashlets Live se choisissent en haut de la fenêtre + Ajouter."
+        "highlight": "La tuile prend une couleur pleine pour ressortir. À garder pour un seul chiffre par tableau de bord. Le style et la couleur de tous les dashlets Live se choisissent en haut de la fenêtre + Ajouter.",
+        "team": "Les fiches que compte la tuile : celles de l'équipe choisie pour tout le tableau de bord (en haut de la fenêtre + Ajouter), tout ce que vous pouvez voir, ou les fiches assignées aux membres d'une équipe, la vôtre ou une autre. Seules les fiches que vous pouvez lire sont comptées."
     }
 }

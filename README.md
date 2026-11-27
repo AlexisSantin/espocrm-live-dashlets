@@ -15,7 +15,7 @@ Out of the box, EspoCRM dashboards offer record lists, the stream, a calendar an
 Live Dashlets adds two dashlet types, **Key Figure** and **Goal**, which you configure in their options without writing code. It also makes the dashboard quicker to fill: a gallery of 16 ready-made indicators shows your real figures before you add them.
 
 - **One click to add.** A visible "+ Add" button opens a gallery of ready-made indicators with live previews. A click puts the indicator on the dashboard, already set up.
-- **Figures that tell a story.** Each figure shows its change against the same point of the previous period, as a badge and as a cumulative curve.
+- **Figures that tell a story.** Each figure shows its change against the same point of the previous period, in figures and as a cumulative curve.
 - **One click to drill down.** Clicking a tile lists the records behind the figure.
 - **Same permissions as everywhere else.** Two people can see different numbers on the same tile, because each one only counts the records they are allowed to read.
 
@@ -33,7 +33,7 @@ New tiles line up from left to right after the small tiles at the top of the das
 
 ### Key Figure
 
-A large number with the entity icon, the period and the change against the previous period, for example "27 new leads this month, +50 %, +9 vs 18 by Oct 17". The change is given both as a percentage and as a value.
+A number with the period and the change against the previous period, for example "27 new leads this month, +50 % vs 18". Resting the pointer on "vs 18" gives the comparison in full: "+9 vs 18 by Oct 17".
 
 - **What the figure counts.** Resting the pointer on the tile's title, or giving it the keyboard focus, shows the entity and filters, what is counted or added up, the dates of the period and of the comparison, and a reminder that only the records you can read are counted. It opens on hover, keyboard focus or a tap.
 - **A fair comparison.** By default, the previous period is cut at the same point: on November 17, this month is compared with October 1 to 17. You can also compare with the whole previous period, or turn the comparison off.
@@ -47,7 +47,7 @@ A large number with the entity icon, the period and the change against the previ
 A progress bar toward a target, with:
 - a marker showing where you should be at this point of the period;
 - a status: **On track**, **Behind** or **Reached**, which the bar also shows: green when on track or reached, amber when behind;
-- what is left to do and the number of days left.
+- what is left to do and the number of days left, until the goal is reached.
 
 ### The records behind a figure
 
@@ -97,7 +97,7 @@ A dashlet that answers "what happened recently?": calls and meetings held, email
 - **The details on a click.** What was written about the call, the meeting or the email, who did it, how long it lasted, and the next step planned on the same record.
 - **Notes on demand.** The **Notes** switch adds the first line of each note under the name, for those who want more at a glance.
 - **The stream's notes.** A note posted on a record shows under that record, with its text; a note posted to people or teams shows its first words. Who may see a note follows EspoCRM's own rule: the record's stream, or the people it was posted to.
-- **Whose actions.** Me, My team (by default), or Everything I can see, from the narrowest to the widest. Without a team, only your own actions are shown. The type menu narrows the list to calls, meetings, emails, additions, deals, tasks or stream notes.
+- **Whose actions.** Me, My team (by default), or Everything I can see, from the narrowest to the widest. Without a team, **My team** is not offered: **Me** shows your own actions. The type menu narrows the list to calls, meetings, emails, additions, deals, tasks or stream notes.
 - **What's new.** A blue dot marks what arrived since your last visit.
 - **Only what matters.** Emails count only when they are linked to an account, a contact, a lead, a deal or a case. Contacts added together to the same account make one line.
 
@@ -114,6 +114,7 @@ Like everything else, the list only shows records the viewer can read, and it on
 | Date used for the period | Which date places a record in the period: created at, close date, converted at… |
 | Compare with | The previous period at the same point, the whole previous period, or nothing |
 | Target | For a Goal |
+| Team | Whose records the tile counts: as the dashboard (the default), everything you can see, or one team, yours or another one |
 | Highlight | Fills one tile with color to make it stand out |
 | Auto-refresh | Every 30 seconds up to every 10 minutes |
 
@@ -123,7 +124,8 @@ Like everything else, the list only shows records the viewer can read, and it on
 
 The top of the **+ Add** window sets the style and the color of every Live dashlet at once: the figures and goals, **Next Actions** and **What happened**. The cards of the window preview each style, and a click shows on the dashboard right away; there is nothing to set dashlet by dashlet.
 
-- **Minimal** (the default) stays neutral, with the change in a line under the figure.
+- **EspoCRM** (the default) looks like the rest of EspoCRM: its font sizes, buttons, labels and checkboxes, in the theme's colors. Figures are a little larger than the text, the change is plain green or red text, goals give their status with EspoCRM's labels, and the icons of Next Actions and What happened are small and grey, red only for what is late.
+- **Minimal** stays neutral, with the change in a line under the figure.
 - **Outline** draws a line around the dashlet, with no fill or shadow, and sets the figures in a monospaced font.
 - **Big figure** lets the number fill the tile in a narrow font, with the change beside it and the comparison below; a goal reads as 20 segments. Its font ships with the extension (Barlow Condensed, SIL Open Font License), so nothing is loaded from outside EspoCRM.
 - **Highlight**, in a tile's options, fills that one tile with color. Keep it for one headline figure per dashboard.
@@ -134,7 +136,9 @@ Green, amber and red keep their meaning on every style: they are left to trends 
 
 ### One team at a time
 
-For someone in several teams, the same line of the **+ Add** window chooses whose work the dashboard shows: all of their teams, or one of them. Figures, goals, the records behind them and the **Team** view of What happened then count only the records assigned to a member of that team, and each tile names the team beside its period. Next Actions stays personal. The choice is kept for each user, and the server ignores a team the user is not in.
+For someone in several teams, the same line of the **+ Add** window chooses whose work the dashboard shows: all of their teams, or one of them. Figures, goals, the records behind them and the **Team** view of What happened then count only the records assigned to a member of that team, and each tile names the team beside its period. Next Actions stays personal. The choice is kept for each user.
+
+**A team per tile.** The **Team** option of a key figure or a goal overrides the dashboard's choice for that tile: everything you can see, or the records assigned to the members of one team. It can be your own team or another one, such as a sales team's figure beside the support team's. Another team is offered to those who may read it and the users, and the server ignores it for anyone else. In every case, only the records you may read are counted.
 
 ![The top of the + Add window sets the style and the color of every dashlet](docs/screenshots/styles.png)
 

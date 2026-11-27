@@ -23,9 +23,14 @@
  * One look for every tile: a style and a color chosen for the whole dashboard. The company's
  * choice is a setting, a user's own choice a preference; an empty preference follows the company.
  * A tile can only be highlighted, in a solid color.
+ *
+ * The EspoCRM style, the default, uses EspoCRM's own components: its buttons, labels and
+ * checkboxes, small grey icons, figures a little larger than the text.
  */
 
-export const LOOK_STYLES = ['minimal', 'outline', 'big'];
+export const LOOK_STYLES = ['native', 'minimal', 'outline', 'big'];
+
+export const DEFAULT_STYLE = 'native';
 
 export const LOOK_COLORS = ['primary', 'info', 'success', 'warning', 'danger', 'default'];
 
@@ -70,7 +75,7 @@ const pick = (value, list, fallback) => list.includes(value) ? value : fallback;
  */
 export function getCompanyLook(config) {
     return {
-        style: pick(config.get('liveDashletsStyle'), LOOK_STYLES, 'minimal'),
+        style: pick(config.get('liveDashletsStyle'), LOOK_STYLES, DEFAULT_STYLE),
         color: pick(config.get('liveDashletsColor'), LOOK_COLORS, 'primary'),
     };
 }
@@ -112,7 +117,27 @@ export function applyLookToPanel(view, style) {
         .filter(name => name.startsWith('live-dashlet-style-') || name.startsWith('live-dashlet-accent-'))
         .forEach(name => panel.classList.remove(name));
 
-    panel.classList.add('live-dashlet-panel', 'live-dashlet-style-' + (style || look.style), 'live-dashlet-accent-' + look.color);
+    [...panel.classList]
+        .filter(name => name.startsWith('live-dashlet-look-'))
+        .forEach(name => panel.classList.remove(name));
+
+    // The look stays on a highlighted tile too: the EspoCRM style keeps its components there.
+    panel.classList.add(
+        'live-dashlet-panel',
+        'live-dashlet-style-' + (style || look.style),
+        'live-dashlet-look-' + look.style,
+        'live-dashlet-accent-' + look.color
+    );
+}
+
+/**
+ * Whether the dashlets use EspoCRM's own components.
+ *
+ * @param {import('view').default} view
+ * @return {boolean}
+ */
+export function isNativeLook(view) {
+    return getLook(view).style === 'native';
 }
 
 /**

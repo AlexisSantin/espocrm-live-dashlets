@@ -13,7 +13,8 @@
         "scope": "Shown by default",
         "days": "Period",
         "showNotes": "Show notes",
-        "highlight": "Highlight"
+        "highlight": "Highlight",
+        "team": "Team"
     },
     "options": {
         "metric": {
@@ -54,6 +55,7 @@
         "staleDays": "Overdue tasks older than this leave the main list and go to “To sort out”.",
         "scope": "Whose actions the dashlet shows when it opens. Everyone can change it in the dashlet; the choice is kept in their browser.",
         "showNotes": "Shows the first line of each note under the name. Everyone can turn it on or off in the dashlet.",
-        "highlight": "Fills the tile with color, to make it stand out. Keep it for one figure per dashboard. The style and the color of all Live dashlets are chosen at the top of the + Add window."
+        "highlight": "Fills the tile with color, to make it stand out. Keep it for one figure per dashboard. The style and the color of all Live dashlets are chosen at the top of the + Add window.",
+        "team": "The records the tile counts: those of the team chosen for the whole dashboard (at the top of the + Add window), everything you can see, or the records assigned to the members of one team, yours or another one. Only records you may read are counted."
     }
 }

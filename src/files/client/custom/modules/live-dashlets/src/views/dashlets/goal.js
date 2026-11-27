@@ -20,6 +20,7 @@
  ************************************************************************/
 
 import LiveDashletsMetricView from 'live-dashlets:views/dashlets/abstract/metric';
+import {isNativeLook} from 'live-dashlets:helpers/look';
 
 /**
  * Progress toward a target, with the pace expected at this point of the period.
@@ -54,23 +55,29 @@ class LiveDashletsGoalView extends LiveDashletsMetricView {
 
         const root = this.createElement('div', `live-dashlet-goal live-dashlet-goal-${status}`);
 
-        // Head: icon, period, status.
+        // Head: icon, period, status. The EspoCRM style has no icon, and EspoCRM's label.
+        const native = isNativeLook(this);
         const head = this.createElement('div', 'live-dashlet-head');
 
-        head.append(this.createIcon(), this.createPeriod(data));
+        if (!native) {
+            head.append(this.createIcon());
+        }
+
+        head.append(this.createPeriod(data));
 
         this.setInfo(data, [
             this.translate('infoTarget', 'labels', 'LiveDashlets').replace('{value}', format(target)),
         ]);
 
         if (status !== 'none') {
+            const labelStyle = {reached: 'success', ahead: 'info', behind: 'warning'}[status];
             const chip = this.createElement(
                 'span',
-                'live-dashlet-status',
+                native ? `live-dashlet-label label label-${labelStyle}` : 'live-dashlet-status',
                 this.translate(status, 'goalStatus', 'LiveDashlets')
             );
 
-            if (status === 'reached') {
+            if (status === 'reached' && !native) {
                 const icon = this.createElement('span', 'fas fa-check');
 
                 icon.setAttribute('aria-hidden', 'true');
@@ -121,7 +128,9 @@ class LiveDashletsGoalView extends LiveDashletsMetricView {
             bar.append(pace);
         }
 
-        root.append(head, figures, bar, this.createFoot(value, target, data, format));
+        const foot = this.createFoot(value, target, data, format);
+
+        root.append(head, figures, bar, ...(foot ? [foot] : []));
 
         container.replaceChildren(root);
 
@@ -154,22 +163,22 @@ class LiveDashletsGoalView extends LiveDashletsMetricView {
         return ratio >= progress ? 'ahead' : 'behind';
     }
 
-    /** @private */
+    /**
+     * What is left to do and the days left. Nothing once the goal is reached: the status and the
+     * figures already say it.
+     *
+     * @private
+     * @return {HTMLElement|null}
+     */
     createFoot(value, target, data, format) {
-        const foot = this.createElement('div', 'live-dashlet-goal-foot');
-        const parts = [];
-
         if (value >= target) {
-            parts.push(
-                this.translate('aboveTarget', 'labels', 'LiveDashlets')
-                    .replace('{value}', format(value - target))
-            );
-        } else {
-            parts.push(
-                this.translate('remaining', 'labels', 'LiveDashlets')
-                    .replace('{value}', format(target - value))
-            );
+            return null;
         }
+
+        const foot = this.createElement('div', 'live-dashlet-goal-foot');
+        const parts = [
+            this.translate('remaining', 'labels', 'LiveDashlets').replace('{value}', format(target - value)),
+        ];
 
         if (data.period && data.period.daysLeft > 0) {
             const key = data.period.daysLeft === 1 ? 'dayLeft' : 'daysLeft';

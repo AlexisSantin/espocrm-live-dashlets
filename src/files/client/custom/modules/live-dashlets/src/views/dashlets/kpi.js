@@ -21,6 +21,7 @@
 
 import LiveDashletsMetricView from 'live-dashlets:views/dashlets/abstract/metric';
 import {createSparkline} from 'live-dashlets:helpers/sparkline';
+import {isNativeLook} from 'live-dashlets:helpers/look';
 
 /**
  * A key figure with its trend against the previous period and the curve of the period.
@@ -42,12 +43,14 @@ class LiveDashletsKpiView extends LiveDashletsMetricView {
         const root = this.createElement('div', 'live-dashlet-kpi');
 
         // Where the change goes: in the head (default); beside the figure, with the comparison
-        // below ("big figure"); or in a line under the figure, with the comparison ("minimal").
+        // below ("big figure"); or in a line under the figure, with the comparison ("minimal" and
+        // the EspoCRM style, highlighted tiles included).
         const style = this.getTileStyle();
-        const big = style === 'big';
-        const foot = style === 'minimal';
+        const native = isNativeLook(this);
+        const big = !native && style === 'big';
+        const foot = native || style === 'minimal';
 
-        // Head: icon, period, info and, on the right, the change.
+        // Head: icon (not in the EspoCRM style), period, info and, on the right, the change.
         const head = this.createElement('div', 'live-dashlet-head');
         const infoLines = data.previousPeriod ?
             [
@@ -57,11 +60,15 @@ class LiveDashletsKpiView extends LiveDashletsMetricView {
             ] :
             [];
 
-        head.append(this.createIcon(), this.createPeriod(data));
+        if (!native) {
+            head.append(this.createIcon());
+        }
+
+        head.append(this.createPeriod(data));
 
         this.setInfo(data, infoLines);
 
-        const badge = this.createTrendBadge(data);
+        const badge = this.createTrendBadge(data, native);
 
         if (badge && !big && !foot) {
             head.append(badge);
@@ -75,9 +82,14 @@ class LiveDashletsKpiView extends LiveDashletsMetricView {
         value.style.setProperty('--ld-chars', String(data.value === null ? 1 : format(data.value).length));
         main.append(value);
 
+        // "vs 35": the dates of the comparison are in its title and in the info of the tile.
         const compare = badge ?
             this.createElement('span', 'live-dashlet-compare', this.getCompareText(data, format)) :
             null;
+
+        if (compare) {
+            compare.title = this.getDifferenceText(data, format) + this.getPreviousText(data, format);
+        }
 
         if (badge && !foot) {
             main.append(big ? badge : compare);
@@ -118,9 +130,11 @@ class LiveDashletsKpiView extends LiveDashletsMetricView {
 
     /**
      * @private
+     * @param {Object} data
+     * @param {boolean} native In the EspoCRM style, the change is plain colored text.
      * @return {HTMLElement|null}
      */
-    createTrendBadge(data) {
+    createTrendBadge(data, native) {
         if (data.previousValue === null || data.previousValue === undefined || data.value === null) {
             return null;
         }
@@ -147,7 +161,11 @@ class LiveDashletsKpiView extends LiveDashletsMetricView {
 
         arrow.setAttribute('aria-hidden', 'true');
 
-        badge.append(arrow, ' ', this.getChangeText(value, previous, data, direction));
+        if (native) {
+            badge.append(this.getChangeText(value, previous, data, direction));
+        } else {
+            badge.append(arrow, ' ', this.getChangeText(value, previous, data, direction));
+        }
 
         if (data.previousPeriod) {
             badge.title = this.translate('previousPeriodRange', 'labels', 'LiveDashlets')
@@ -159,12 +177,13 @@ class LiveDashletsKpiView extends LiveDashletsMetricView {
     }
 
     /**
-     * "vs 5 on 17 Oct" while the period runs, "vs 33 last month" for a whole period.
+     * "vs 35": short, beside the change. The full comparison ("+12 vs 35 by Oct 17", "vs 33 last
+     * month") is in its title.
      *
      * @private
      */
     getCompareText(data, format) {
-        return this.getDifferenceText(data, format) + this.getPreviousText(data, format);
+        return this.translate('comparedTo', 'labels', 'LiveDashlets').replace('{value}', format(data.previousValue));
     }
 
     /**

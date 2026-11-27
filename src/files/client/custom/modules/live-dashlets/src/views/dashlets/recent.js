@@ -21,7 +21,7 @@
 
 import BaseDashletView from 'views/dashlets/abstract/base';
 import LiveDashletsFormatter from 'live-dashlets:helpers/formatter';
-import {applyLookToPanel, getTeamFilter, TEAM_EVENT, watchLook} from 'live-dashlets:helpers/look';
+import {applyLookToPanel, getTeamFilter, isNativeLook, TEAM_EVENT, watchLook} from 'live-dashlets:helpers/look';
 import {createSegmented} from 'live-dashlets:helpers/segmented';
 
 const ICONS = {
@@ -100,11 +100,19 @@ class LiveDashletsRecentView extends BaseDashletView {
             this.renderList();
         },
         /** @this LiveDashletsRecentView */
-        'click .live-recent-notes': function () {
+        'click button.live-recent-notes': function () {
             this.prefs.notes = !this.prefs.notes;
             this.saveState();
             this.renderList();
             this.getContainer()?.querySelector('.live-recent-notes')?.focus();
+        },
+        // The EspoCRM style: a checkbox.
+        /** @this LiveDashletsRecentView */
+        'change .live-recent-notes input': function (e) {
+            this.prefs.notes = e.currentTarget.checked;
+            this.saveState();
+            this.renderList();
+            this.getContainer()?.querySelector('.live-recent-notes input')?.focus();
         },
         // A plain click previews the record; Ctrl, Cmd or the middle button open it in a new tab.
         /** @this LiveDashletsRecentView */
@@ -122,8 +130,12 @@ class LiveDashletsRecentView extends BaseDashletView {
     setup() {
         super.setup();
 
-        // The style and the color chosen for every Live dashlet.
-        watchLook(this, () => applyLookToPanel(this));
+        // The style and the color chosen for every Live dashlet; the EspoCRM style has its own
+        // controls in the toolbar.
+        watchLook(this, () => {
+            applyLookToPanel(this);
+            this.renderList();
+        });
 
         // "My team" is the team chosen for the dashboard, when there is one.
         this.listenTo(this.getPreferences(), TEAM_EVENT, () => this.load());
@@ -224,7 +236,7 @@ class LiveDashletsRecentView extends BaseDashletView {
 
         Espo.Ajax
             .getRequest('LiveDashlets/recent', {
-                scope: this.prefs.scope,
+                scope: this.getScope(),
                 teamId: getTeamFilter(this)?.id || null,
                 days: this.getDays(),
             })
@@ -256,6 +268,22 @@ class LiveDashletsRecentView extends BaseDashletView {
         return parseInt(this.getOption('days'), 10) || 7;
     }
 
+    /**
+     * Without a team, "My team" would only show the user's own actions: there is no such choice,
+     * and the user's own actions are shown instead. The saved choice is kept for when they join one.
+     *
+     * @private
+     * @return {string[]}
+     */
+    getScopes() {
+        return (this.getUser().get('teamsIds') || []).length ? SCOPES : SCOPES.filter(name => name !== 'team');
+    }
+
+    /** @private */
+    getScope() {
+        return this.getScopes().includes(this.prefs.scope) ? this.prefs.scope : 'me';
+    }
+
     // -----------------------------------------------------------------------------------------
     // Rendering.
     // -----------------------------------------------------------------------------------------
@@ -271,10 +299,6 @@ class LiveDashletsRecentView extends BaseDashletView {
         const kinds = TYPES[this.prefs.type];
         const events = this.feed.events.filter(event => !kinds || kinds.includes(event.kind));
         const list = this.make('div', 'live-recent-list');
-
-        if (this.feed.noTeam && this.prefs.scope === 'team') {
-            list.append(this.make('p', 'live-recent-hint', this.t('noTeam')));
-        }
 
         let date = null;
         let group = null;
@@ -301,11 +325,13 @@ class LiveDashletsRecentView extends BaseDashletView {
     createToolbar() {
         const bar = this.make('div', 'live-recent-toolbar');
 
+        const native = isNativeLook(this);
         const scope = createSegmented({
             label: this.t('scopeLabel'),
             className: 'live-recent-scope',
-            value: this.prefs.scope,
-            options: SCOPES.map(name => ({
+            native,
+            value: this.getScope(),
+            options: this.getScopes().map(name => ({
                 value: name,
                 label: name === 'team' && getTeamFilter(this) ?
                     getTeamFilter(this).name :
@@ -339,16 +365,35 @@ class LiveDashletsRecentView extends BaseDashletView {
             .filter(name => name === 'all' || counts[name] || name === this.prefs.type)
             .map(name => [name, this.t(name, {}, 'recentTypes') + (counts[name] ? ` (${counts[name]})` : '')]), this.prefs.type);
 
-        const notes = this.make('button', 'live-recent-notes');
+        const notes = native ? this.createNotesCheckbox() : this.make('button', 'live-recent-notes');
 
-        notes.type = 'button';
-        notes.setAttribute('role', 'switch');
-        notes.setAttribute('aria-checked', String(this.prefs.notes));
-        notes.append(this.make('span', 'live-recent-switch'), this.t('notes'));
+        if (!native) {
+            notes.type = 'button';
+            notes.setAttribute('role', 'switch');
+            notes.setAttribute('aria-checked', String(this.prefs.notes));
+            notes.append(this.make('span', 'live-recent-switch'), this.t('notes'));
+        }
 
         bar.append(scope, type, notes);
 
         return bar;
+    }
+
+    /**
+     * Notes, in the EspoCRM style: EspoCRM's own checkbox.
+     *
+     * @private
+     * @return {HTMLElement}
+     */
+    createNotesCheckbox() {
+        const label = this.make('label', 'live-recent-notes');
+        const box = this.make('input', 'form-checkbox form-checkbox-small');
+
+        box.type = 'checkbox';
+        box.checked = this.prefs.notes;
+        label.append(box, this.make('span', null, this.t('notes')));
+
+        return label;
     }
 
     /** @private */

@@ -14,7 +14,6 @@
     "labels": {
         "stable": "Stable",
         "remaining": "Encore {value}",
-        "aboveTarget": "{value} au-delà de l'objectif",
         "daysLeft": "{count} jours restants",
         "dayLeft": "Dernier jour",
         "expectedPace": "Rythme attendu : {value}",
@@ -24,6 +23,7 @@
         "add": "Ajouter",
         "added": "Ajouté",
         "nativeDashlets": "Tous les dashlets EspoCRM",
+        "comparedTo": "contre {value}",
         "comparedToDate": "contre {value} au {date}",
         "comparedToPrevious": "contre {value} {period}",
         "comparedToYesterday": "contre {value} hier à la même heure",
@@ -42,7 +42,9 @@
         "infoAccess": "Seuls les enregistrements que vous pouvez lire sont comptés.",
         "infoTeam": "Assigné à un membre de l'équipe {team}",
         "infoTeamNone": "Pas de filtre d'équipe : ces fiches n'ont pas d'utilisateur assigné",
-        "templatePreview": "Aperçu avec vos données : chaque utilisateur verra les siennes."
+        "templatePreview": "Aperçu avec vos données : chaque utilisateur verra les siennes.",
+        "teamFollow": "Comme le tableau de bord",
+        "teamAll": "Tout ce que je peux voir"
     },
     "goalStatus": {
         "reached": "Atteint",
@@ -231,7 +233,6 @@
         "today": "Aujourd'hui",
         "yesterday": "Hier",
         "newSinceVisit": "Nouveau depuis votre dernière visite",
-        "noTeam": "Vous n'êtes dans aucune équipe : seules vos actions sont affichées.",
         "empty": "Rien ces {days} derniers jours.",
         "minutes": "{count} min",
         "by": "par {name}",
@@ -276,6 +277,7 @@
         "style": "Style",
         "color": "Couleur",
         "styles": {
+            "native": "EspoCRM",
             "minimal": "Épuré",
             "outline": "Contour",
             "big": "Grand chiffre"

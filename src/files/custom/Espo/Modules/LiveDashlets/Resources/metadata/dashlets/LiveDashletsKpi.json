@@ -45,6 +45,11 @@
                 "type": "multiEnum",
                 "view": "views/dashlets/fields/records/bool-filter-list"
             },
+            "team": {
+                "type": "enum",
+                "view": "live-dashlets:views/dashlets/fields/team",
+                "tooltip": true
+            },
             "period": {
                 "type": "enum",
                 "options": [
@@ -116,7 +121,9 @@
                         {
                             "name": "boolFilterList"
                         },
-                        false
+                        {
+                            "name": "team"
+                        }
                     ],
                     [
                         {

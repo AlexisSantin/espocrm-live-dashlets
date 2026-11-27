@@ -74,12 +74,24 @@ class LiveDashletsLookPicker {
         const styleNames = this.t('styles');
         const colorNames = this.t('colors');
 
-        root.className = `live-look live-dashlet-accent-${look.color}`;
+        const native = look.style === 'native';
+
+        root.className = `live-look live-dashlet-accent-${look.color}` + (native ? ' live-dashlet-look-native' : '');
+
+        // From or to the EspoCRM style, the controls are drawn again with the other components.
+        if (this.styleControl && this.nativeShown !== native) {
+            const hadFocus = root.contains(document.activeElement);
+
+            this.styleControl = null;
+            this.refocus = hadFocus;
+        }
 
         if (!this.styleControl) {
+            this.nativeShown = native;
             this.styleControl = createSegmented({
                 label: this.t('style'),
                 className: 'live-look-styles',
+                native,
                 value: look.style,
                 options: LOOK_STYLES.map(style => ({
                     value: style,
@@ -104,7 +116,7 @@ class LiveDashletsLookPicker {
             });
 
             this.foot = this.make('div', 'live-look-foot');
-            this.teamControl = this.createTeamControl();
+            this.teamControl = this.createTeamControl(native);
 
             root.replaceChildren(this.styleControl, this.colors, ...(this.teamControl ? [this.teamControl] : []), this.foot);
         }
@@ -115,7 +127,8 @@ class LiveDashletsLookPicker {
             this.teamControl.liveSelect ? this.teamControl.liveSelect(team) : (this.teamControl.value = team);
         }
 
-        this.styleControl.liveSelect(look.style);
+        this.styleControl.liveSelect(look.style, this.refocus);
+        this.refocus = false;
 
         this.colors.querySelectorAll('[data-look-color]').forEach(option => {
             option.setAttribute('aria-pressed', String(option.dataset.lookColor === look.color));
@@ -150,9 +163,10 @@ class LiveDashletsLookPicker {
      * Whose work the dashboard shows, for a user of several teams: all of their teams, or one.
      *
      * @private
+     * @param {boolean} native
      * @return {HTMLElement|null}
      */
-    createTeamControl() {
+    createTeamControl(native) {
         const teams = getUserTeams(this.view);
 
         if (!teams.length) {
@@ -166,6 +180,7 @@ class LiveDashletsLookPicker {
             return createSegmented({
                 label: this.t('team'),
                 className: 'live-look-team',
+                native,
                 value: getTeamFilter(this.view)?.id || '',
                 options: options.map(option => ({...option, attributes: {'data-look-team': option.value}})),
                 onChange: save,

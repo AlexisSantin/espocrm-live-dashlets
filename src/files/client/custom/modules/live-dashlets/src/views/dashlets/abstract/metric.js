@@ -139,8 +139,25 @@ class LiveDashletsMetricView extends BaseDashletView {
             period: period,
             comparison: period === 'ever' ? 'none' : this.getComparison(),
             series: this.withSeries && period !== 'ever' ? 'true' : null,
-            teamId: getTeamFilter(this)?.id || null,
+            teamId: this.getTeamId(),
         };
+    }
+
+    /**
+     * Whose records the tile counts: its own choice (everything, or one team), else the team chosen
+     * for the whole dashboard.
+     *
+     * @protected
+     * @return {string|null}
+     */
+    getTeamId() {
+        const team = this.getOption('team');
+
+        if (team === 'all') {
+            return null;
+        }
+
+        return team || getTeamFilter(this)?.id || null;
     }
 
     /** @private */

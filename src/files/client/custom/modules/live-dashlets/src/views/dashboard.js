@@ -21,6 +21,7 @@
 
 import DashboardView from 'views/dashboard';
 import {findTopPosition} from 'live-dashlets:helpers/grid-position';
+import {isNativeLook, watchLook} from 'live-dashlets:helpers/look';
 
 /**
  * The home dashboard, with a visible "Add" button that opens the gallery of ready-made
@@ -39,6 +40,14 @@ class LiveDashletsDashboardView extends DashboardView {
         'click [data-action="liveDashletsGallery"]': function () {
             this.openGallery();
         },
+    }
+
+    setup() {
+        super.setup();
+
+        // The EspoCRM style keeps EspoCRM's own button.
+        watchLook(this, () => this.element?.querySelector('.live-dashlets-add')
+            ?.classList.toggle('live-dashlets-add-pill', !isNativeLook(this)));
     }
 
     afterRender() {
@@ -63,7 +72,8 @@ class LiveDashletsDashboardView extends DashboardView {
         const button = document.createElement('button');
 
         button.type = 'button';
-        button.className = 'btn btn-default btn-sm pull-right live-dashlets-add';
+        button.className = 'btn btn-default btn-sm pull-right live-dashlets-add' +
+            (isNativeLook(this) ? '' : ' live-dashlets-add-pill');
         button.dataset.action = 'liveDashletsGallery';
         button.title = this.translate('galleryTitle', 'labels', 'LiveDashlets');
 

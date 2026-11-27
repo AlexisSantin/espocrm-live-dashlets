@@ -22,12 +22,16 @@
 
 namespace Espo\Modules\LiveDashlets\Tools;
 
+use Espo\Core\Acl;
+use Espo\Core\Acl\Table;
 use Espo\Entities\User;
 use Espo\ORM\EntityManager;
 
 /**
- * "What was done by a team": the active users of one of the viewer's own teams. A team the
- * viewer is not a member of is ignored, so the filter can only narrow what they already see.
+ * "What was done by a team": the active users of a team. One of the viewer's own teams, or
+ * another team they may read along with the users (a tile can be set to any team); any other team
+ * is ignored. The filter only narrows what the viewer already sees: every query keeps their access
+ * rights.
  */
 class TeamFilter
 {
@@ -36,6 +40,7 @@ class TeamFilter
     public function __construct(
         private User $user,
         private EntityManager $entityManager,
+        private Acl $acl,
     ) {}
 
     /**
@@ -43,17 +48,23 @@ class TeamFilter
      */
     public function resolve(?string $teamId): ?array
     {
-        if (
-            !$teamId ||
-            !preg_match(self::ID_PATTERN, $teamId) ||
-            !in_array($teamId, $this->user->getLinkMultipleIdList('teams'), true)
-        ) {
+        if (!$teamId || !preg_match(self::ID_PATTERN, $teamId)) {
             return null;
         }
 
         $team = $this->entityManager->getEntityById('Team', $teamId);
 
         if (!$team) {
+            return null;
+        }
+
+        // Another team: who is in it is only shown to those who may read it and the users.
+        $isMember = in_array($teamId, $this->user->getLinkMultipleIdList('teams'), true);
+
+        if (
+            !$isMember &&
+            (!$this->acl->checkEntityRead($team) || !$this->acl->checkScope('User', Table::ACTION_READ))
+        ) {
             return null;
         }
 

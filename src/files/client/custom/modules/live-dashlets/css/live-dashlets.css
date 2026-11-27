@@ -73,8 +73,9 @@ body .dashlet.live-dashlet-panel.live-dashlet-style-big {
     text-transform: uppercase;
 }
 
-.dashlet.live-dashlet-panel > .panel-heading,
-.dashlet.live-dashlet-panel > .dashlet-body {
+/* The EspoCRM style keeps the theme's panel as it is. */
+.dashlet.live-dashlet-panel:not(.live-dashlet-style-native) > .panel-heading,
+.dashlet.live-dashlet-panel:not(.live-dashlet-style-native) > .dashlet-body {
     background-color: transparent;
 }
 
@@ -376,7 +377,8 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     box-shadow: 0 0 0 2px rgba(0, 0, 0, .12);
 }
 
-.live-dashlet-style-minimal .live-dashlet-spark-area {
+.live-dashlet-style-minimal .live-dashlet-spark-area,
+.live-dashlet-style-native .live-dashlet-spark-area {
     display: none;
 }
 
@@ -1239,13 +1241,17 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     align-items: center;
     gap: .45em;
     margin-right: .5em;
+}
+
+/* The older styles: a pill. The EspoCRM style keeps EspoCRM's button. */
+.live-dashlets-add.live-dashlets-add-pill {
     border-radius: 999px;
     padding-left: .9em;
     padding-right: 1em;
     font-weight: 600;
 }
 
-.live-dashlets-add .fas {
+.live-dashlets-add.live-dashlets-add-pill .fas {
     color: var(--brand-primary);
 }
 
@@ -1285,7 +1291,7 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     transition: transform .22s cubic-bezier(.22, 1, .36, 1);
 }
 
-.live-seg-option {
+.live-seg > .live-seg-option {
     position: relative;
     z-index: 1;
     padding: .25em .9em;
@@ -1298,11 +1304,11 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
     transition: color .15s ease;
 }
 
-.live-seg-option[aria-checked="true"] {
+.live-seg > .live-seg-option[aria-checked="true"] {
     color: var(--text-color);
 }
 
-.live-seg-option:focus-visible {
+.live-seg > .live-seg-option:focus-visible {
     outline: 2px solid var(--ld-accent, var(--brand-primary));
     outline-offset: 1px;
 }
@@ -1726,7 +1732,7 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 }
 
 /* Counts make the labels longer: a little less room around them keeps the toolbar on one line. */
-.live-actions-filter .live-seg-option {
+.live-seg.live-actions-filter .live-seg-option {
     padding-left: .6em;
     padding-right: .6em;
 }
@@ -1989,7 +1995,7 @@ body .dashlet.live-dashlet-style-solid > .panel-heading .btn.menu-button .fas {
 
 /* + Create, in the heading, and its composer at the top of the list. */
 /* EspoCRM and themes make heading buttons transparent: + Create stays a button. */
-body .dashlet.panel > .panel-heading .btn-group > .btn[data-action="liveCreate"] {
+body .dashlet.panel:not(.live-dashlet-look-native) > .panel-heading .btn-group > .btn[data-action="liveCreate"] {
     display: inline-flex;
     align-items: center;
     gap: .4em;
@@ -2003,11 +2009,11 @@ body .dashlet.panel > .panel-heading .btn-group > .btn[data-action="liveCreate"]
     font-weight: 600;
 }
 
-body .dashlet.panel > .panel-heading .btn-group > .btn[data-action="liveCreate"]:hover {
+body .dashlet.panel:not(.live-dashlet-look-native) > .panel-heading .btn-group > .btn[data-action="liveCreate"]:hover {
     border-color: var(--ld-accent, var(--brand-primary));
 }
 
-body .dashlet.panel > .panel-heading .btn-group > .btn[data-action="liveCreate"] .fas {
+body .dashlet.panel:not(.live-dashlet-look-native) > .panel-heading .btn-group > .btn[data-action="liveCreate"] .fas {
     color: var(--ld-accent, var(--brand-primary));
     font-size: .85em;
 }
@@ -2177,7 +2183,7 @@ body .dashlet.panel > .panel-heading .btn-group > .btn[data-action="liveCreate"]
     gap: .35em;
 }
 
-.live-actions-chip {
+.live-actions-chip:not(.btn) {
     padding: .22em .75em;
     border: 1px solid var(--default-border-color);
     border-radius: 999px;
@@ -2187,7 +2193,7 @@ body .dashlet.panel > .panel-heading .btn-group > .btn[data-action="liveCreate"]
     cursor: pointer;
 }
 
-.live-actions-chip[aria-pressed="true"] {
+.live-actions-chip:not(.btn)[aria-pressed="true"] {
     color: var(--btn-primary-color, #fff);
     background-color: var(--btn-primary-bg, var(--brand-primary));
     border-color: var(--btn-primary-bg, var(--brand-primary));
@@ -2501,4 +2507,232 @@ body .dashlet.panel > .panel-heading .btn-group > .btn[data-action="liveCreate"]
 .live-template-layout .live-actions-cta,
 .live-template-layout .live-actions-detail-actions .btn {
     cursor: default;
+}
+
+/* ---------------------------------------------------------------------------------------------
+   The EspoCRM style (the default): EspoCRM's own panels, font sizes, buttons, labels and
+   checkboxes, small grey icons. Laid over the rules above, which make the other styles.
+   `.live-dashlet-look-native` is on every dashlet of that look, highlighted tiles included, on
+   the gallery and on the line that chooses the style.
+   --------------------------------------------------------------------------------------------- */
+
+/* Figures: a little larger than the text, in semibold. */
+.live-dashlet-look-native .live-dashlet-value,
+.live-dashlet-look-native .live-dashlet-goal .live-dashlet-value {
+    font-size: 1.85em;
+    font-size: clamp(1.45em, 11cqi, 2.1em);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: normal;
+}
+
+@container (max-height: 112px) {
+    .live-dashlet-look-native .live-dashlet-value,
+    .live-dashlet-look-native .live-dashlet-goal .live-dashlet-value {
+        font-size: clamp(1.35em, min(11cqi, 22cqh), 1.85em);
+    }
+}
+
+/* The change: plain colored text, with what it is compared to, in a line under the figure. */
+.live-dashlet-look-native .live-dashlet-kpi-foot {
+    padding-top: 0;
+    border-top: 0;
+}
+
+.live-dashlet-look-native .live-dashlet-trend-badge {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+}
+
+/* Goals: EspoCRM's label for the status; the bar in the accent, green once reached. */
+.live-dashlet-label {
+    flex: none;
+    margin-left: auto;
+}
+
+.live-dashlet-style-solid .live-dashlet-label {
+    color: #fff;
+    background-color: rgba(255, 255, 255, .22);
+}
+
+.live-dashlet-look-native .live-dashlet-goal {
+    --ld-goal: var(--ld-accent-on, var(--ld-accent));
+}
+
+.live-dashlet-look-native .live-dashlet-goal-reached {
+    --ld-goal: var(--brand-success);
+}
+
+.live-dashlet-look-native.live-dashlet-style-solid .live-dashlet-goal {
+    --ld-goal: #fff;
+}
+
+.live-dashlet-look-native .live-dashlet-goal .live-dashlet-goal-bar {
+    height: .5em;
+    border-radius: var(--border-radius, 4px);
+    background-color: color-mix(in srgb, var(--text-color) 10%, transparent);
+}
+
+.live-dashlet-look-native .live-dashlet-goal-percent {
+    font-weight: 600;
+}
+
+.live-dashlet-look-native .live-dashlet-goal-reached .live-dashlet-goal-fill::after {
+    display: none;
+}
+
+/* Toolbars: EspoCRM's text buttons and checkboxes. */
+.live-seg-native {
+    flex: none;
+    white-space: nowrap;
+}
+
+.live-recent-notes,
+.live-actions-why-switch {
+    margin-bottom: 0;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.live-recent-notes .form-checkbox,
+.live-actions-why-switch .form-checkbox {
+    margin: 0;
+}
+
+/* Group and day titles: small and muted, without capitals. */
+.live-dashlet-look-native .live-recent-day-title,
+.live-dashlet-look-native .live-actions-group-title {
+    font-size: var(--font-size-small);
+    font-weight: 600;
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+/* Icons: small and grey, as in EspoCRM's lists. Only what is late is red. */
+.live-dashlet-look-native .live-recent-icon,
+.live-dashlet-look-native .live-actions-icon:not(.live-actions-urgent) {
+    color: var(--text-muted-color);
+}
+
+.live-dashlet-look-native .live-recent-tone-good,
+.live-dashlet-look-native .live-recent-tone-warn,
+.live-dashlet-look-native .live-recent-tone-bad,
+.live-dashlet-look-native .live-actions-when.live-actions-urgent,
+.live-dashlet-look-native .live-actions-reason.live-actions-urgent {
+    font-weight: normal;
+}
+
+.live-dashlet-look-native .live-recent-members {
+    gap: .2em 1em;
+}
+
+.live-dashlet-look-native .live-recent-members .live-recent-link {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+}
+
+/* Next actions. */
+.live-dashlet-look-native .live-actions-chips {
+    gap: 0;
+    align-self: flex-start;
+}
+
+/* Read by screen readers only. Above EspoCRM's padding after a button's icon. */
+body .dashlet.live-dashlet-look-native > .panel-heading .btn .live-actions-create-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    border: 0;
+    white-space: nowrap;
+}
+
+.live-dashlet-look-native .live-actions-panel {
+    background-color: color-mix(in srgb, var(--text-color) 3%, transparent);
+}
+
+.live-dashlet-look-native .live-actions-context {
+    border-left-color: var(--default-border-color, #e5e5e5);
+}
+
+.live-dashlet-look-native .live-actions-phone a {
+    font-size: inherit;
+}
+
+.live-dashlet-look-native .live-actions-more-link,
+.live-dashlet-look-native .live-actions-undo > .btn {
+    font-weight: normal;
+}
+
+.live-dashlet-look-native .live-actions-done {
+    background: none;
+}
+
+.live-dashlet-look-native .live-actions-done .live-dashlet-icon,
+.live-dashlet-look-native .live-actions-empty .live-dashlet-icon {
+    width: 1.2em;
+    height: auto;
+    margin: .15em 0 0;
+    font-size: inherit;
+    color: var(--state-success-text);
+    background: none;
+}
+
+.live-dashlet-look-native .live-actions-empty b {
+    font-size: inherit;
+}
+
+/* The gallery and the line that chooses the style. */
+.live-gallery.live-dashlet-look-native .live-gallery-group-title {
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.live-gallery.live-dashlet-look-native .live-gallery-card {
+    transition: border-color .15s ease;
+}
+
+.live-gallery.live-dashlet-look-native .live-gallery-card:hover {
+    transform: none;
+    border-color: var(--ld-accent);
+    box-shadow: none;
+}
+
+.live-gallery.live-dashlet-look-native .live-gallery-card .live-dashlet-icon {
+    width: 1.2em;
+    height: auto;
+    font-size: inherit;
+    color: var(--text-muted-color);
+    background: none;
+}
+
+.live-gallery.live-dashlet-look-native .live-gallery-card.live-dashlet-style-solid .live-dashlet-icon {
+    color: rgba(255, 255, 255, .8);
+}
+
+.live-gallery.live-dashlet-look-native .live-gallery-card-value {
+    font-size: 1.4em;
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: normal;
+}
+
+.live-gallery.live-dashlet-look-native .live-gallery-card-trend {
+    padding: 0;
+    border-radius: 0;
+    background: none;
+}
+
+.live-gallery.live-dashlet-look-native .live-gallery-card-bar {
+    border-radius: var(--border-radius, 4px);
+}
+
+.live-gallery.live-dashlet-look-native .live-gallery-card-add {
+    border-radius: var(--border-radius, 4px);
+    font-weight: normal;
 }
