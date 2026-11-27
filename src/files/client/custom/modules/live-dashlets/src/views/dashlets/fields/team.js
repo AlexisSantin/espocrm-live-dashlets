@@ -26,8 +26,8 @@ const MAX_TEAMS = 200;
 
 /**
  * Whose records a tile counts: the team chosen for the whole dashboard (the default), everything
- * the user can see, or one team, theirs or another one they may read. The server checks the team
- * again, and every figure keeps the user's access rights.
+ * the user can see, or one team, theirs or another one they may read along with every user. The
+ * server checks the team again, and every figure keeps the user's access rights.
  */
 class LiveDashletsTeamFieldView extends EnumFieldView {
 
@@ -61,7 +61,8 @@ class LiveDashletsTeamFieldView extends EnumFieldView {
     }
 
     /**
-     * The user's teams first, then the other teams they may read along with the users.
+     * The user's teams first, then the other teams they may read, when they may also read every
+     * user (as the server requires: the members of another team are not theirs to know otherwise).
      *
      * @private
      * @return {Promise<{id: string, name: string}[]>}
@@ -74,7 +75,9 @@ class LiveDashletsTeamFieldView extends EnumFieldView {
 
         own.sort(byName);
 
-        if (!this.getAcl().checkScope('Team', 'read') || !this.getAcl().checkScope('User', 'read')) {
+        const allUsers = user.isAdmin() || this.getAcl().getLevel('User', 'read') === 'all';
+
+        if (!allUsers || !this.getAcl().checkScope('Team', 'read')) {
             return own;
         }
 

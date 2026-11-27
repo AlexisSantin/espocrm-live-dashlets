@@ -138,7 +138,7 @@ Green, amber and red keep their meaning on every style: they are left to trends 
 
 For someone in several teams, the same line of the **+ Add** window chooses whose work the dashboard shows: all of their teams, or one of them. Figures, goals, the records behind them and the **Team** view of What happened then count only the records assigned to a member of that team, and each tile names the team beside its period. Next Actions stays personal. The choice is kept for each user.
 
-**A team per tile.** The **Team** option of a key figure or a goal overrides the dashboard's choice for that tile: everything you can see, or the records assigned to the members of one team. It can be your own team or another one, such as a sales team's figure beside the support team's. Another team is offered to those who may read it and the users, and the server ignores it for anyone else. In every case, only the records you may read are counted.
+**A team per tile.** The **Team** option of a key figure or a goal overrides the dashboard's choice for that tile: everything you can see, or the records assigned to the members of one team. It can be your own team or another one, such as a sales team's figure beside the support team's. Another team is offered to those who may read it and every user, and the server ignores it for anyone else: its members are not theirs to know. In every case, only the records you may read are counted.
 
 ![The top of the + Add window sets the style and the color of every dashlet](docs/screenshots/styles.png)
 

@@ -29,8 +29,8 @@ use Espo\ORM\EntityManager;
 
 /**
  * "What was done by a team": the active users of a team. One of the viewer's own teams, or
- * another team they may read along with the users (a tile can be set to any team); any other team
- * is ignored. The filter only narrows what the viewer already sees: every query keeps their access
+ * another team they may read, when they may also read every user (a tile can be set to any team);
+ * any other team is ignored: its members are not theirs to know. The filter only narrows what the viewer already sees: every query keeps their access
  * rights.
  */
 class TeamFilter
@@ -58,12 +58,16 @@ class TeamFilter
             return null;
         }
 
-        // Another team: who is in it is only shown to those who may read it and the users.
+        // Another team: who is in it is only shown to those who may read it and every user. A
+        // narrower access to users (their own, their teams') would not show these members.
         $isMember = in_array($teamId, $this->user->getLinkMultipleIdList('teams'), true);
 
         if (
             !$isMember &&
-            (!$this->acl->checkEntityRead($team) || !$this->acl->checkScope('User', Table::ACTION_READ))
+            (
+                !$this->acl->checkEntityRead($team) ||
+                $this->acl->getLevel('User', Table::ACTION_READ) !== Table::LEVEL_ALL
+            )
         ) {
             return null;
         }
